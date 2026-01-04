@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ quiz.topic }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Times New Roman', Times, serif; }
+    </style>
+</head>
+<body class="bg-white text-gray-800 max-w-3xl mx-auto p-8" 
+      data-time-limit="{{ quiz.time_limit|default(0) }}" 
+      data-started-at="{{ started_at|default('') }}" 
+      data-status="{{ status }}">
+    <a href="{{ api_base_url }}/quizzes" class="text-gray-600 text-sm hover:underline">← Back</a>
+
+    {% if status == 'completed' %}
+    <div class="flex justify-between items-baseline border-b-2 border-gray-800 pb-2 mb-2 mt-4">
+        <h1 class="text-3xl text-gray-800">{{ quiz.topic }}</h1>
+        <span class="text-3xl font-semibold text-green-800">{{ score }}/{{ total }}</span>
+    </div>
+    {% elif status == 'in_progress' %}
+    <div class="flex justify-between items-baseline border-b-2 border-gray-800 pb-2 mb-2 mt-4">
+        <h1 class="text-3xl text-gray-800">{{ quiz.topic }}</h1>
+        {% if quiz.time_limit > 0 %}
+        <span id="timer" class="text-3xl font-semibold text-gray-800">--:--</span>
+        {% else %}
+        <span class="text-3xl font-semibold text-gray-800">📚</span>
+        {% endif %}
+    </div>
+    {% else %}
+    <h1 class="text-3xl text-gray-800 border-b-2 border-gray-800 pb-2 mb-2 mt-4">{{ quiz.topic }}</h1>
+    {% endif %}
+    
+    <p class="text-gray-600 mb-2">{{ quiz.questions|length }} questions</p>
+    {% if quiz.time_limit > 0 %}
+    <p class="text-gray-600 mb-6">Time limit: {{ (quiz.time_limit // 60)|string.zfill(2) }}:{{ (quiz.time_limit % 60)|string.zfill(2) }}</p>
+    {% endif %}
+
+    {% if status == 'preview' %}
+    <!-- No session yet - show start button -->
+    <div class="border border-gray-300 p-8 text-center">
+        <p class="text-gray-600 mb-4">Ready to start the quiz?</p>
+        <button onclick="startQuiz()" class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-8">Start Quiz</button>
+    </div>
+    
+    {% elif status == 'in_progress' %}
+    <!-- In progress - show quiz form -->
+    <div id="quizForm">
+        {% for question in quiz.questions %}
+        {% set i = loop.index0 %}
+
+        <div class="border border-gray-300 p-5 mb-4">
+            <p class="mb-3">{{ loop.index }}. {{ question.text }}</p>
+            <div class="ml-4 space-y-1">
+                {% if question.multiple %}
+                    <!-- Multiple choice - checkboxes -->
+                    {% for choice_text in question.choices %}
+                    <label class="block py-1 cursor-pointer">
+                        <input type="checkbox" data-question="{{ i }}" value="{{ choice_text }}" class="mr-2">
+                        {{ choice_text }}
+                    </label>
+                    {% endfor %}
+                {% else %}
+                    <!-- Single choice - radio buttons -->
+                    {% for choice_text in question.choices %}
+                    <label class="block py-1 cursor-pointer">
+                        <input type="radio" name="q{{ i }}" data-question="{{ i }}" value="{{ choice_text }}" class="mr-2">
+                        {{ choice_text }}
+                    </label>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <button onclick="submitQuiz()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">Submit Quiz</button>
+    </div>
+    
+    {% elif status == 'completed' %}
+    <!-- Completed - show results -->
+    {% for question in quiz.questions %}
+    {% set i = loop.index0 %}
+    {% set is_correct = question.correct %}
+
+    <div class="border-2 p-5 mb-4 {{ 'border-green-600 bg-green-50' if is_correct else 'border-red-600 bg-red-50' }}">
+        <p class="mb-3">{{ loop.index }}. {{ question.text }}</p>
+
+        <div class="ml-4 space-y-1">
+            {% for choice_text in question.choices %}
+                {% set is_user_choice = choice_text in question.your_answer %}
+                {% set is_correct_choice = choice_text in question.correct_answers %}
+
+                <label class="block py-1 {{ 'bg-green-200' if is_correct_choice else ('bg-red-200' if is_user_choice and not is_correct_choice else '') }}">
+                    {% if question.multiple %}
+                        <input type="checkbox" {% if is_user_choice %}checked{% endif %} disabled class="mr-2">
+                    {% else %}
+                        <input type="radio" {% if is_user_choice %}checked{% endif %} disabled class="mr-2">
+                    {% endif %}
+                    {{ choice_text }}
+                    {% if is_correct_choice %}✓{% endif %}
+                </label>
+            {% endfor %}
+        </div>
+
+        {% if question.explanation %}
+        <div class="border border-gray-400 bg-gray-50 p-3 mt-3">
+            <p>{{ question.explanation }}</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <hr class="my-8 border-gray-400">
+
+    <button onclick="retakeQuiz()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">Retake Quiz</button>
+    {% endif %}
+
+    <div id="loading" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="flex flex-col items-center">
+            <div class="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+            <p id="loadingText" class="text-white mt-5">Processing...</p>
+        </div>
+    </div>
+
+    <script>
+        const apiBaseUrl = '{{ api_base_url }}';
+        const quizSlug = '{{ quiz.slug }}';
+        const sessionId = '{{ session_id }}' || null;
+        const status = document.body.getAttribute('data-status');
+        const timeLimit = parseInt(document.body.getAttribute('data-time-limit')) || 0;
+        const startedAtStr = document.body.getAttribute('data-started-at') || '';
+        
+        // Store session_id in localStorage when available
+        if (sessionId && sessionId !== 'None') {
+            localStorage.setItem('quiz_' + quizSlug, sessionId);
+        }
+        
+        // Submit quiz function
+        async function submitQuiz() {
+            document.getElementById('loadingText').textContent = 'Evaluating answers...';
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('loading').classList.add('flex');
+            
+            // Collect answers
+            const answers = {};
+            const inputs = document.querySelectorAll('#quizForm input[data-question]');
+            
+            inputs.forEach(input => {
+                const questionIdx = input.getAttribute('data-question');
+                
+                if (input.type === 'checkbox' && input.checked) {
+                    if (!answers[questionIdx]) answers[questionIdx] = [];
+                    answers[questionIdx].push(input.value);
+                } else if (input.type === 'radio' && input.checked) {
+                    answers[questionIdx] = [input.value];
+                }
+            });
+            
+            try {
+                const response = await fetch(apiBaseUrl + '/quizzes/' + quizSlug + '/sessions/latest/submit?session_id=' + sessionId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ answers })
+                });
+                
+                if (response.ok) {
+                    window.location.href = apiBaseUrl + '/quizzes/' + quizSlug + '?session_id=' + sessionId;
+                } else {
+                    const error = await response.json();
+                    alert('Failed to submit: ' + (error.detail || 'Unknown error'));
+                    document.getElementById('loading').classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error submitting quiz:', error);
+                alert('Failed to submit quiz. Please try again.');
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+        
+        // Start quiz function
+        async function startQuiz() {
+            document.getElementById('loadingText').textContent = 'Starting quiz...';
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('loading').classList.add('flex');
+            
+            try {
+                const response = await fetch(apiBaseUrl + '/quizzes/' + quizSlug + '/sessions', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('quiz_' + quizSlug, data.session_id);
+                    window.location.href = apiBaseUrl + '/quizzes/' + quizSlug + '?session_id=' + data.session_id;
+                } else {
+                    alert('Failed to start quiz. Please try again.');
+                    document.getElementById('loading').classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error starting quiz:', error);
+                alert('Failed to start quiz. Please try again.');
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+        
+        // Retake quiz function
+        async function retakeQuiz() {
+            if (!confirm('Are you sure you want to retake this quiz? Your current results will be cleared.')) {
+                return;
+            }
+            
+            // Clear old session
+            localStorage.removeItem('quiz_' + quizSlug);
+            
+            // Start new quiz
+            await startQuiz();
+        }
+        
+        // Client-side timer (in-progress only)
+        if (status === 'in_progress' && timeLimit > 0 && startedAtStr) {
+            const startedAt = new Date(startedAtStr);
+            const timerDisplay = document.getElementById('timer');
+            
+            if (timerDisplay) {
+                const interval = setInterval(() => {
+                    const elapsed = (new Date() - startedAt) / 1000;
+                    const remaining = Math.max(0, timeLimit - elapsed);
+                    
+                    const minutes = Math.floor(remaining / 60);
+                    const seconds = Math.floor(remaining % 60);
+                    timerDisplay.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+                    
+                    if (remaining <= 60 && remaining > 0) {
+                        timerDisplay.classList.add('text-red-500');
+                    }
+                    
+                    if (remaining === 0) {
+                        clearInterval(interval);
+                        alert('Time is up! Submitting your quiz.');
+                        submitQuiz();
+                    }
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
