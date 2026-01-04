@@ -1,14 +1,17 @@
 # AI-Powered Quiz Platform
 
-A lightweight quiz platform built with FastAPI and Google Gemini AI for intelligent answer evaluation.
+A modern quiz platform built with FastAPI and OpenRouter AI for intelligent answer evaluation and question generation.
 
 ## Features
 
-- Session tracking with localStorage
-- AI-powered answer evaluation
-- Markdown file upload
-- RESTful API with JSON/HTML responses
-- Randomized questions and answers
+- **AI-Powered Evaluation** - Expert feedback with detailed explanations using OpenRouter API (Google Gemini 2.5 Flash)
+- **AI Question Generation** - Generate 15 additional questions matching existing quiz style
+- **Session Tracking** - Persistent sessions with localStorage
+- **Quiz Management** - Upload markdown files or paste content directly
+- **Custom Modals** - Professional Tailwind-styled dialogs
+- **Quiz Link Sharing** - Copy quiz links with visual feedback
+- **Timer Support** - Optional time limits with countdown
+- **Responsive Design** - Mobile-first UI with Tailwind CSS
 
 ## Quick Start
 
@@ -17,7 +20,7 @@ A lightweight quiz platform built with FastAPI and Google Gemini AI for intellig
 pip install -e .
 
 # Configure
-echo "GOOGLE_API_KEY=your_key_here" > .env
+echo "OPENROUTER_API_KEY=your_key_here" > .env
 
 # Run
 uvicorn main:app --reload --port 8000
@@ -25,7 +28,7 @@ uvicorn main:app --reload --port 8000
 
 Visit [http://localhost:8000](http://localhost:8000)
 
-Get API key at [ai.google.dev](https://ai.google.dev)
+Get API key at [openrouter.ai](https://openrouter.ai/)
 
 ## Quiz Format
 
@@ -51,10 +54,11 @@ Which are valid types in Python?
 - `>` prefix = correct answer
 - Multiple correct answers supported
 - Empty line between questions
+- Optional timer: `<Topic Name | 30>` (30 minutes)
 
 **Multiple topics per file:**
 ```markdown
-<Topic 1>
+<Topic 1 | 15>
 ...
 </Topic 1>
 
@@ -74,44 +78,72 @@ Which are valid types in Python?
 │   └── v1/quizzes.py       # API endpoints
 ├── templates/
 │   ├── quizzes.html        # Quiz list
-│   └── quiz.html           # Quiz/results
+│   ├── quiz.html           # Quiz/results
+│   └── modal.html          # Shared modal
+├── static/
+│   └── modal.js            # Modal functions
 ├── src/
 │   ├── models.py           # Data models
 │   ├── parser.py           # Markdown parser
 │   ├── storage.py          # Persistence
-│   └── quiz_ai.py          # Gemini AI
+│   └── quiz_ai.py          # OpenRouter AI
 ├── quizzes/                # Quiz files
-│   └── examples/           # Samples (excluded)
+│   └── examples/           # Samples (git-ignored)
 └── pyproject.toml
 ```
 
 ## API Endpoints
 
 ```
-POST   /api/v1/quizzes                               # Upload
-GET    /api/v1/quizzes                               # List
-GET    /api/v1/quizzes/{slug}                        # Preview
-POST   /api/v1/quizzes/{slug}/sessions               # Start
-GET    /api/v1/quizzes/{slug}/sessions/latest        # View session
-POST   /api/v1/quizzes/{slug}/sessions/latest/submit # Submit
+POST   /api/v1/quizzes                               # Upload file
+POST   /api/v1/quizzes/create                        # Create from content
+DELETE /api/v1/quizzes                               # Delete all
+GET    /api/v1/quizzes                               # List quizzes
+GET    /api/v1/quizzes/{slug}                        # Get quiz
+POST   /api/v1/quizzes/{slug}/sessions               # Start session
+GET    /api/v1/quizzes/{slug}/sessions/latest        # Get session
+POST   /api/v1/quizzes/{slug}/sessions/latest/submit # Submit answers
+POST   /api/v1/quizzes/{slug}/generate               # Generate +15 questions
 ```
 
 All endpoints support JSON/HTML via `Accept` header.
 
-## Usage
+## AI Integration
 
-**Take quiz:** Browse → Start → Answer → Submit → View results  
-**Upload:** Scroll down → Select `.md` file → Upload  
-**Retake:** Click "Retake Quiz" (clears session)
+**Answer Evaluation:**
+- Highlighted key concepts using `<mark>` tags
+- Detailed analysis of misconceptions
+- Bulleted key distinctions
+- Third-person professional voice
+
+**Question Generation:**
+- Matches style and difficulty of samples
+- Tests conceptual understanding
+- Plausible distractors based on common errors
 
 ## Dependencies
 
-- `fastapi` - Web framework
-- `uvicorn` - ASGI server
-- `jinja2` - Templating
-- `google-generativeai` - AI integration
-- `python-multipart` - File uploads
-- `python-dotenv` - Environment variables
+- `fastapi>=0.108.0` - Web framework
+- `uvicorn>=0.25.0` - ASGI server
+- `jinja2>=3.1.2` - Templates
+- `openai>=1.0.0` - OpenRouter client
+- `python-multipart>=0.0.6` - File uploads
+- `python-dotenv>=1.0.0` - Environment variables
+
+## Configuration
+
+Create `.env` file:
+
+```bash
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+```
+
+Change AI model in `src/quiz_ai.py`:
+
+```python
+QuizAI(model="google/gemini-2.5-flash")  # Default
+QuizAI(model="anthropic/claude-3.5-sonnet")  # Alternative
+```
 
 ## License
 
@@ -119,4 +151,6 @@ MIT
 
 ---
 
-**Built with FastAPI, Gemini AI, and Tailwind CSS**
+**Built with FastAPI, OpenRouter AI, and Tailwind CSS**
+
+[GitHub Repository](https://github.com/alfaarizi/agentic-mcq-generator)
