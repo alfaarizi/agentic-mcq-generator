@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ quiz.topic }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body { font-family: 'Times New Roman', Times, serif; }
         .quiz-content::-webkit-scrollbar { width: 8px; }
@@ -14,6 +15,12 @@
         @media (min-width: 768px) {
             .submit-retake-btn { width: calc(5 * 2.5rem + 4 * 0.5rem); }
         }
+        .explanation-content p { margin-bottom: 0.5rem; }
+        .explanation-content ul, .explanation-content ol { margin-left: 1.25rem; margin-bottom: 0.5rem; }
+        .explanation-content li { margin-bottom: 0.25rem; }
+        .explanation-content strong { font-weight: bold; }
+        .explanation-content em { font-style: italic; }
+        .explanation-content code { background-color: #e5e7eb; padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-family: monospace; }
     </style>
 </head>
 <body class="bg-white text-gray-800 max-w-6xl mx-auto p-4 md:p-8" 
@@ -41,7 +48,10 @@
     {% if status == 'preview' %}
     <div class="border border-gray-300 p-8 text-center">
         <p class="text-gray-600 mb-4">Ready to start the quiz?</p>
-        <button id="startBtn" class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-8">Start Quiz</button>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <button id="startBtn" class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-8 w-full sm:w-auto">Start Quiz</button>
+            <button id="generateBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-8 w-full sm:w-auto">Generate More (+15)</button>
+        </div>
     </div>
     
     {% elif status == 'in_progress' %}
@@ -110,8 +120,8 @@
                     {% endfor %}
                 </div>
                 {% if question.explanation %}
-                <div class="border border-gray-400 bg-gray-50 p-3 mt-3">
-                    <p>{{ question.explanation }}</p>
+                <div class="border border-gray-400 bg-gray-50 p-3 mt-3 explanation-content" id="explanation-{{ q_idx }}">
+                    <script type="text/template" class="markdown-source">{{ question.explanation }}</script>
                 </div>
                 {% endif %}
             </div>
@@ -252,6 +262,29 @@
             localStorage.removeItem('quiz_' + SLUG + '_score');
             await startQuiz();
         }
+
+        async function generateQuestions() {
+            showLoader('Generating 15 new questions...');
+            try {
+                const res = await fetch(`${API}/quizzes/${SLUG}/generate`, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    alert(`Successfully generated ${data.new_count} questions! Total: ${data.total_questions}`);
+                    location.reload();
+                } else {
+                    const err = await res.json();
+                    alert('Failed to generate questions: ' + (err.detail || 'Unknown error'));
+                    hideLoader();
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Failed to generate questions. Please try again.');
+                hideLoader();
+            }
+        }
         
         // Timer function
         function startTimer() {
@@ -294,6 +327,9 @@
             if (STATUS === 'preview') {
                 const startBtn = document.getElementById('startBtn');
                 if (startBtn) startBtn.addEventListener('click', startQuiz);
+
+                const generateBtn = document.getElementById('generateBtn');
+                if (generateBtn) generateBtn.addEventListener('click', generateQuestions);
             }
             
             if (STATUS === 'in_progress') {
@@ -313,6 +349,18 @@
             if (STATUS === 'completed') {
                 const retakeBtn = document.getElementById('retakeBtn');
                 if (retakeBtn) retakeBtn.addEventListener('click', retakeQuiz);
+
+                // Render markdown explanations
+                document.querySelectorAll('.explanation-content').forEach(el => {
+                    const template = el.querySelector('.markdown-source');
+                    if (template) {
+                        const textarea = document.createElement('textarea');
+                        textarea.innerHTML = template.textContent;
+                        const markdown = textarea.value;
+                        template.remove();
+                        el.innerHTML = marked.parse(markdown);
+                    }
+                });
             }
         });
     </script>

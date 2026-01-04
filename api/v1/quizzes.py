@@ -61,28 +61,32 @@ def serialize_questions(
     return result
 
 def serialize_evaluation(
-    ai: QuizAI, 
-    question: Question, 
+    ai: QuizAI,
+    question: Question,
     selected: List[Choice]
 ) -> Dict:
-    """Serialize evaluation of an answer using AI, fallback to basic check."""
+    """Serialize evaluation with AI-generated feedback."""
+    is_correct = set(selected) == set(question.correct_choices)
+    correct_choices = [c.text for c in question.correct_choices]
+
+    # Build result header
+    result_header = "Correct!" if is_correct else "Incorrect."
+
     try:
         evaluation = ai.evaluate_answer(question, selected)
-        return {
-            "correct": evaluation.get("result") == "correct",
-            "explanation": evaluation.get("explanation", ""),
-            "your_answer": [c.text for c in selected],
-            "correct_answers": [c.text for c in question.correct_choices]
-        }
-    except Exception:
-        correct = set(selected) == set(question.correct_choices)
-        correct_answers = [c.text for c in question.correct_choices]
-        return {
-            "correct": correct,
-            "explanation": "Correct!" if correct else f"Incorrect. The correct answer{'s are' if len(correct_answers) > 1 else ' is'} {', '.join(repr(a) for a in correct_answers)}",
-            "your_answer": [c.text for c in selected],
-            "correct_answers": correct_answers
-        }
+        detailed_explanation = evaluation.get("explanation", "").strip()
+        explanation = f"{result_header}\n\n{detailed_explanation}" if detailed_explanation else result_header
+    except Exception as e:
+        import logging
+        logging.error(f"AI evaluation failed: {type(e).__name__}: {str(e)}")
+        explanation = result_header
+
+    return {
+        "correct": is_correct,
+        "explanation": explanation,
+        "your_answer": [c.text for c in selected],
+        "correct_answers": correct_choices
+    }
 
 # ============================================
 # API Endpoints
@@ -341,3 +345,42 @@ async def submit_session(
     session["score"] = sum(1 for e in evaluations.values() if e.get("correct"))
     
     return JSONResponse({"score": session["score"], "total": quiz.total_questions})
+
+
+@router.post("/{slug}/generate")
+async def generate_questions(
+    slug: str,
+    storage: QuizStorage = Depends(get_storage),
+    ai: QuizAI = Depends(get_ai)
+):
+    """Generate 15 more questions for the quiz."""
+    quiz = storage.get_quiz(slug)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+
+    try:
+        # Generate 15 new questions based on existing ones
+        new_questions = ai.generate_questions(
+            topic=quiz.topic,
+            samples=quiz.questions,
+            count=15
+        )
+
+        if not new_questions:
+            raise HTTPException(status_code=500, detail="Failed to generate questions")
+
+        # Add new questions to the quiz
+        quiz.questions.extend(new_questions)
+
+        # Save updated quiz
+        storage.save_quiz(quiz)
+
+        return JSONResponse({
+            "message": f"Generated {len(new_questions)} new questions",
+            "total_questions": len(quiz.questions),
+            "new_count": len(new_questions)
+        })
+    except Exception as e:
+        import logging
+        logging.error(f"Failed to generate questions: {type(e).__name__}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate questions: {str(e)}")
