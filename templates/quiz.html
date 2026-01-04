@@ -7,9 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Times New Roman', Times, serif; }
+        .quiz-content::-webkit-scrollbar { width: 8px; }
+        .quiz-content::-webkit-scrollbar-track { background: #f1f1f1; }
+        .quiz-content::-webkit-scrollbar-thumb { background: #888; }
     </style>
 </head>
-<body class="bg-white text-gray-800 max-w-3xl mx-auto p-8" 
+<body class="bg-white text-gray-800 max-w-6xl mx-auto p-4 md:p-8" 
       data-time-limit="{{ quiz.time_limit|default(0) }}" 
       data-started-at="{{ started_at|default('') }}" 
       data-status="{{ status }}">
@@ -34,59 +37,104 @@
     {% if status == 'preview' %}
     <div class="border border-gray-300 p-8 text-center">
         <p class="text-gray-600 mb-4">Ready to start the quiz?</p>
-        <button onclick="startQuiz()" class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-8">Start Quiz</button>
+        <button id="startBtn" class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-8">Start Quiz</button>
     </div>
     
     {% elif status == 'in_progress' %}
-    <div id="quizForm">
-        {% for question in quiz.questions %}
-        {% set q_idx = loop.index0 %}
-        <div class="border border-gray-300 p-5 mb-4">
-            <p class="mb-3">{{ loop.index }}. {{ question.text }}</p>
-            <div class="ml-4 space-y-1">
-                {% for choice_text in question.choices %}
-                <label class="block py-1 cursor-pointer">
-                    <input type="{{ 'checkbox' if question.multiple else 'radio' }}" 
-                           name="q{{ q_idx }}" 
-                           data-q="{{ q_idx }}" 
-                           value="{{ choice_text }}" 
-                           class="mr-2">
-                    {{ choice_text }}
-                </label>
+    <div class="flex flex-col md:flex-row gap-6">
+        <!-- Left: Scrollable Quiz Content -->
+        <div class="flex-1 md:overflow-y-scroll md:max-h-[calc(100vh-250px)] md:pr-1 quiz-content">
+            <div id="quizForm">
+                {% for question in quiz.questions %}
+                {% set q_idx = loop.index0 %}
+                <div id="q{{ q_idx }}" class="border border-gray-300 p-5 mb-4">
+                    <p class="mb-3">{{ loop.index }}. {{ question.text }}</p>
+                    <div class="ml-4 space-y-1">
+                        {% for choice_text in question.choices %}
+                        <label class="block py-1 cursor-pointer">
+                            <input type="{{ 'checkbox' if question.multiple else 'radio' }}" 
+                                   name="q{{ q_idx }}" 
+                                   data-q="{{ q_idx }}" 
+                                   value="{{ choice_text }}" 
+                                   class="mr-2">
+                            {{ choice_text }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
                 {% endfor %}
             </div>
         </div>
-        {% endfor %}
-        <button onclick="submitQuiz()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">Submit Quiz</button>
+
+        <hr class="md:hidden border-gray-400 my-6">
+
+        <!-- Right: Question Navigator -->
+        <div class="w-full md:w-64 md:flex-shrink-0">
+            <div class="border border-gray-300 p-5 md:min-h-[calc(100vh-250px)]">
+                <h3 class="text-lg mb-3 text-gray-800">Questions</h3>
+                <div class="grid grid-cols-5 gap-2 mb-4">
+                    {% for question in quiz.questions %}
+                    <button data-question="{{ loop.index0 }}"
+                            class="question-nav w-10 h-10 border border-gray-400 hover:bg-gray-200 flex items-center justify-center text-sm">
+                        {{ loop.index }}
+                    </button>
+                    {% endfor %}
+                </div>
+                <button id="submitBtn" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">Submit Quiz</button>
+            </div>
+        </div>
     </div>
     
     {% elif status == 'completed' %}
-    {% for question in quiz.questions %}
-    {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
-    <div class="p-5 mb-4 {{ 'border-2 border-green-600 bg-green-50' if question.correct|default(False) else ('border-2 border-red-600 bg-red-50' if was_answered else 'border border-gray-300') }}">
-        <p class="mb-3">{{ loop.index }}. {{ question.text }}</p>
-        <div class="ml-4 space-y-1">
-            {% for choice_text in question.choices %}
-            {% set user_chose = choice_text in question.your_answer|default([]) %}
-            {% set is_correct = choice_text in question.correct_answers|default([]) %}
-            <label class="block py-1 {{ 'bg-green-200' if is_correct else ('bg-red-200' if user_chose else '') }}">
-                <input type="{{ 'checkbox' if question.multiple else 'radio' }}" 
-                       {% if user_chose %}checked{% endif %} 
-                       disabled 
-                       class="mr-2">
-                {{ choice_text }}{% if is_correct %} ✓{% endif %}
-            </label>
+    <div class="flex flex-col md:flex-row gap-6">
+        <!-- Left: Scrollable Results -->
+        <div class="flex-1 md:overflow-y-scroll md:max-h-[calc(100vh-250px)] md:pr-1 quiz-content">
+            {% for question in quiz.questions %}
+            {% set q_idx = loop.index0 %}
+            {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
+            <div id="q{{ q_idx }}" class="p-5 mb-4 {{ 'border-2 border-green-600 bg-green-50' if question.correct|default(False) else ('border-2 border-red-600 bg-red-50' if was_answered else 'border border-gray-300') }}">
+                <p class="mb-3">{{ loop.index }}. {{ question.text }}</p>
+                <div class="ml-4 space-y-1">
+                    {% for choice_text in question.choices %}
+                    {% set user_chose = choice_text in question.your_answer|default([]) %}
+                    {% set is_correct = choice_text in question.correct_answers|default([]) %}
+                    <label class="block py-1 {{ 'bg-green-200' if is_correct else ('bg-red-200' if user_chose else '') }}">
+                        <input type="{{ 'checkbox' if question.multiple else 'radio' }}" 
+                               {% if user_chose %}checked{% endif %} 
+                               disabled 
+                               class="mr-2">
+                        {{ choice_text }}{% if is_correct %} ✓{% endif %}
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if question.explanation %}
+                <div class="border border-gray-400 bg-gray-50 p-3 mt-3">
+                    <p>{{ question.explanation }}</p>
+                </div>
+                {% endif %}
+            </div>
             {% endfor %}
         </div>
-        {% if question.explanation %}
-        <div class="border border-gray-400 bg-gray-50 p-3 mt-3">
-            <p>{{ question.explanation }}</p>
+
+        <hr class="md:hidden border-gray-400 my-6">
+
+        <!-- Right: Question Navigator -->
+        <div class="w-full md:w-64 md:flex-shrink-0">
+            <div class="border border-gray-300 p-5 md:min-h-[calc(100vh-250px)]">
+                <h3 class="text-lg mb-3 text-gray-800">Questions</h3>
+                <div class="grid grid-cols-5 gap-2 mb-4">
+                    {% for question in quiz.questions %}
+                    {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
+                    <button data-question="{{ loop.index0 }}"
+                            class="question-nav w-10 h-10 border flex items-center justify-center text-sm {{ 'border-green-600 bg-green-100' if question.correct|default(False) else ('border-red-600 bg-red-100' if was_answered else 'border-gray-400') }}">
+                        {{ loop.index }}
+                    </button>
+                    {% endfor %}
+                </div>
+                <button id="retakeBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4">Retake Quiz</button>
+            </div>
         </div>
-        {% endif %}
     </div>
-    {% endfor %}
-    <hr class="my-8 border-gray-400">
-    <button onclick="retakeQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4">Retake Quiz</button>
     {% endif %}
 
     <div id="loading" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 hidden items-center justify-center z-50">
@@ -103,20 +151,44 @@
         const STATUS = document.body.dataset.status;
         const TIME_LIMIT = parseInt(document.body.dataset.timeLimit) || 0;
         const STARTED_AT = document.body.dataset.startedAt;
-        const loader = document.getElementById('loading');
-        const loaderText = document.getElementById('loadingText');
         
+        let timerInterval = null;
+        
+        // Loader functions
         function showLoader(text) {
+            const loader = document.getElementById('loading');
+            const loaderText = document.getElementById('loadingText');
             loaderText.textContent = text;
             loader.classList.replace('hidden', 'flex');
         }
         
         function hideLoader() {
-            loader.classList.replace('flex', 'hidden');
+            document.getElementById('loading').classList.replace('flex', 'hidden');
         }
         
-        if (SID && SID !== 'None') localStorage.setItem('quiz_' + SLUG, SID);
+        // Navigation functions
+        function scrollToQuestion(index) {
+            const element = document.getElementById('q' + index);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
         
+        function updateQuestionStatus() {
+            document.querySelectorAll('.question-nav').forEach(btn => {
+                const qIndex = btn.dataset.question;
+                const inputs = document.querySelectorAll(`input[data-q="${qIndex}"]:checked`);
+                if (inputs.length > 0) {
+                    btn.classList.remove('border-gray-400', 'hover:bg-gray-200');
+                    btn.classList.add('border-blue-600', 'bg-blue-100');
+                } else {
+                    btn.classList.remove('border-blue-600', 'bg-blue-100');
+                    btn.classList.add('border-gray-400', 'hover:bg-gray-200');
+                }
+            });
+        }
+        
+        // Quiz action functions
         async function submitQuiz() {
             showLoader('Evaluating answers...');
             const answers = {};
@@ -181,24 +253,68 @@
             await startQuiz();
         }
         
-        if (STATUS === 'in_progress' && TIME_LIMIT > 0 && STARTED_AT) {
+        // Timer function
+        function startTimer() {
             const timer = document.getElementById('timer');
-            if (timer) {
-                const start = new Date(STARTED_AT);
-                setInterval(() => {
-                    const elapsed = (new Date() - start) / 1000;
-                    const remaining = Math.max(0, TIME_LIMIT - elapsed);
-                    const mins = Math.floor(remaining / 60);
-                    const secs = Math.floor(remaining % 60);
-                    timer.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                    if (remaining <= 60 && remaining > 0) timer.classList.add('text-red-500');
-                    if (remaining === 0) {
-                        alert('Time is up! Submitting your quiz.');
-                        submitQuiz();
-                    }
-                }, 1000);
-            }
+            if (!timer) return;
+            
+            const start = new Date(STARTED_AT);
+            timerInterval = setInterval(() => {
+                const elapsed = (new Date() - start) / 1000;
+                const remaining = Math.max(0, TIME_LIMIT - elapsed);
+                const mins = Math.floor(remaining / 60);
+                const secs = Math.floor(remaining % 60);
+                timer.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (remaining <= 60 && remaining > 0) {
+                    timer.classList.add('text-red-500');
+                }
+                if (remaining === 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up! Submitting your quiz.');
+                    submitQuiz();
+                }
+            }, 1000);
         }
+        
+        // Initialize on page load
+        if (SID && SID !== 'None') {
+            localStorage.setItem('quiz_' + SLUG, SID);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Question navigation
+            document.querySelectorAll('.question-nav').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    scrollToQuestion(parseInt(btn.dataset.question));
+                });
+            });
+            
+            // Status-specific initialization
+            if (STATUS === 'preview') {
+                const startBtn = document.getElementById('startBtn');
+                if (startBtn) startBtn.addEventListener('click', startQuiz);
+            }
+            
+            if (STATUS === 'in_progress') {
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) submitBtn.addEventListener('click', submitQuiz);
+                
+                document.querySelectorAll('#quizForm input[data-q]').forEach(input => {
+                    input.addEventListener('change', updateQuestionStatus);
+                });
+                updateQuestionStatus();
+                
+                if (TIME_LIMIT > 0 && STARTED_AT) {
+                    startTimer();
+                }
+            }
+            
+            if (STATUS === 'completed') {
+                const retakeBtn = document.getElementById('retakeBtn');
+                if (retakeBtn) retakeBtn.addEventListener('click', retakeQuiz);
+            }
+        });
     </script>
 </body>
 </html>
