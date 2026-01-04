@@ -47,7 +47,7 @@
     {% elif status == 'in_progress' %}
     <div class="flex flex-col md:flex-row gap-3 md:gap-6">
         <!-- Left: Scrollable Quiz Content -->
-        <div class="flex-1 md:overflow-y-scroll md:max-h-[calc(100vh-250px)] md:pr-1 quiz-content">
+        <div class="flex-1 md:overflow-y-auto md:max-h-[calc(100vh-250px)] md:pr-1 quiz-content">
             <div id="quizForm">
                 {% for question in quiz.questions %}
                 {% set q_idx = loop.index0 %}
@@ -90,7 +90,7 @@
     {% elif status == 'completed' %}
     <div class="flex flex-col md:flex-row gap-3 md:gap-6">
         <!-- Left: Scrollable Results -->
-        <div class="flex-1 md:overflow-y-scroll md:max-h-[calc(100vh-250px)] md:pr-1 quiz-content">
+        <div class="flex-1 md:overflow-y-auto md:max-h-[calc(100vh-250px)] md:pr-1 quiz-content">
             {% for question in quiz.questions %}
             {% set q_idx = loop.index0 %}
             {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
