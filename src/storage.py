@@ -60,3 +60,15 @@ class QuizStorage:
 
         file_path.write_text("\n".join(lines), encoding='utf-8')
         return str(file_path)
+
+    def delete_quizzes(self) -> int:
+        """Delete all quiz files except those in examples directory.
+        
+        Returns:
+            int: Number of files deleted
+        """
+        deleted_count = 0
+        for file_path in self.storage_dir.glob("*.md"):
+            file_path.unlink()
+            deleted_count += 1
+        return deleted_count

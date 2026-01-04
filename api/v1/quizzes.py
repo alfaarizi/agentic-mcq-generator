@@ -105,6 +105,42 @@ async def upload_quiz(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse quiz: {str(e)}")
 
+
+@router.post("/create")
+async def create_quiz(
+    request: Request,
+    storage: QuizStorage = Depends(get_storage)
+):
+    """Create quiz from pasted content."""
+    try:
+        body = await request.json()
+        content = body.get("content", "")
+        if not content:
+            raise HTTPException(status_code=400, detail="No content provided")
+        
+        quizzes = QuizParser.from_string(content, source="pasted")
+        if not quizzes:
+            raise HTTPException(status_code=400, detail="No quizzes found in content")
+        
+        for quiz in quizzes:
+            storage.save_quiz(quiz)
+        
+        return JSONResponse({"message": f"Created {len(quizzes)} quiz(es)"}, status_code=201)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to parse quiz: {str(e)}")
+
+
+@router.delete("")
+async def reset_quizzes(storage: QuizStorage = Depends(get_storage)):
+    """Delete all quizzes except those in examples directory."""
+    try:
+        storage.delete_quizzes()
+        return JSONResponse({"message": "All quizzes deleted successfully"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete quizzes: {str(e)}")
+
 @router.get("")
 async def list_quizzes(
     request: Request, 

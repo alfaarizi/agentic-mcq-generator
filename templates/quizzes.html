@@ -54,15 +54,36 @@
         <!-- Separator for mobile -->
         <hr class="md:hidden border-gray-400">
 
-        <!-- Right: Fixed Upload Section -->
-        <div class="w-full md:w-80 md:flex-shrink-0">
-            <div class="border border-gray-300 p-5 md:sticky md:top-0">
+        <!-- Right: Fixed Action Section -->
+        <div class="w-full md:w-80 md:flex-shrink-0 space-y-4">
+            <!-- Upload Quiz -->
+            <div class="border border-gray-300 p-5">
                 <div class="px-3">
                     <h3 class="text-xl mb-3">Upload Quiz</h3>
                     <form action="{{ api_base_url }}/quizzes" method="post" enctype="multipart/form-data">
                         <input type="file" name="file" accept=".md" required class="w-full p-1 border border-gray-300 text-sm">
                         <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">Upload</button>
                     </form>
+                </div>
+            </div>
+
+            <!-- Create Quiz -->
+            <div class="border border-gray-300 p-5">
+                <div class="px-3">
+                    <h3 class="text-xl mb-3">Create Quiz</h3>
+                    <form id="createQuizForm" class="flex flex-col">
+                        <textarea id="quizContent" name="content" placeholder="Paste quiz content here..." required class="w-full p-2 border border-gray-300 text-sm resize-none" style="height: 210px;"></textarea>
+                        <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">Create</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Reset Quizzes -->
+            <div class="border border-gray-300 p-5">
+                <div class="px-3">
+                    <h3 class="text-xl mb-4">Reset Quizzes</h3>
+                    <p class="text-gray-600 text-sm mb-3">This action permanently deletes all quizzes.</p>
+                    <button onclick="resetQuizzes()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4">Reset All</button>
                 </div>
             </div>
         </div>
@@ -160,6 +181,51 @@
             } catch (e) {
                 console.error(e);
                 alert('Failed to start quiz. Please try again.');
+            }
+        }
+        
+        document.getElementById('createQuizForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const content = document.getElementById('quizContent').value;
+            
+            try {
+                const res = await fetch(`${API}/quizzes/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    const err = await res.json();
+                    alert('Failed to create quiz: ' + (err.detail || 'Unknown error'));
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Failed to create quiz. Please try again.');
+            }
+        });
+        
+        async function resetQuizzes() {
+            if (!confirm('Are you sure you want to delete all quizzes? This action cannot be undone.')) return;
+            
+            try {
+                const res = await fetch(`${API}/quizzes`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (res.ok) {
+                    localStorage.clear();
+                    location.reload();
+                } else {
+                    const err = await res.json();
+                    alert('Failed to reset quizzes: ' + (err.detail || 'Unknown error'));
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Failed to reset quizzes. Please try again.');
             }
         }
     </script>
