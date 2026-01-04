@@ -14,21 +14,30 @@
 
     {% if quizzes %}
     {% for quiz in quizzes %}
-    <div class="border border-gray-300 p-5 mb-4" data-quiz-slug="{{ quiz.slug }}">
-        <div class="flex justify-between items-baseline mb-2">
-            <h3 class="text-xl quiz-title">{{ quiz.topic }}</h3>
-            <span class="text-gray-600 text-sm">
-                {% if quiz.time_limit > 0 %}
-                    ⏱️ {{ (quiz.time_limit // 60)|string.zfill(2) }}:{{ (quiz.time_limit % 60)|string.zfill(2) }}
-                {% else %}
-                    📚 No limit
-                {% endif %}
-            </span>
-        </div>
-        <p class="text-gray-600 mb-4">{{ quiz.questions }} questions</p>
-        <button onclick="handleQuizAction('{{ quiz.slug }}')" class="quiz-button w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">
-            Start Quiz
+    <div class="border border-gray-300 p-5 mb-4 group relative" data-slug="{{ quiz.slug }}">
+        <button onclick="copyQuizLink(event, '{{ quiz.slug }}')" class="absolute left-2 top-7 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-all" title="Copy link">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+            </svg>
         </button>
+        <div class="px-3">
+            <div class="flex justify-between items-baseline mb-2">
+                <div>
+                    <h3 class="text-xl quiz-title">{{ quiz.topic }}</h3>
+                </div>
+                <span class="text-gray-600 text-sm">
+                    {% if quiz.time_limit > 0 %}
+                        ⏱️ {{ "%02d"|format(quiz.time_limit // 60) }}:{{ "%02d"|format(quiz.time_limit % 60) }}
+                    {% else %}
+                        📚 No limit
+                    {% endif %}
+                </span>
+            </div>
+            <p class="text-gray-600 mb-4">{{ quiz.questions }} questions</p>
+            <button onclick="handleQuiz('{{ quiz.slug }}')" class="quiz-btn w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">
+                Start Quiz
+            </button>
+        </div>
     </div>
     {% endfor %}
     {% else %}
@@ -44,68 +53,96 @@
     </form>
 
     <script>
-        // Check which quizzes have been taken
-        document.addEventListener('DOMContentLoaded', function() {
-            const quizElements = document.querySelectorAll('[data-quiz-slug]');
+        const API = '{{ api_base_url }}';
+
+        async function copyQuizLink(e, slug) {
+            e.stopPropagation();
+            const url = `${window.location.origin}${API}/quizzes/${slug}`;
+            const btn = e.currentTarget;
+            const svg = btn.querySelector('svg');
             
-            quizElements.forEach(function(element) {
-                const slug = element.getAttribute('data-quiz-slug');
-                const sessionId = localStorage.getItem('quiz_' + slug);
-                const button = element.querySelector('.quiz-button');
-                const title = element.querySelector('.quiz-title');
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(url);
+                } else {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = url;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                }
                 
-                if (sessionId) {
-                    // Quiz has been taken - change button to "Retake Quiz"
-                    button.textContent = 'Retake Quiz';
-                    button.classList.remove('bg-gray-800', 'hover:bg-gray-700');
-                    button.classList.add('bg-gray-600', 'hover:bg-gray-500');
-                    
-                    // Make title clickable to view results
-                    title.classList.add('text-blue-700', 'hover:underline', 'cursor-pointer');
-                    title.onclick = function() {
-                        window.location.href = '{{ api_base_url }}/quizzes/' + slug + '?session_id=' + sessionId;
-                    };
+                btn.style.opacity = '1';
+                svg.classList.add('text-green-600');
+                svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />';
+                setTimeout(() => {
+                    btn.style.opacity = '';
+                    svg.classList.remove('text-green-600');
+                    svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />';
+                }, 1500);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy link. Please copy manually: ' + url);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-slug]').forEach(el => {
+                const slug = el.dataset.slug;
+                const sessionId = localStorage.getItem('quiz_' + slug);
+                const isCompleted = localStorage.getItem('quiz_' + slug + '_completed') === 'true';
+                const score = localStorage.getItem('quiz_' + slug + '_score');
+                const btn = el.querySelector('.quiz-btn');
+                const title = el.querySelector('.quiz-title');
+                
+                title.className += ' text-blue-700 cursor-pointer';
+                title.onclick = () => {
+                    const url = isCompleted 
+                        ? `${API}/quizzes/${slug}?session_id=${sessionId}`
+                        : `${API}/quizzes/${slug}`;
+                    location.href = url;
+                };
+                
+                const titleText = title.textContent;
+                title.innerHTML = `<span class="hover:underline">${titleText}</span>`;
+                
+                if (isCompleted) {
+                    btn.textContent = 'Retake Quiz';
+                    btn.className = btn.className.replace('bg-gray-800 hover:bg-gray-700', 'bg-blue-600 hover:bg-blue-700');
+                    if (score) {
+                        const scoreSpan = document.createElement('span');
+                        scoreSpan.className = 'text-blue-600 text-lg ml-2';
+                        scoreSpan.textContent = `(${score})`;
+                        title.appendChild(scoreSpan);
+                    }
                 }
             });
         });
         
-        async function handleQuizAction(slug) {
-            const sessionId = localStorage.getItem('quiz_' + slug);
+        async function handleQuiz(slug) {
+            const isCompleted = localStorage.getItem('quiz_' + slug + '_completed') === 'true';
+            if (isCompleted && !confirm('You have already taken this quiz. Start a new attempt?')) return;
             
-            if (sessionId) {
-                // Has existing session - ask if they want to retake
-                if (confirm('You have already taken this quiz. Start a new attempt?')) {
-                    // Clear old session and start new one
-                    localStorage.removeItem('quiz_' + slug);
-                    await startNewQuiz(slug);
-                }
-                // If cancel, do nothing (no redirect)
-            } else {
-                // No session - start new quiz
-                await startNewQuiz(slug);
-            }
-        }
-        
-        async function startNewQuiz(slug) {
             try {
-                const response = await fetch('{{ api_base_url }}/quizzes/' + slug + '/sessions', {
+                const res = await fetch(`${API}/quizzes/${slug}/sessions`, {
                     method: 'POST',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Accept': 'application/json' }
                 });
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    // Store session_id in localStorage
+                if (res.ok) {
+                    const data = await res.json();
                     localStorage.setItem('quiz_' + slug, data.session_id);
-                    // Redirect to quiz with session_id
-                    window.location.href = '{{ api_base_url }}/quizzes/' + slug + '?session_id=' + data.session_id;
+                    localStorage.removeItem('quiz_' + slug + '_completed');
+                    localStorage.removeItem('quiz_' + slug + '_score');
+                    location.href = `${API}/quizzes/${slug}?session_id=${data.session_id}`;
                 } else {
                     alert('Failed to start quiz. Please try again.');
                 }
-            } catch (error) {
-                console.error('Error starting quiz:', error);
+            } catch (e) {
+                console.error(e);
                 alert('Failed to start quiz. Please try again.');
             }
         }
