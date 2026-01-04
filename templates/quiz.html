@@ -62,12 +62,13 @@
     
     {% elif status == 'completed' %}
     {% for question in quiz.questions %}
-    <div class="border-2 p-5 mb-4 {{ 'border-green-600 bg-green-50' if question.correct else 'border-red-600 bg-red-50' }}">
+    {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
+    <div class="p-5 mb-4 {{ 'border-2 border-green-600 bg-green-50' if question.correct|default(False) else ('border-2 border-red-600 bg-red-50' if was_answered else 'border border-gray-300') }}">
         <p class="mb-3">{{ loop.index }}. {{ question.text }}</p>
         <div class="ml-4 space-y-1">
             {% for choice_text in question.choices %}
-            {% set user_chose = choice_text in question.your_answer %}
-            {% set is_correct = choice_text in question.correct_answers %}
+            {% set user_chose = choice_text in question.your_answer|default([]) %}
+            {% set is_correct = choice_text in question.correct_answers|default([]) %}
             <label class="block py-1 {{ 'bg-green-200' if is_correct else ('bg-red-200' if user_chose else '') }}">
                 <input type="{{ 'checkbox' if question.multiple else 'radio' }}" 
                        {% if user_chose %}checked{% endif %} 
