@@ -1,12 +1,14 @@
 """AI integration for question generation and evaluation using OpenRouter."""
 
 import os
-from typing import List, Dict
+from typing import List, Dict, Optional
 from dotenv import load_dotenv
 from openai import OpenAI
 
 from .models import Question, Choice
 from .parser import parse_questions
+from .agents.evaluator import EvaluatorAgent
+from .agents.schemas import LearningHistory
 
 load_dotenv()
 
@@ -32,6 +34,7 @@ class QuizAI:
             base_url="https://openrouter.ai/api/v1",
         )
         self.model = model
+        self._evaluator = None  # Lazy initialization
 
     def _generate(
         self,
@@ -130,77 +133,40 @@ Output exactly {count} questions in the specified format only, no commentary.
         response = self._generate(system_prompt, user_prompt, temperature=0.7)
         return parse_questions(response)
 
+    @property
+    def evaluator(self) -> EvaluatorAgent:
+        """Get or create EvaluatorAgent instance."""
+        if self._evaluator is None:
+            self._evaluator = EvaluatorAgent(model=self.model)
+        return self._evaluator
+
     def evaluate_answer(
         self,
         question: Question,
         selected: List[Choice],
-    ) -> Dict[str, str]:
-        """Evaluate answer with expert feedback using role-based prompting.
+        topic: Optional[str] = None,
+        learning_history: Optional[LearningHistory] = None,
+    ) -> Dict[str, any]:
+        """Evaluate answer using EvaluatorAgent.
 
         Args:
             question: The question being answered.
             selected: User's selected choices.
+            topic: Topic of the quiz (defaults to "general").
+            learning_history: Optional learning history for personalized feedback.
 
         Returns:
-            Dictionary with 'result' and 'explanation' keys.
+            Dictionary with evaluation result including structured feedback.
         """
-        correct = [c.text for c in question.correct_choices]
-        chosen = [c.text for c in selected]
-        is_correct = set(correct) == set(chosen)
-
-        # Extract topic from question context (you may pass this explicitly if available)
-        # For now, we'll use generic expertise
-
-        # System prompt: Senior technical educator role
-        system_prompt = \
-f"""
-Act as a seasoned AI Engineer and Senior Software Engineer with 15+ years of experience in technical education, mentorship, and building production systems. Your expertise spans:
-
-**Technical Depth:**
-- Deep understanding of computer science fundamentals, software architecture, and AI/ML systems
-- Practical experience debugging misconceptions and explaining complex concepts clearly
-- Ability to distill technical nuances into digestible explanations
-
-**Teaching Philosophy:**
-- Precision over vagueness - use concrete examples and technical accuracy
-- Focus on *why* concepts work, not just *what* they are
-- Identify the root cause of misconceptions with surgical precision
-- Provide structured, scannable explanations using markdown formatting
-
-**Communication Style:**
-- Direct, professional technical writing
-- Avoid second-person pronouns (no "you/your/you've")
-- Use third-person or passive voice: "The selected answer...", "This choice reflects...", "The correct approach..."
-- Employ bullet points, numbered lists, and clear structure
-- Keep explanations concise: 3-4 sentences maximum
-"""
-
-        # User prompt: Specific evaluation task
-        correct_str = ", ".join(correct) if correct else "None"
-        chosen_str = ", ".join(chosen) if chosen else "None"
-
-        user_prompt = \
-f"""
-**Task:**
-Evaluate the selected answer based on the question and correct answer provided below.
-- Question: {question.text}
-- Correct answer: {correct_str}
-- Selected answer: {chosen_str}
-
-**Requirements:**
-Use third-person voice, separate paragraphs with blank lines, maintain technical precision.
-
-**Output Format:**
-Paragraph 1: Begin with <mark>, state the fundamental principle or concept being tested (1-2 sentences), then close with </mark>.
-Paragraph 2: Analyze the selected answer—explain the specific misconception or reasoning error if incorrect, or affirm the reasoning if correct (1-2 sentences).
-Paragraph 3: Provide the heading "<u>Key Distinctions:</u>" followed by a bulleted list with 2-3 critical points distinguishing the correct answer from incorrect options.
-
-Output exactly in the specified format only, no commentary.
-"""
-
-        explanation = self._generate(system_prompt, user_prompt, temperature=0.3)
-
-        return {
-            "result": "correct" if is_correct else "incorrect",
-            "explanation": explanation.strip(),
-        }
+        if topic is None:
+            topic = "general"
+        
+        result = self.evaluator.evaluate(
+            question=question,
+            selected=selected,
+            topic=topic,
+            learning_history=learning_history
+        )
+        
+        # Convert to dict format for backward compatibility
+        return result.to_dict()

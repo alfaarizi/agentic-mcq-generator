@@ -120,9 +120,63 @@
                     </label>
                     {% endfor %}
                 </div>
-                {% if question.explanation %}
+                {% if question.feedback %}
+                <div class="border border-blue-400 bg-blue-50 p-3 mt-3 feedback-content" id="feedback-{{ q_idx }}">
+                    {% if question.feedback.concept %}
+                    <div class="mb-2">
+                        <strong class="text-blue-800">Core Concept:</strong>
+                        <p class="mt-1">{{ question.feedback.concept }}</p>
+                    </div>
+                    {% endif %}
+                    {% if question.feedback.explanation %}
+                    <div class="mb-2">
+                        <strong class="text-blue-800">Explanation:</strong>
+                        <p class="mt-1">{{ question.feedback.explanation }}</p>
+                    </div>
+                    {% endif %}
+                    {% if question.feedback.key_points %}
+                    <div class="mb-2">
+                        <strong class="text-blue-800">Key Points:</strong>
+                        <ul class="list-disc list-inside mt-1">
+                            {% for point in question.feedback.key_points %}
+                            <li>{{ point }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% if question.feedback.hints %}
+                    <div class="mb-2">
+                        <strong class="text-blue-800">💡 Hints:</strong>
+                        <ul class="list-disc list-inside mt-1">
+                            {% for hint in question.feedback.hints %}
+                            <li>{{ hint }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                {% elif question.explanation %}
+                {# Fallback to markdown explanation if structured feedback not available #}
                 <div class="border border-gray-400 bg-gray-50 p-3 mt-3 explanation-content" id="explanation-{{ q_idx }}">
                     <script type="text/template" class="markdown-source">{{ question.explanation }}</script>
+                </div>
+                {% endif %}
+                {% if question.suggestions %}
+                <div class="border border-green-400 bg-green-50 p-3 mt-3 suggestions-content" id="suggestions-{{ q_idx }}">
+                    <strong class="text-green-800">📚 Learning Suggestions:</strong>
+                    {% for suggestion in question.suggestions %}
+                    <div class="mt-2 mb-3">
+                        <h4 class="font-semibold text-green-900">{{ suggestion.title }}</h4>
+                        <p class="text-sm text-gray-700 mt-1">{{ suggestion.explanation }}</p>
+                        {% if suggestion.resources %}
+                        <ul class="list-disc list-inside mt-1 text-sm text-gray-600">
+                            {% for resource in suggestion.resources %}
+                            <li>{{ resource }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
                 </div>
                 {% endif %}
             </div>
@@ -367,6 +421,8 @@
                         textarea.innerHTML = template.textContent;
                         const markdown = textarea.value;
                         template.remove();
+                        // Configure marked to allow HTML
+                        marked.setOptions({ breaks: true });
                         el.innerHTML = marked.parse(markdown);
                     }
                 });
