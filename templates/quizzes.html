@@ -25,10 +25,15 @@
 
     <div class="flex flex-col md:flex-row gap-6">
         <!-- Left: Scrollable Quiz List -->
-        <div class="flex-1 md:overflow-y-auto md:max-h-[calc(100vh-200px)] md:pr-1 quiz-list">
-            {% if quizzes %}
-            {% for quiz in quizzes %}
-            <div class="border border-gray-300 p-5 mb-4 group relative" data-slug="{{ quiz.slug }}">
+        <div class="flex-1 md:flex md:flex-col md:max-h-[calc(100vh-200px)]">
+            <div class="border border-gray-300 md:flex md:flex-col md:min-h-[calc(100vh-200px)]">
+                <div class="px-3 py-2 border-b border-gray-300 bg-gray-50">
+                    <h2 class="text-base font-medium text-gray-800">Quizzes</h2>
+                </div>
+                <div class="flex-1 overflow-y-auto md:pr-1 md:pl-2 quiz-list p-4 bg-gray-100">
+                    {% if quizzes %}
+                    {% for quiz in quizzes %}
+                    <div class="border border-gray-300 bg-white p-5 mb-4 mx-2 group relative" data-slug="{{ quiz.slug }}">
                 <button onclick="copyQuizLink(event, '{{ quiz.slug }}')" class="absolute left-2 top-7 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-all" title="Copy link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
@@ -37,7 +42,7 @@
                 <div class="px-3">
                     <div class="flex justify-between items-baseline mb-2">
                         <div>
-                            <h3 class="text-xl quiz-title">{{ quiz.topic }}</h3>
+                            <h3 class="text-2xl quiz-title">{{ quiz.topic }}</h3>
                         </div>
                         <span class="text-gray-600 text-sm">
                             {% if quiz.time_limit > 0 %}
@@ -47,51 +52,147 @@
                             {% endif %}
                         </span>
                     </div>
-                    <p class="text-gray-600 mb-4">{{ quiz.questions }} questions</p>
-                    <button onclick="handleQuiz('{{ quiz.slug }}')" class="quiz-btn w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">
+                    <p class="text-gray-600 text-base mb-4">{{ quiz.questions }} questions</p>
+                    <button onclick="handleQuiz('{{ quiz.slug }}')" class="quiz-btn w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">
                         Start Quiz
                     </button>
+                    </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-gray-600">No quizzes available. Upload a file or create a quiz to get started.</p>
+                    {% endif %}
                 </div>
             </div>
-            {% endfor %}
-            {% else %}
-            <p class="text-gray-600">No quizzes available. Upload a file or create a quiz to get started.</p>
-            {% endif %}
         </div>
 
         <!-- Separator for mobile -->
         <hr class="md:hidden border-gray-400">
 
-        <!-- Right: Fixed Action Section -->
-        <div class="w-full md:w-80 md:flex-shrink-0 space-y-4">
-            <!-- Upload Quiz -->
-            <div class="border border-gray-300 p-5">
-                <div class="px-3">
-                    <h3 class="text-xl mb-3">Upload Quiz</h3>
-                    <form action="{{ api_base_url }}/quizzes" method="post" enctype="multipart/form-data">
-                        <input type="file" name="file" accept=".md" required class="w-full p-1 border border-gray-300 text-sm">
-                        <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">Upload</button>
-                    </form>
+        <!-- Right: Fixed Action Section with Tabs -->
+        <div class="w-full md:w-96 md:flex-shrink-0 md:flex md:flex-col">
+            <div class="border border-gray-300 md:flex md:flex-col md:min-h-[calc(100vh-200px)]">
+                <!-- Tab Navigation -->
+                <div class="flex border-b border-gray-300 bg-gray-50">
+                    <button onclick="switchTab('generate')" id="tab-generate" class="flex-1 px-3 py-2 text-sm font-medium text-gray-800 bg-white border-b-2 border-gray-800 tab-button">
+                        Generate
+                    </button>
+                    <button onclick="switchTab('create')" id="tab-create" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
+                        Create
+                    </button>
+                    <button onclick="switchTab('upload')" id="tab-upload" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
+                        Upload
+                    </button>
+                    <button onclick="switchTab('reset')" id="tab-reset" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
+                        Reset
+                    </button>
                 </div>
-            </div>
 
-            <!-- Create Quiz -->
-            <div class="border border-gray-300 p-5">
-                <div class="px-3">
-                    <h3 class="text-xl mb-3">Create Quiz</h3>
-                    <form id="createQuizForm" class="flex flex-col">
-                        <textarea id="quizContent" name="content" placeholder="Paste quiz content here...&#10;&#10;e.g.,&#10;&lt;Math Basics&gt;&#10;What is 2 + 2?&#10;- 3&#10;&gt; 4&#10;- 5&#10;&lt;/Math Basics&gt;" required class="w-full p-2 border border-gray-300 text-sm resize-none" style="height: 210px;"></textarea>
-                        <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">Create</button>
-                    </form>
-                </div>
-            </div>
+                <!-- Tab Content -->
+                <div class="p-4 flex-1 overflow-y-auto">
+                    <!-- Generate Quiz Tab -->
+                    <div id="content-generate" class="tab-content">
+                        <h3 class="text-xl font-semibold mb-3">Generate Quiz</h3>
+                        <form id="generateQuizForm" class="flex flex-col space-y-3">
+                            <div>
+                                <label for="topicInput" class="block text-base font-medium text-gray-700 mb-1">Topic Description</label>
+                                <textarea 
+                                    id="topicInput" 
+                                    name="topic" 
+                                    placeholder="Describe the topic...&#10;e.g., 'neural networks for CS students'" 
+                                    required 
+                                    class="w-full p-2 border border-gray-300 text-base resize-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800" 
+                                    style="height: 309px;"
+                                    aria-label="Topic description for quiz generation"
+                                ></textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label for="complexitySelect" class="block text-sm font-medium text-gray-700 mb-1">Complexity</label>
+                                    <select 
+                                        id="complexitySelect" 
+                                        name="complexity" 
+                                        required
+                                        class="w-full p-2 border border-gray-300 text-sm focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+                                        aria-label="Question complexity level"
+                                    >
+                                        <option value="beginner">Beginner</option>
+                                        <option value="intermediate" selected>Intermediate</option>
+                                        <option value="advanced">Advanced</option>
+                                        <option value="expert">Expert</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="styleSelect" class="block text-sm font-medium text-gray-700 mb-1">Style</label>
+                                    <select 
+                                        id="styleSelect" 
+                                        name="style" 
+                                        required
+                                        class="w-full p-2 border border-gray-300 text-sm focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+                                        aria-label="Question presentation style"
+                                    >
+                                        <option value="academic" selected>Academic</option>
+                                        <option value="conversational">Conversational</option>
+                                        <option value="practical">Practical</option>
+                                        <option value="concise">Concise</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="targetAudienceSelect" class="block text-sm font-medium text-gray-700 mb-1">Audience</label>
+                                    <select 
+                                        id="targetAudienceSelect" 
+                                        name="target_audience" 
+                                        required
+                                        class="w-full p-2 border border-gray-300 text-sm focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+                                        aria-label="Target audience level"
+                                    >
+                                        <option value="high_school">High School</option>
+                                        <option value="undergraduate" selected>Undergraduate</option>
+                                        <option value="graduate">Graduate</option>
+                                        <option value="professional">Professional</option>
+                                        <option value="general">General</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base transition-colors">Generate Quiz</button>
+                        </form>
+                    </div>
 
-            <!-- Reset Quizzes -->
-            <div class="border border-gray-300 p-5">
-                <div class="px-3">
-                    <h3 class="text-xl mb-4">Reset Quizzes</h3>
-                    <p class="text-gray-600 text-sm mb-3">This action permanently deletes all quizzes.</p>
-                    <button onclick="resetQuizzes()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4">Reset All</button>
+                    <!-- Upload Quiz Tab -->
+                    <div id="content-upload" class="tab-content hidden">
+                        <h3 class="text-xl font-semibold mb-4">Upload Quiz</h3>
+                        <form action="{{ api_base_url }}/quizzes" method="post" enctype="multipart/form-data" class="space-y-3">
+                            <input type="file" name="file" accept=".md" required class="w-full p-2 border border-gray-300 text-base">
+                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">Upload</button>
+                        </form>
+                    </div>
+
+                    <!-- Create Quiz Tab -->
+                    <div id="content-create" class="tab-content hidden">
+                        <h3 class="text-xl font-semibold mb-3">Create Quiz</h3>
+                        <form id="createQuizForm" class="flex flex-col space-y-3">
+                            <textarea 
+                                id="quizContent" 
+                                name="content" 
+                                placeholder="Paste quiz content...&#10;&#10;e.g.,&#10;&lt;Math Basics&gt;&#10;What is 2 + 2?&#10;- 3&#10;&gt; 4&#10;- 5&#10;&lt;/Math Basics&gt;" 
+                                required 
+                                class="w-full p-2 border border-gray-300 text-base resize-none" 
+                                style="height: 415px;"
+                            ></textarea>
+                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">Create</button>
+                        </form>
+                    </div>
+
+                    <!-- Reset Quizzes Tab -->
+                    <div id="content-reset" class="tab-content hidden">
+                        <h3 class="text-xl font-semibold mb-3">Reset Quizzes</h3>
+                        <p class="text-gray-600 text-base mb-4">This action permanently deletes all quizzes. This cannot be undone.</p>
+                        <button onclick="resetQuizzes()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 text-base">Reset All</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -101,6 +202,28 @@
 
     <script>
         const API = '{{ api_base_url }}';
+
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active state from all tabs
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('bg-white', 'border-b-2', 'border-gray-800', 'text-gray-800');
+                button.classList.add('text-gray-600');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`content-${tabName}`).classList.remove('hidden');
+            
+            // Add active state to selected tab
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            activeTab.classList.add('bg-white', 'border-b-2', 'border-gray-800', 'text-gray-800');
+            activeTab.classList.remove('text-gray-600');
+        }
 
         async function copyQuizLink(e, slug) {
             e.stopPropagation();
@@ -206,6 +329,55 @@
                 await showModal('Start Failed', 'Failed to start quiz. Please try again.');
             }
         }
+        
+        document.getElementById('generateQuizForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const topic = document.getElementById('topicInput').value.trim();
+            const complexity = document.getElementById('complexitySelect').value;
+            const style = document.getElementById('styleSelect').value;
+            const targetAudience = document.getElementById('targetAudienceSelect').value;
+            
+            if (!topic) {
+                await showModal('Validation Error', 'Please enter a topic description.');
+                return;
+            }
+            
+            try {
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Generating...';
+                
+                const res = await fetch(`${API}/quizzes/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        topic,
+                        complexity,
+                        style,
+                        target_audience: targetAudience
+                    })
+                });
+                
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    await showModal('Success', `Successfully generated quiz: ${data.topic || 'Quiz'}`);
+                    location.reload();
+                } else {
+                    const err = await res.json();
+                    await showModal('Generation Failed', 'Failed to generate quiz: ' + (err.detail || 'Unknown error'));
+                }
+            } catch (e) {
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Generate Quiz';
+                console.error(e);
+                await showModal('Generation Failed', 'Failed to generate quiz. Please try again.');
+            }
+        });
         
         document.getElementById('createQuizForm').addEventListener('submit', async (e) => {
             e.preventDefault();

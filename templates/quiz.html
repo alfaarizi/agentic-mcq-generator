@@ -28,7 +28,7 @@
       data-time-limit="{{ quiz.time_limit|default(0) }}" 
       data-started-at="{{ started_at|default('') }}" 
       data-status="{{ status }}">
-    <a href="{{ api_base_url }}/quizzes" class="text-gray-600 text-sm hover:underline">← Back</a>
+    <a href="{{ api_base_url }}/quizzes" class="text-gray-600 text-base hover:underline">← Back</a>
 
     <div class="flex justify-between items-baseline border-b-2 border-gray-800 pb-2 mb-2 mt-4">
         <h1 class="text-3xl text-gray-800">{{ quiz.topic }}</h1>
@@ -41,17 +41,17 @@
         {% endif %}
     </div>
     
-    <p class="text-gray-600 mb-2">{{ quiz.questions|length }} questions</p>
+    <p class="text-gray-600 text-base mb-2">{{ quiz.questions|length }} questions</p>
     {% if quiz.time_limit > 0 %}
-    <p class="text-gray-600 mb-6">Time limit: {{ "%02d"|format(quiz.time_limit // 60) }}:{{ "%02d"|format(quiz.time_limit % 60) }}</p>
+    <p class="text-gray-600 text-base mb-6">Time limit: {{ "%02d"|format(quiz.time_limit // 60) }}:{{ "%02d"|format(quiz.time_limit % 60) }}</p>
     {% endif %}
 
     {% if status == 'preview' %}
     <div class="border border-gray-300 p-8 text-center">
-        <p class="text-gray-600 mb-4">Ready to start the quiz?</p>
+        <p class="text-gray-600 text-base mb-4">Ready to start the quiz?</p>
         <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <button id="startBtn" class="bg-gray-800 hover:bg-gray-700 text-white py-2 px-8 w-full sm:w-auto">Start Quiz</button>
-            <button id="generateBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-8 w-full sm:w-auto">Generate More (+15)</button>
+            <button id="startBtn" class="bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-8 text-base w-full sm:w-auto">Start Quiz</button>
+            <button id="generateBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-8 text-base w-full sm:w-auto">Generate More (+15)</button>
         </div>
     </div>
     
@@ -63,10 +63,10 @@
                 {% for question in quiz.questions %}
                 {% set q_idx = loop.index0 %}
                 <div id="q{{ q_idx }}" class="border border-gray-300 p-5 mb-4">
-                    <p class="mb-3">{{ loop.index }}. {{ question.text }}</p>
+                    <p class="mb-3 text-base">{{ loop.index }}. {{ question.text }}</p>
                     <div class="ml-4 space-y-1">
                         {% for choice_text in question.choices %}
-                        <label class="block py-1 cursor-pointer">
+                        <label class="block py-1.5 cursor-pointer text-base">
                             <input type="{{ 'checkbox' if question.multiple else 'radio' }}" 
                                    name="q{{ q_idx }}" 
                                    data-q="{{ q_idx }}" 
@@ -84,16 +84,16 @@
         <!-- Right: Question Navigator -->
         <div class="w-full md:w-auto md:flex-shrink-0">
             <div class="p-3 md:border md:border-gray-300 md:py-5 md:px-6 md:min-h-[calc(100vh-250px)]">
-                <h3 class="hidden md:block text-lg mb-3 text-gray-800">Questions</h3>
+                <h3 class="hidden md:block text-xl mb-3 text-gray-800">Questions</h3>
                 <div class="hidden md:grid grid-cols-5 gap-2 mb-4">
                     {% for question in quiz.questions %}
                     <button data-question="{{ loop.index0 }}"
-                            class="question-nav w-10 h-10 border border-gray-400 hover:bg-gray-200 flex items-center justify-center text-sm">
+                            class="question-nav w-10 h-10 border border-gray-400 hover:bg-gray-200 flex items-center justify-center text-base">
                         {{ loop.index }}
                     </button>
                     {% endfor %}
                 </div>
-                <button id="submitBtn" class="submit-retake-btn bg-gray-800 hover:bg-gray-700 text-white py-2 px-4">Submit Quiz</button>
+                <button id="submitBtn" class="submit-retake-btn bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">Submit Quiz</button>
             </div>
         </div>
     </div>
@@ -106,12 +106,12 @@
             {% set q_idx = loop.index0 %}
             {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
             <div id="q{{ q_idx }}" class="p-5 mb-4 {{ 'border-2 border-green-600 bg-green-50' if question.correct|default(False) else ('border-2 border-red-600 bg-red-50' if was_answered else 'border border-gray-300') }}">
-                <p class="mb-3">{{ loop.index }}. {{ question.text }}</p>
+                <p class="mb-3 text-base">{{ loop.index }}. {{ question.text }}</p>
                 <div class="ml-4 space-y-1">
                     {% for choice_text in question.choices %}
                     {% set user_chose = choice_text in question.your_answer|default([]) %}
                     {% set is_correct = choice_text in question.correct_answers|default([]) %}
-                    <label class="block py-1 {{ 'bg-green-200' if is_correct else ('bg-red-200' if user_chose else '') }}">
+                    <label class="block py-1.5 text-base {{ 'bg-green-200' if is_correct else ('bg-red-200' if user_chose else '') }}">
                         <input type="{{ 'checkbox' if question.multiple else 'radio' }}" 
                                {% if user_chose %}checked{% endif %} 
                                disabled 
@@ -167,9 +167,9 @@
                     {% for suggestion in question.suggestions %}
                     <div class="mt-2 mb-3">
                         <h4 class="font-semibold text-green-900">{{ suggestion.title }}</h4>
-                        <p class="text-sm text-gray-700 mt-1">{{ suggestion.explanation }}</p>
+                        <p class="text-base text-gray-700 mt-1">{{ suggestion.explanation }}</p>
                         {% if suggestion.resources %}
-                        <ul class="list-disc list-inside mt-1 text-sm text-gray-600">
+                        <ul class="list-disc list-inside mt-1 text-base text-gray-600">
                             {% for resource in suggestion.resources %}
                             <li>{{ resource }}</li>
                             {% endfor %}
@@ -186,12 +186,12 @@
         <!-- Right: Question Navigator -->
         <div class="w-full md:w-auto md:flex-shrink-0">
             <div class="p-3 md:border md:border-gray-300 md:py-5 md:px-6 md:min-h-[calc(100vh-250px)]">
-                <h3 class="hidden md:block text-lg mb-3 text-gray-800">Questions</h3>
+                <h3 class="hidden md:block text-xl mb-3 text-gray-800">Questions</h3>
                 <div class="hidden md:grid grid-cols-5 gap-2 mb-4">
                     {% for question in quiz.questions %}
                     {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
                     <button data-question="{{ loop.index0 }}"
-                            class="question-nav w-10 h-10 border flex items-center justify-center text-sm {{ 'border-green-600 bg-green-100' if question.correct|default(False) else ('border-red-600 bg-red-100' if was_answered else 'border-gray-400') }}">
+                            class="question-nav w-10 h-10 border flex items-center justify-center text-base {{ 'border-green-600 bg-green-100' if question.correct|default(False) else ('border-red-600 bg-red-100' if was_answered else 'border-gray-400') }}">
                         {{ loop.index }}
                     </button>
                     {% endfor %}
