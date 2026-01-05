@@ -37,8 +37,11 @@ class EvaluatorAgent(Agent):
             learning_history = LearningHistory.from_dict(learning_history)
         
         error_analysis: ErrorAnalysis = analyze_error(question, selected, agent=self)
+        
         eval_context: EvaluationContext = gather_context(question, error_analysis, topic, learning_history, agent=self)
+        
         feedback: Feedback = generate_feedback(question, selected, error_analysis, eval_context, agent=self)
+        
         suggestions: List[LearningSuggestion] = generate_suggestions(question, error_analysis, topic, learning_history, eval_context, agent=self)
         
         return EvaluationResult(
@@ -47,23 +50,4 @@ class EvaluatorAgent(Agent):
             learning_history=learning_history,
             suggestions=suggestions if suggestions else None
         )
-    
-    def evaluate_batch(
-        self,
-        questions: List[Question],
-        answers: Dict[int, List[Choice]],
-        topic: str = "general",
-        learning_history: Optional[Union[LearningHistory, Dict[str, Any]]] = None
-    ) -> Dict[int, EvaluationResult]:
-        """Evaluate multiple answers in batch."""
-        if learning_history is None:
-            learning_history = LearningHistory()
-        elif isinstance(learning_history, dict):
-            learning_history = LearningHistory.from_dict(learning_history)
-        
-        return {
-            idx: self.evaluate(questions[idx], sel, topic, learning_history)
-            for idx, sel in answers.items()
-            if idx < len(questions)
-        }
     

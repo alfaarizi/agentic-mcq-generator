@@ -221,3 +221,141 @@ class LearningSuggestion:
             "explanation": self.explanation,
             "resources": self.resources
         }
+
+
+# ==============================
+# AUGMENTATION
+# ==============================
+
+class Complexity(StrEnum):
+    """Question difficulty and depth."""
+    BEGINNER = "beginner"               # Basic concepts, minimal prerequisite knowledge, simple recall or comprehension
+    INTERMEDIATE = "intermediate"       # Moderate depth, some prerequisite knowledge expected, application of concepts
+    ADVANCED = "advanced"               # Deep understanding required, significant prerequisite knowledge, analysis and synthesis
+    EXPERT = "expert"                   # Specialized knowledge, complex reasoning, evaluation and creation of new understanding
+    
+    @classmethod
+    def _missing_(cls, value: object) -> "Complexity":
+        """Handle unknown values by defaulting to INTERMEDIATE."""
+        return cls.INTERMEDIATE
+
+
+class Style(StrEnum):
+    """Question presentation approach."""
+    ACADEMIC = "academic"               # Formal, precise, scholarly language, uses technical terminology, structured presentation, emphasizes theoretical understanding
+    CONVERSATIONAL = "conversational"   # Friendly, explanatory, accessible tone, uses everyday language, includes context and background, encourages understanding through dialogue
+    PRACTICAL = "practical"             # Applied, scenario-based, real-world focus, emphasizes hands-on application, uses examples from actual use cases, connects theory to practice
+    CONCISE = "concise"                 # Direct, minimal explanation, to-the-point, focuses on essential information, avoids elaboration, efficient and straightforward communication
+    
+    @classmethod
+    def _missing_(cls, value: object) -> "Style":
+        """Handle unknown values by defaulting to ACADEMIC."""
+        return cls.ACADEMIC
+
+
+class TargetAudience(StrEnum):
+    """Educational/professional level."""
+    HIGH_SCHOOL = "high_school"         # Secondary education level, foundational knowledge, age-appropriate terminology
+    UNDERGRADUATE = "undergraduate"     # College/university level, intermediate depth, assumes some prior coursework
+    GRADUATE = "graduate"               # Advanced academic level, specialized knowledge, research-oriented expectations
+    PROFESSIONAL = "professional"       # Industry/workplace context, practical application, professional terminology
+    GENERAL = "general"                 # Broad public audience, accessible to non-specialists, minimal assumptions about prior knowledge
+    
+    @classmethod
+    def _missing_(cls, value: object) -> "TargetAudience":
+        """Handle unknown values by defaulting to UNDERGRADUATE."""
+        return cls.UNDERGRADUATE
+
+
+@dataclass
+class QuizProfile:
+    """Core characteristics of a quiz/topic shared across workflows."""
+    complexity: Complexity = Complexity.INTERMEDIATE
+    language: str = "en"
+    domain: str = "general"
+    style: Style = Style.ACADEMIC
+    target_audience: TargetAudience = TargetAudience.UNDERGRADUATE
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "QuizProfile":
+        """Create from dictionary."""
+        return cls(
+            complexity=Complexity(data.get("complexity", "intermediate")),
+            language=data.get("language", "en"),
+            domain=data.get("domain", "general"),
+            style=Style(data.get("style", "academic")),
+            target_audience=TargetAudience(data.get("target_audience", "undergraduate"))
+        )
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary."""
+        return {
+            "complexity": self.complexity,
+            "language": self.language,
+            "domain": self.domain,
+            "style": self.style,
+            "target_audience": self.target_audience
+        }
+
+
+@dataclass
+class QuizAnalysis:
+    """Analysis result from quiz_analyzer tool."""
+    profile: QuizProfile
+    covered_concepts: List[str] = field(default_factory=list)
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "QuizAnalysis":
+        """Create from dictionary."""
+        return cls(
+            profile=QuizProfile.from_dict(data),
+            covered_concepts=data.get("covered_concepts", [])
+        )
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary."""
+        result = self.profile.to_dict()
+        result.update({
+            "covered_concepts": self.covered_concepts
+        })
+        return result
+
+
+@dataclass
+class CoverageAnalysis:
+    """Coverage gap analysis result from coverage_analyzer tool."""
+    gaps: List[str] = field(default_factory=list)
+    suggested_concepts: List[str] = field(default_factory=list)
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "CoverageAnalysis":
+        """Create from dictionary."""
+        return cls(
+            gaps=data.get("gaps", []),
+            suggested_concepts=data.get("suggested_concepts", [])
+        )
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary."""
+        return {
+            "gaps": self.gaps,
+            "suggested_concepts": self.suggested_concepts
+        }
+
+
+@dataclass
+class QuestionValidation:
+    """Validation result from question_validator tool."""
+    valid_questions: List[Question] = field(default_factory=list)
+    invalid_questions: List[Question] = field(default_factory=list)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary.
+        
+        Note: Serializes questions as text only for API responses.
+        Full Question objects are preserved in the dataclass.
+        """
+        return {
+            "valid_questions": [q.text for q in self.valid_questions],
+            "invalid_questions": [q.text for q in self.invalid_questions]
+        }
