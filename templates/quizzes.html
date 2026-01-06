@@ -44,7 +44,7 @@
                         <div>
                             <h3 class="text-2xl quiz-title">{{ quiz.topic }}</h3>
                         </div>
-                        {% if quiz.time_limit > 0 %}
+                            {% if quiz.time_limit > 0 %}
                         <span class="text-gray-600 text-2xl">
                             ⏱️ {{ (quiz.time_limit // 60) }}m
                         </span>
@@ -186,7 +186,7 @@
                             <textarea 
                                 id="quizContent" 
                                 name="content" 
-                                placeholder="Paste quiz content...&#10;&#10;e.g.,&#10;&lt;Math Basics&gt;&#10;What is 2 + 2?&#10;- 3&#10;&gt; 4&#10;- 5&#10;&lt;/Math Basics&gt;" 
+                                placeholder="Paste quiz content..&#10;&#10;e.g.,&#10;&lt;Math Basics&gt;&#10;What is 2 + 2?&#10;- 3&#10;&gt; 4&#10;&lt;/Math Basics&gt;&#10;&#10;For timed quiz:&#10;&lt;Math Basics:5&gt;&#10;What is 2 + 2?&#10;- 3&#10;&gt; 4&#10;&lt;/Math Basics&gt;" 
                                 required 
                                 class="w-full p-2 border border-gray-300 text-base resize-none" 
                                 style="height: 415px;"

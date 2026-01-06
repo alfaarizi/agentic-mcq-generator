@@ -35,9 +35,9 @@
     
     <p class="text-gray-600 text-base mb-6">
         {{ quiz.questions|length }} question{% if quiz.questions|length != 1 %}s{% endif %}
-        {% if quiz.time_limit > 0 %}
+    {% if quiz.time_limit > 0 %}
         | Time limit: {{ quiz.time_limit // 60 }} minute{% if (quiz.time_limit // 60) != 1 %}s{% endif %}
-        {% endif %}
+    {% endif %}
     </p>
 
     {% if status == 'preview' %}
