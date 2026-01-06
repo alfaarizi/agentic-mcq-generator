@@ -57,7 +57,7 @@
                 {% for question in quiz.questions %}
                 {% set q_idx = loop.index0 %}
                 <div id="q{{ q_idx }}" class="border border-gray-300 p-5 mb-4">
-                    <p class="mb-3 text-base">{{ loop.index }}. {{ question.text }}</p>
+                    <p class="mb-3 text-base"><span class="text-lg">{{ loop.index }}.</span> {{ question.text }}</p>
                     <div class="ml-4 space-y-1">
                         {% for choice_text in question.choices %}
                         <label class="block py-1.5 cursor-pointer text-base">
@@ -100,74 +100,32 @@
             {% set q_idx = loop.index0 %}
             {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
             <div id="q{{ q_idx }}" class="p-5 mb-4 {{ 'border-2 border-green-600 bg-green-50' if question.correct|default(False) else ('border-2 border-red-600 bg-red-50' if was_answered else 'border border-gray-300') }}">
-                <p class="mb-3 text-base">{{ loop.index }}. {{ question.text }}</p>
+                <p class="mb-3 text-base"><span class="text-lg">{{ loop.index }}.</span> {{ question.text }}</p>
                 <div class="ml-4 space-y-1">
                     {% for choice_text in question.choices %}
                     {% set user_chose = choice_text in question.your_answer|default([]) %}
                     {% set is_correct = choice_text in question.correct_answers|default([]) %}
-                    <label class="block py-1.5 text-base {{ 'bg-green-200' if is_correct else ('bg-red-200' if user_chose else '') }}">
+                    <label class="block py-1.5 text-base flex items-center justify-between {% if user_chose and is_correct %}bg-green-100{% elif user_chose %}bg-red-100{% endif %}">
+                        <div class="flex items-center flex-1">
                         <input type="{{ 'checkbox' if question.multiple else 'radio' }}" 
                                {% if user_chose %}checked{% endif %} 
                                disabled 
                                class="mr-2">
-                        {{ choice_text }}{% if is_correct %} ✓{% endif %}
+                            <span>{{ choice_text }}</span>
+                        </div>
+                        {% if is_correct %}
+                        <svg class="w-6 h-6 text-green-600 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        {% elif user_chose %}
+                        <svg class="w-6 h-6 text-red-600 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        {% endif %}
                     </label>
                     {% endfor %}
                 </div>
-                {% if question.feedback %}
-                <div class="border border-blue-400 bg-blue-50 p-3 mt-3 feedback-content" id="feedback-{{ q_idx }}">
-                    {% if question.feedback.concept %}
-                    <div class="mb-2">
-                        <strong class="text-blue-800">Core Concept:</strong>
-                        <p class="mt-1">{{ question.feedback.concept }}</p>
-                    </div>
-                    {% endif %}
-                    {% if question.feedback.explanation %}
-                    <div class="mb-2">
-                        <strong class="text-blue-800">Explanation:</strong>
-                        <p class="mt-1">{{ question.feedback.explanation }}</p>
-                    </div>
-                    {% endif %}
-                    {% if question.feedback.key_points %}
-                    <div class="mb-2">
-                        <strong class="text-blue-800">Key Points:</strong>
-                        <ul class="list-disc list-inside mt-1">
-                            {% for point in question.feedback.key_points %}
-                            <li>{{ point }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    {% if question.feedback.hints %}
-                    <div class="mb-2">
-                        <strong class="text-blue-800">💡 Hints:</strong>
-                        <ul class="list-disc list-inside mt-1">
-                            {% for hint in question.feedback.hints %}
-                            <li>{{ hint }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                </div>
-                {% endif %}
-                {% if question.suggestions %}
-                <div class="border border-green-400 bg-green-50 p-3 mt-3 suggestions-content" id="suggestions-{{ q_idx }}">
-                    <strong class="text-green-800">📚 Learning Suggestions:</strong>
-                    {% for suggestion in question.suggestions %}
-                    <div class="mt-2 mb-3">
-                        <h4 class="font-semibold text-green-900">{{ suggestion.title }}</h4>
-                        <p class="text-base text-gray-700 mt-1">{{ suggestion.explanation }}</p>
-                        {% if suggestion.resources %}
-                        <ul class="list-disc list-inside mt-1 text-base text-gray-600">
-                            {% for resource in suggestion.resources %}
-                            <li>{{ resource }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+                {% include 'feedback.html' %}
             </div>
             {% endfor %}
         </div>
