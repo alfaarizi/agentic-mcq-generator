@@ -13,6 +13,9 @@ from src.quiz_ai import QuizAI
 # In-memory session storage
 _sessions: Dict[str, Any] = {}
 
+# In-memory quiz context cache (keyed by slug)
+_quiz_contexts: Dict[str, Any] = {}
+
 
 @lru_cache()
 def get_storage() -> QuizStorage:
@@ -41,3 +44,12 @@ def get_sessions() -> Dict[str, Any]:
         Dict[str, Any]: Session storage dictionary
     """
     return _sessions
+
+
+def get_quiz_contexts() -> Dict[str, Any]:
+    """Get in-memory quiz contexts cache.
+    
+    Returns:
+        Dict[str, Any]: Quiz context cache dictionary (keyed by slug)
+    """
+    return _quiz_contexts

@@ -64,7 +64,7 @@ Analyze the quiz systematically and provide the following characteristics:
 
 4. **Domain**: Identify the subject domain (e.g., "computer science", "medicine", "engineering", "mathematics", "biology", "general")
 
-5. **Covered Concepts**: Extract 3-8 main concepts, topics, or themes covered in the existing questions. Be specific and use domain-appropriate terminology.
+5. **Covered Concepts**: Extract 3-8 main concepts, topics, or themes covered in the existing questions. Be specific and use domain-appropriate terminology. The concepts MUST be expressed in the detected language (see Language section above).
 
 6. **Target Audience** (one of: high_school, undergraduate, graduate, professional, general). Infer the educational or professional level based on:
    - High School: Secondary education level, foundational knowledge, age-appropriate terminology

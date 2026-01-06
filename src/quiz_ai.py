@@ -84,13 +84,22 @@ class QuizAI:
         topic: str,
         samples: List[Question],
         count: int = 3,
+        quiz_context: Optional[QuizContext] = None
     ) -> List[Question]:
-        """Generate new questions similar to samples using AugmenterAgent (Workflow 2)."""
+        """Generate new questions similar to samples using AugmenterAgent (Workflow 2).
+
+        Args:
+            topic: Quiz topic.
+            samples: Sample questions to match style from.
+            count: Number of questions to generate.
+            quiz_context: Optional cached QuizContext to avoid recalculation.
+        """
         
         quiz = Quiz(topic=topic, questions=samples)
         return self.augmenter.augment(
             quiz, 
-            target_count=count
+            target_count=count,
+            quiz_context=quiz_context
         )
 
 

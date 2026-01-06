@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from api.config import settings
-from api.dependencies import get_storage, get_ai, get_sessions
+from api.dependencies import get_storage, get_ai, get_sessions, get_quiz_contexts
 from src.storage import QuizStorage
 from src.quiz_ai import QuizAI
 from src.parser import QuizParser
@@ -245,7 +245,9 @@ async def get_quiz(
     slug: str,
     session_id: Optional[str] = Query(None),
     storage: QuizStorage = Depends(get_storage),
-    sessions: Dict[str, Any] = Depends(get_sessions)
+    sessions: Dict[str, Any] = Depends(get_sessions),
+    ai: QuizAI = Depends(get_ai),
+    quiz_contexts: Dict[str, Any] = Depends(get_quiz_contexts)
 ):
     """Get quiz preview or session."""
     quiz = storage.get_quiz(slug)
@@ -265,8 +267,15 @@ async def get_quiz(
         })
     
     # HTML: show preview or session
-    if not session_id or session_id not in sessions:
-        # Preview
+    if not session_id or session_id not in sessions: 
+        if slug in quiz_contexts:
+            quiz_context_dict = quiz_contexts[slug]
+        else:
+            from src.agents.tools.quiz_context_extractor import extract_quiz_context
+            quiz_context = extract_quiz_context(quiz, agent=ai.evaluator)
+            quiz_context_dict = quiz_context.to_dict()
+            quiz_contexts[slug] = quiz_context_dict
+        
         return templates.TemplateResponse("quiz.html", {
             "request": request,
             "quiz": {
@@ -275,6 +284,7 @@ async def get_quiz(
                 "time_limit": quiz.time_limit,
                 "questions": serialize_questions(quiz.questions)
             },
+            "quiz_context": quiz_context_dict,
             "status": "preview",
             "api_base_url": settings.API_BASE_URL
         })
@@ -448,7 +458,8 @@ async def submit_session(
 async def generate_questions(
     slug: str,
     storage: QuizStorage = Depends(get_storage),
-    ai: QuizAI = Depends(get_ai)
+    ai: QuizAI = Depends(get_ai),
+    quiz_contexts: Dict[str, Any] = Depends(get_quiz_contexts)
 ):
     """Generate 15 more questions for the quiz."""
     quiz = storage.get_quiz(slug)
@@ -456,11 +467,18 @@ async def generate_questions(
         raise HTTPException(status_code=404, detail="Quiz not found")
 
     try:
+        # Get cached quiz context if available
+        from src.agents.schemas import QuizContext
+        quiz_context = None
+        if slug in quiz_contexts:
+            quiz_context = QuizContext.from_dict(quiz_contexts[slug])
+        
         # Generate 15 new questions based on existing ones
         new_questions = ai.generate_questions(
             topic=quiz.topic,
             samples=quiz.questions,
-            count=15
+            count=15,
+            quiz_context=quiz_context
         )
 
         if not new_questions:
@@ -471,6 +489,9 @@ async def generate_questions(
 
         # Save updated quiz
         storage.save_quiz(quiz)
+        
+        # Invalidate cached quiz context (questions changed)
+        quiz_contexts.pop(slug, None)
 
         return JSONResponse({
             "message": f"Generated {len(new_questions)} new questions",
@@ -499,7 +520,8 @@ async def get_quiz_content(
 async def update_quiz(
     slug: str,
     request: Request,
-    storage: QuizStorage = Depends(get_storage)
+    storage: QuizStorage = Depends(get_storage),
+    quiz_contexts: Dict[str, Any] = Depends(get_quiz_contexts)
 ):
     """Update quiz content."""
     try:
@@ -527,6 +549,9 @@ async def update_quiz(
         # Update the quiz
         updated_quiz = quizzes[0]
         storage.save_quiz(updated_quiz)
+        
+        # Invalidate cached quiz context (questions changed)
+        quiz_contexts.pop(slug, None)
         
         return JSONResponse({
             "message": f"Updated quiz '{updated_quiz.topic}'",

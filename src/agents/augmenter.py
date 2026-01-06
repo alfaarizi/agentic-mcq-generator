@@ -1,6 +1,6 @@
 """AugmenterAgent for autonomous quiz augmentation with additional questions."""
 
-from typing import Dict, Any, List, Optional, Callable
+from typing import List, Optional, Callable
 
 
 from ..models import Quiz, Question
@@ -26,11 +26,19 @@ class AugmenterAgent(Agent):
     def augment(
         self,
         quiz: Quiz,
-        target_count: int = 15
+        target_count: int = 15,
+        quiz_context: Optional[QuizContext] = None
     ) -> List[Question]:
-        """Augment quiz with additional questions matching existing style."""
+        """Augment quiz with additional questions matching existing style.
         
-        quiz_context: QuizContext = extract_quiz_context(quiz, agent=self)
+        Args:
+            quiz: The quiz to augment.
+            target_count: Number of new questions to generate.
+            quiz_context: Optional cached QuizContext. If None, will extract it.
+        """
+        
+        if quiz_context is None:
+            quiz_context = extract_quiz_context(quiz, agent=self)
         
         topic_coverage: TopicCoverage = analyze_topic_coverage(quiz, quiz_context, agent=self, target_count=target_count)
         
