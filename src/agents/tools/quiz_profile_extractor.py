@@ -12,8 +12,8 @@ def extract_quiz_profile(
     topic_description: str,
     agent: "Agent",
     quiz_profile: Optional[QuizProfile] = None
-) -> tuple[str, QuizProfile, int]:
-    """Extract quiz profile, inferred topic name, and suggested time limit from topic description.
+) -> tuple[str, QuizProfile, int, int]:
+    """Extract quiz profile, inferred topic name, suggested time limit, and question count from topic description.
     
     Args:
         topic_description: User-provided description of the topic.
@@ -21,8 +21,9 @@ def extract_quiz_profile(
         quiz_profile: Optional initial QuizProfile to refine. If None, creates a new profile.
     
     Returns:
-        Tuple of (inferred_topic_name, QuizProfile, suggested_time_limit) where suggested_time_limit
-        is in seconds (0 if quiz should not be timed).
+        Tuple of (inferred_topic_name, QuizProfile, suggested_time_limit, suggested_question_count) where:
+        - suggested_time_limit: in seconds (0 if quiz should not be timed)
+        - suggested_question_count: 0 if not mentioned, otherwise the extracted or calculated count
     """
     
     system_prompt = \
@@ -94,6 +95,13 @@ Analyze the topic description systematically and provide:
    - Return 0 if description suggests self-paced learning, practice, or casual study
    - This is a preliminary estimate; the actual time limit will be refined based on generated questions (unless explicitly mentioned)
 
+7. **Suggested Question Count**: Extract or calculate the number of questions. Consider:
+   - If the number of questions is explicitly mentioned (e.g., "10 questions", "20 questions", "5 questions"), extract that exact number
+   - If time limit is explicitly mentioned but question count is not, calculate question count from time limit:
+     * Use time per question based on complexity: beginner (~60s), intermediate (~120s), advanced (~180s), expert (~240s)
+     * Formula: question_count = (time_limit_seconds / time_per_question_seconds) rounded to nearest reasonable number
+   - If neither time nor question count is mentioned, return 0 (will use default)
+
 **Guidelines:**
 - Extract domain and language from the actual content of the description
 {f'- Be conservative with refinements - Only refine complexity, style, or target_audience if the description provides clear indicators' if quiz_profile else 'Determine complexity, style, and target_audience based on the description content'}
@@ -108,7 +116,8 @@ Analyze the topic description systematically and provide:
   "complexity": "beginner|intermediate|advanced|expert",
   "style": "academic|conversational|practical|concise",
   "target_audience": "high_school|undergraduate|graduate|professional|general",
-  "suggested_time_limit": 0
+  "suggested_time_limit": 0,
+  "suggested_question_count": 0
 }}
 """
     
@@ -134,7 +143,8 @@ Analyze the topic description systematically and provide:
         "complexity": default_complexity,
         "style": default_style,
         "target_audience": default_audience,
-        "suggested_time_limit": 0
+        "suggested_time_limit": 0,
+        "suggested_question_count": 0
     })
     
     # Create profile
@@ -146,9 +156,13 @@ Analyze the topic description systematically and provide:
         domain=parsed.get("domain", default_domain)
     )
     
+    suggested_time_limit = max(0, int(parsed.get("suggested_time_limit", 0)))
+    suggested_question_count = max(0, int(parsed.get("suggested_question_count", 0)))
+    
     return (
         parsed.get("topic", default_topic).strip(), 
         profile, 
-        max(0, int(parsed.get("suggested_time_limit", 0)))
+        suggested_time_limit,
+        suggested_question_count
     )
 

@@ -36,11 +36,14 @@ class GeneratorAgent(Agent):
     ) -> Quiz:
         """Generate a new quiz from a high-level topic description."""
 
-        quiz_topic, quiz_profile, suggested_time_limit = extract_quiz_profile(
+        quiz_topic, quiz_profile, suggested_time_limit, suggested_question_count = extract_quiz_profile(
             topic_description=topic_description,
             agent=self,
             quiz_profile=profile
         )
+        
+        # Use suggested question count if provided (non-zero), otherwise use the parameter
+        question_count = suggested_question_count if suggested_question_count > 0 else question_count
         
         quiz_context: QuizContext = QuizContext(
             profile=quiz_profile,
