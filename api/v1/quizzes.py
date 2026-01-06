@@ -179,6 +179,48 @@ async def reset_quizzes(storage: QuizStorage = Depends(get_storage)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to delete quizzes: {str(e)}")
 
+
+@router.post("/generate")
+async def generate_quiz(
+    request: Request,
+    storage: QuizStorage = Depends(get_storage),
+    ai: QuizAI = Depends(get_ai),
+):
+    """Generate a new quiz from a natural language topic description (Workflow 1)."""
+    try:
+        body = await request.json()
+        topic = (body.get("topic") or "").strip()
+        complexity = body.get("complexity", "intermediate")
+        style = body.get("style", "academic")
+        target_audience = body.get("target_audience", "undergraduate")
+        question_count = int(body.get("count", 15))
+
+        if not topic:
+            raise HTTPException(status_code=400, detail="Topic description is required")
+
+        quiz = ai.generate_quiz(
+            topic_description=topic,
+            complexity=complexity,
+            style=style,
+            target_audience=target_audience,
+            question_count=question_count,
+        )
+
+        storage.save_quiz(quiz)
+
+        return JSONResponse(
+            {
+                "message": f"Generated quiz '{quiz.topic}'",
+                "slug": quiz.slug,
+                "questions": quiz.total_questions,
+            },
+            status_code=201,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate quiz: {str(e)}")
+
 @router.get("")
 async def list_quizzes(
     request: Request, 

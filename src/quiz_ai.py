@@ -5,7 +5,15 @@ from typing import List, Dict, Optional
 from .models import Question, Choice, Quiz
 from .agents.evaluator import EvaluatorAgent
 from .agents.augmenter import AugmenterAgent
-from .agents.schemas import LearningProfile, QuizContext
+from .agents.generator import GeneratorAgent
+from .agents.schemas import (
+    LearningProfile,
+    QuizContext,
+    QuizProfile,
+    Complexity,
+    Style,
+    TargetAudience,
+)
 
 
 class QuizAI:
@@ -17,9 +25,20 @@ class QuizAI:
         Args:
             model: Model identifier (e.g., "google/gemini-2.5-flash").
         """
+
         self.model = model
-        self._evaluator = None  # Lazy initialization
+        self._generator = None  # Lazy initialization
         self._augmenter = None  # Lazy initialization
+        self._evaluator = None  # Lazy initialization
+    
+
+    @property
+    def generator(self) -> GeneratorAgent:
+        """Get or create GeneratorAgent instance."""
+        if self._generator is None:
+            self._generator = GeneratorAgent(model=self.model)
+        return self._generator
+
 
     @property
     def augmenter(self) -> AugmenterAgent:
@@ -28,6 +47,7 @@ class QuizAI:
             self._augmenter = AugmenterAgent(model=self.model)
         return self._augmenter
 
+
     @property
     def evaluator(self) -> EvaluatorAgent:
         """Get or create EvaluatorAgent instance."""
@@ -35,26 +55,44 @@ class QuizAI:
             self._evaluator = EvaluatorAgent(model=self.model)
         return self._evaluator
 
+
+    def generate_quiz(
+        self,
+        topic_description: str,
+        complexity: str,
+        style: str,
+        target_audience: str,
+        question_count: int = 15,
+    ) -> Quiz:
+        """Generate a new quiz from a natural language topic description (Workflow 1)."""
+
+        profile = QuizProfile(
+            complexity=Complexity(complexity),
+            style=Style(style),
+            target_audience=TargetAudience(target_audience),
+        )
+
+        return self.generator.generate_quiz(
+            topic_description=topic_description,
+            profile=profile,
+            question_count=question_count,
+        )
+
+
     def generate_questions(
         self,
         topic: str,
         samples: List[Question],
         count: int = 3,
     ) -> List[Question]:
-        """Generate new questions similar to samples using AugmenterAgent.
-
-        Args:
-            topic: The topic for questions.
-            samples: Sample questions to learn from.
-            count: Number of questions to generate.
-
-        Returns:
-            List of generated Question objects.
-        """
-
-        quiz = Quiz(topic=topic, questions=samples)
+        """Generate new questions similar to samples using AugmenterAgent (Workflow 2)."""
         
-        return self.augmenter.augment(quiz, target_count=count)
+        quiz = Quiz(topic=topic, questions=samples)
+        return self.augmenter.augment(
+            quiz, 
+            target_count=count
+        )
+
 
     def evaluate_answer(
         self,
