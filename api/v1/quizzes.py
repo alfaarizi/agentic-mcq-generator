@@ -9,7 +9,8 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from api.config import settings
-from api.dependencies import get_storage, get_ai, get_sessions, get_quiz_contexts
+from api.dependencies import get_storage, get_ai, get_sessions, get_quiz_contexts, get_user_language, language_preferences
+from api.i18n import load_translations
 from src.storage import QuizStorage
 from src.quiz_ai import QuizAI
 from src.parser import QuizParser
@@ -230,12 +231,17 @@ async def list_quizzes(
 ):
     """List all quizzes."""
     quizzes = serialize_quizzes(storage.get_quizzes())
+    lang = get_user_language(request)
+    translations = load_translations(lang)
+    
     if accepts_json(request):
         return JSONResponse({"quizzes": quizzes})
     return templates.TemplateResponse("quizzes.html", {
         "request": request,
         "quizzes": quizzes,
-        "api_base_url": settings.API_BASE_URL
+        "api_base_url": settings.API_BASE_URL,
+        "lang": lang,
+        "t": translations
     })
 
 
@@ -256,6 +262,9 @@ async def get_quiz(
             raise HTTPException(status_code=404, detail="Quiz not found")
         return RedirectResponse(url=f"{settings.API_BASE_URL}/quizzes")
     
+    lang = get_user_language(request)
+    translations = load_translations(lang)
+    
     # JSON: return preview
     if accepts_json(request):
         quiz.shuffle_questions()
@@ -267,7 +276,7 @@ async def get_quiz(
         })
     
     # HTML: show preview or session
-    if not session_id or session_id not in sessions: 
+    if not session_id or session_id not in sessions:
         if slug in quiz_contexts:
             quiz_context_dict = quiz_contexts[slug]
         else:
@@ -286,7 +295,9 @@ async def get_quiz(
             },
             "quiz_context": quiz_context_dict,
             "status": "preview",
-            "api_base_url": settings.API_BASE_URL
+            "api_base_url": settings.API_BASE_URL,
+            "lang": lang,
+            "t": translations
         })
     
     # Active session
@@ -309,7 +320,9 @@ async def get_quiz(
         "submitted_at": session["submitted_at"].isoformat() + "Z" if session.get("submitted_at") else None,
         "score": session.get("score"),
         "total": session.get("total"),
-        "api_base_url": settings.API_BASE_URL
+        "api_base_url": settings.API_BASE_URL,
+        "lang": lang,
+        "t": translations
     })
 
 
@@ -573,3 +586,28 @@ async def delete_quiz(
     if not deleted:
         raise HTTPException(status_code=404, detail="Quiz not found")
     return JSONResponse({"message": f"Quiz deleted successfully"})
+
+
+@router.post("/language")
+async def set_language(
+    request: Request,
+    lang: str = Query(...)
+):
+    """Set user's preferred language.
+    
+    Args:
+        lang: Language code (en, hu, de, id)
+    """
+    if lang not in ["en", "hu", "de", "id"]:
+        raise HTTPException(status_code=400, detail="Invalid language code")
+    
+    # Get or create session ID
+    session_id = request.cookies.get("session_id")
+    if not session_id:
+        session_id = str(uuid.uuid4())
+    
+    language_preferences[session_id] = lang
+    
+    response = JSONResponse({"message": "Language set successfully", "lang": lang})
+    response.set_cookie(key="session_id", value=session_id, max_age=86400 * 30)  # 30 days
+    return response

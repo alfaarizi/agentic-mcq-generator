@@ -17,11 +17,27 @@
 <body class="bg-white text-gray-800 max-w-full md:max-w-6xl mx-auto p-4 md:p-8">
     <div class="flex justify-between items-center border-b-2 border-gray-800 pb-2 mb-6">
         <h1 class="text-3xl text-gray-800">QuizAI</h1>
-        <a href="https://github.com/alfaarizi/agentic-mcq-generator" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-gray-800 transition-colors" title="View on GitHub">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-        </a>
+        <div class="flex items-center gap-3">
+            <!-- Language Selector -->
+            <div class="relative">
+                <select id="languageSelect" class="appearance-none bg-white border border-gray-300 rounded px-3 py-1.5 pr-8 text-sm text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                    <option value="en" {% if lang == 'en' %}selected{% endif %}>🇬🇧 English</option>
+                    <option value="hu" {% if lang == 'hu' %}selected{% endif %}>🇭🇺 Magyar</option>
+                    <option value="de" {% if lang == 'de' %}selected{% endif %}>🇩🇪 Deutsch</option>
+                    <option value="id" {% if lang == 'id' %}selected{% endif %}>🇮🇩 Bahasa</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    </svg>
+                </div>
+            </div>
+            <a href="https://github.com/alfaarizi/agentic-mcq-generator" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-gray-800 transition-colors" title="View on GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+            </a>
+        </div>
     </div>
 
     <div class="flex flex-col md:flex-row gap-6">
@@ -29,7 +45,7 @@
         <div class="flex-1 md:flex md:flex-col md:max-h-[calc(100vh-200px)]">
             <div class="border border-gray-300 md:flex md:flex-col md:min-h-[calc(100vh-200px)]">
                 <div class="px-3 py-2 border-b border-gray-300 bg-gray-50">
-                    <h2 class="text-base font-medium text-gray-800">Quizzes</h2>
+                    <h2 class="text-base font-medium text-gray-800">{{ t.quizzes }}</h2>
                 </div>
                 <div class="flex-1 overflow-y-auto md:pr-1 md:pl-2 quiz-list p-4 bg-gray-100 {% if not quizzes %}flex items-center justify-center{% endif %}">
             {% if quizzes %}
@@ -52,11 +68,11 @@
                         {% endif %}
                     </div>
                     <p class="text-gray-600 text-base mb-4">
-                        {{ quiz.questions }} question{% if quiz.questions != 1 %}s{% endif %}
+                        {{ quiz.questions }} {% if quiz.questions == 1 %}{{ t.question }}{% else %}{{ t.questions }}{% endif %}
                     </p>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <button onclick="handleQuiz('{{ quiz.slug }}')" class="quiz-btn flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">
-                        Start Quiz
+                        {{ t.start_quiz }}
                     </button>
                         <button onclick="generateMoreQuestions('{{ quiz.slug }}')" class="flex-1 sm:flex-initial sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-3 text-sm flex items-center justify-center gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -69,7 +85,7 @@
             </div>
             {% endfor %}
             {% else %}
-                    <p class="text-gray-600 text-base text-center">No quizzes available. Generate, upload a file, or create a quiz to get started.</p>
+                    <p class="text-gray-600 text-base text-center">{{ t.no_quizzes_available }}</p>
             {% endif %}
                 </div>
             </div>
@@ -84,19 +100,16 @@
                 <!-- Tab Navigation -->
                 <div class="flex border-b border-gray-300 bg-gray-50">
                     <button onclick="switchTab('generate')" id="tab-generate" class="flex-1 px-3 py-2 text-sm font-medium text-gray-800 bg-white border-b-2 border-gray-800 tab-button">
-                        Generate
+                        {{ t.generate }}
                     </button>
                     <button onclick="switchTab('create')" id="tab-create" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
-                        Create
+                        {{ t.create }}
                     </button>
                     <button onclick="switchTab('edit')" id="tab-edit" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
-                        Edit
+                        {{ t.edit }}
                     </button>
                     <button onclick="switchTab('delete')" id="tab-delete" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
-                        Delete
-                    </button>
-                    <button onclick="switchTab('reset')" id="tab-reset" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
-                        Reset
+                        {{ t.delete }}
                     </button>
                 </div>
 
@@ -104,13 +117,13 @@
                 <div class="p-4 flex-1 overflow-y-auto">
                     <!-- Generate Quiz Tab -->
                     <div id="content-generate" class="tab-content">
-                        <h3 class="text-xl font-semibold mb-3">Generate Quiz</h3>
+                        <h3 class="text-xl font-semibold mb-3">{{ t.generate_quiz }}</h3>
                         <form id="generateQuizForm" class="flex flex-col">
                             <div>
                                 <textarea 
                                     id="topicInput" 
                                     name="topic" 
-                                    placeholder="Describe the topic...&#10;e.g., 'neural networks for CS students'" 
+                                    placeholder="{{ t.topic_description_placeholder }}" 
                                     required 
                                     class="w-full p-2 border border-gray-300 text-base resize-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800" 
                                     style="height: 423px;"
@@ -120,7 +133,7 @@
                             
                             <div class="grid grid-cols-3 gap-2 mb-3">
                                 <div>
-                                    <label for="complexitySelect" class="block text-sm font-medium text-gray-700 mb-1">Complexity</label>
+                                    <label for="complexitySelect" class="block text-sm font-medium text-gray-700 mb-1">{{ t.complexity }}</label>
                                     <select 
                                         id="complexitySelect" 
                                         name="complexity" 
@@ -128,15 +141,15 @@
                                         class="w-full p-2 border border-gray-300 text-sm focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
                                         aria-label="Question complexity level"
                                     >
-                                        <option value="beginner">Beginner</option>
-                                        <option value="intermediate" selected>Intermediate</option>
-                                        <option value="advanced">Advanced</option>
-                                        <option value="expert">Expert</option>
+                                        <option value="beginner">{{ t.complexity_beginner }}</option>
+                                        <option value="intermediate" selected>{{ t.complexity_intermediate }}</option>
+                                        <option value="advanced">{{ t.complexity_advanced }}</option>
+                                        <option value="expert">{{ t.complexity_expert }}</option>
                                     </select>
                                 </div>
                                 
                                 <div>
-                                    <label for="styleSelect" class="block text-sm font-medium text-gray-700 mb-1">Style</label>
+                                    <label for="styleSelect" class="block text-sm font-medium text-gray-700 mb-1">{{ t.style }}</label>
                                     <select 
                                         id="styleSelect" 
                                         name="style" 
@@ -144,15 +157,15 @@
                                         class="w-full p-2 border border-gray-300 text-sm focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
                                         aria-label="Question presentation style"
                                     >
-                                        <option value="academic" selected>Academic</option>
-                                        <option value="conversational">Conversational</option>
-                                        <option value="practical">Practical</option>
-                                        <option value="concise">Concise</option>
+                                        <option value="academic" selected>{{ t.style_academic }}</option>
+                                        <option value="conversational">{{ t.style_conversational }}</option>
+                                        <option value="practical">{{ t.style_practical }}</option>
+                                        <option value="concise">{{ t.style_concise }}</option>
                                     </select>
             </div>
 
                                 <div>
-                                    <label for="targetAudienceSelect" class="block text-sm font-medium text-gray-700 mb-1">Audience</label>
+                                    <label for="targetAudienceSelect" class="block text-sm font-medium text-gray-700 mb-1">{{ t.audience }}</label>
                                     <select 
                                         id="targetAudienceSelect" 
                                         name="target_audience" 
@@ -160,22 +173,22 @@
                                         class="w-full p-2 border border-gray-300 text-sm focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
                                         aria-label="Target audience level"
                                     >
-                                        <option value="high_school">High School</option>
-                                        <option value="undergraduate" selected>Undergraduate</option>
-                                        <option value="graduate">Graduate</option>
-                                        <option value="professional">Professional</option>
-                                        <option value="general">General</option>
+                                        <option value="high_school">{{ t.audience_high_school }}</option>
+                                        <option value="undergraduate" selected>{{ t.audience_undergraduate }}</option>
+                                        <option value="graduate">{{ t.audience_graduate }}</option>
+                                        <option value="professional">{{ t.audience_professional }}</option>
+                                        <option value="general">{{ t.audience_general }}</option>
                                     </select>
                 </div>
             </div>
 
-                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base transition-colors">Generate</button>
+                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base transition-colors">{{ t.generate }}</button>
                         </form>
                     </div>
 
                     <!-- Delete Quiz Tab -->
                     <div id="content-delete" class="tab-content hidden">
-                        <h3 class="text-xl font-semibold mb-3">Delete Quiz</h3>
+                        <h3 class="text-xl font-semibold mb-3">{{ t.delete }}</h3>
                         <form id="deleteQuizForm" class="flex flex-col">
                             <div class="mb-4">
                                 <select 
@@ -184,19 +197,33 @@
                                     required
                                     class="w-full py-3.5 px-4 border border-gray-300 text-base focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
                                 >
-                                    <option value="">-- Select a quiz --</option>
+                                    <option value="">-- {{ t.select_quiz }} --</option>
                                     {% for quiz in quizzes %}
                                     <option value="{{ quiz.slug }}">{{ quiz.topic }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 text-base">Delete</button>
+                            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 text-base">{{ t.delete }}</button>
                         </form>
+                        
+                        <!-- Separator -->
+                        <div class="my-4 flex items-center">
+                            <div class="flex-1 border-t border-gray-300"></div>
+                            <span class="px-3 text-sm text-gray-500">{{ t.get('or', 'or') }}</span>
+                            <div class="flex-1 border-t border-gray-300"></div>
+                        </div>
+                        
+                        <!-- Reset All Quizzes -->
+                        <div>
+                            <h4 class="text-lg font-semibold mb-2">{{ t.delete_quizzes }}</h4>
+                            <p class="text-gray-600 text-base mb-4">{{ t.reset_warning }}</p>
+                            <button onclick="resetQuizzes()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 text-base">{{ t.reset_all }}</button>
+                        </div>
                     </div>
 
                     <!-- Create Quiz Tab -->
                     <div id="content-create" class="tab-content hidden">
-                        <h3 class="text-xl font-semibold mb-3">Create Quiz</h3>
+                        <h3 class="text-xl font-semibold mb-3">{{ t.create_quiz }}</h3>
                         <form id="uploadFileForm" class="mb-4">
                             <input type="file" id="uploadFileInput" accept=".md" class="w-full p-2 border border-gray-300 text-base">
                         </form>
@@ -204,18 +231,18 @@
                             <textarea 
                                 id="quizContent" 
                                 name="content" 
-                                placeholder="Paste quiz content..&#10;&#10;e.g.,&#10;&lt;Math Basics&gt;&#10;What is 2 + 2?&#10;- 3&#10;&gt; 4&#10;&lt;/Math Basics&gt;&#10;&#10;For timed quiz:&#10;&lt;Math Basics:5&gt;&#10;What is 2 + 2?&#10;- 3&#10;&gt; 4&#10;&lt;/Math Basics&gt;" 
+                                placeholder="{{ t.create_quiz_placeholder }}" 
                                 required 
                                 class="w-full p-2 border border-gray-300 text-base resize-none" 
                                 style="height: 425px;"
                             ></textarea>
-                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">Create</button>
+                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">{{ t.create }}</button>
                         </form>
                     </div>
 
                     <!-- Edit Quiz Tab -->
                     <div id="content-edit" class="tab-content hidden">
-                        <h3 class="text-xl font-semibold mb-3">Edit Quiz</h3>
+                        <h3 class="text-xl font-semibold mb-3">{{ t.edit_quiz }}</h3>
                         <form id="editQuizForm" class="flex flex-col">
                             <div class="mb-4">
                                 <select 
@@ -224,7 +251,7 @@
                                     required
                                     class="w-full py-3.5 px-4 border border-gray-300 text-base focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
                                 >
-                                    <option value="">-- Select a quiz --</option>
+                                    <option value="">-- {{ t.select_quiz }} --</option>
                                     {% for quiz in quizzes %}
                                     <option value="{{ quiz.slug }}">{{ quiz.topic }}</option>
                                     {% endfor %}
@@ -240,16 +267,10 @@
                                     readonly
                                 ></textarea>
                             </div>
-                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">Save</button>
+                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">{{ t.save }}</button>
                         </form>
                     </div>
 
-                    <!-- Reset Quizzes Tab -->
-                    <div id="content-reset" class="tab-content hidden">
-                        <h3 class="text-xl font-semibold mb-3">Reset Quizzes</h3>
-                        <p class="text-gray-600 text-base mb-[17px]">This action permanently deletes all quizzes. This cannot be undone.</p>
-                        <button onclick="resetQuizzes()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 text-base">Reset All</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -258,7 +279,7 @@
     <div id="loading" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="flex flex-col items-center">
             <div class="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-            <p id="loadingText" class="text-white mt-5">Processing...</p>
+            <p id="loadingText" class="text-white mt-5">{{ t.processing }}</p>
         </div>
     </div>
 
@@ -266,6 +287,44 @@
 
     <script>
         const API = '{{ api_base_url }}';
+        const translations = {
+            generate_more_questions: '{{ t.generate_more_questions }}',
+            generate_more_confirm: '{{ t.generate_more_confirm }}',
+            delete_quiz: '{{ t.delete }}',
+            delete_quiz_confirm: '{{ t.delete_quiz_confirm }}',
+            quiz_deleted: '{{ t.quiz_deleted }}',
+            reset_all_quizzes: '{{ t.reset_all_quizzes }}',
+            delete_all_confirm: '{{ t.delete_all_confirm }}',
+            success: '{{ t.success }}',
+            quiz_updated: '{{ t.quiz_updated }}',
+            generated_success: '{{ t.generated_success }}',
+            retake_quiz: '{{ t.retake_quiz }}',
+            retake_prompt: '{{ t.retake_prompt }}',
+            retake_confirm: '{{ t.retake_confirm }}',
+            save_failed: '{{ t.save_failed }}',
+            save_failed_detail: '{{ t.save_failed_detail }}',
+            save_failed_retry: '{{ t.save_failed_retry }}',
+            validation_error: '{{ t.validation_error }}',
+            quiz_content_empty: '{{ t.quiz_content_empty }}',
+            no_quizzes_found: '{{ t.no_quizzes_found }}',
+            select_quiz_to_delete: '{{ t.select_quiz_to_delete }}',
+            select_quiz_to_edit: '{{ t.select_quiz_to_edit }}',
+            loading_quiz_content: '{{ t.loading_quiz_content }}',
+            saving_quiz: '{{ t.saving_quiz }}',
+            load_failed: '{{ t.load_failed }}',
+            load_failed_detail: '{{ t.load_failed_detail }}',
+            load_failed_retry: '{{ t.load_failed_retry }}',
+            delete_failed: '{{ t.delete_failed }}',
+            delete_failed_detail: '{{ t.delete_failed_detail }}',
+            delete_failed_retry: '{{ t.delete_failed_retry }}',
+            deleting_quiz: '{{ t.deleting_quiz }}',
+            ok: '{{ t.ok }}',
+            cancel: '{{ t.cancel }}',
+            processing: '{{ t.processing }}',
+            generating_quiz: '{{ t.generating_quiz }}',
+            error: '{{ t.error }}',
+            success_message: '{{ t.success_message }}'
+        };
         
         // Loader functions
         function showLoader(text) {
@@ -372,7 +431,7 @@
                 title.innerHTML = `<span class="hover:underline">${titleText}</span>`;
                 
                 if (isCompleted) {
-                    btn.textContent = 'Retake Quiz';
+                    btn.textContent = translations.retake_quiz;
                     btn.className = btn.className.replace('bg-gray-800 hover:bg-gray-700', 'bg-blue-600 hover:bg-blue-700');
                     if (score) {
                         const scoreSpan = document.createElement('span');
@@ -398,7 +457,7 @@
                     }
 
                     try {
-                        showLoader('Loading quiz content...');
+                        showLoader(translations.loading_quiz_content + '..');
                         const res = await fetch(`${API}/quizzes/${slug}/content`, {
                             headers: { 'Accept': 'application/json' }
                         });
@@ -409,13 +468,14 @@
                             editQuizContent.readOnly = false;
                         } else {
                             const err = await res.json();
-                            await showModal('Load Failed', 'Failed to load quiz: ' + (err.detail || 'Unknown error'));
+                            const errorMsg = err.detail || 'Unknown error';
+                            await showModal(translations.load_failed, translations.load_failed_detail.replace('{}', errorMsg));
                             editQuizContent.value = '';
                             editQuizContent.readOnly = true;
                         }
                     } catch (e) {
                         console.error(e);
-                        await showModal('Load Failed', 'Failed to load quiz. Please try again.');
+                        await showModal(translations.load_failed, translations.load_failed_retry);
                         editQuizContent.value = '';
                         editQuizContent.readOnly = true;
                     } finally {
@@ -431,17 +491,17 @@
                     const content = editQuizContent.value.trim();
 
                     if (!slug) {
-                        await showModal('Validation Error', 'Please select a quiz to edit.');
+                        await showModal(translations.validation_error, translations.select_quiz_to_edit);
                         return;
                     }
 
                     if (!content) {
-                        await showModal('Validation Error', 'Quiz content cannot be empty.');
+                        await showModal(translations.validation_error, translations.quiz_content_empty);
                         return;
                     }
 
                     try {
-                        showLoader('Saving quiz...');
+                        showLoader(translations.saving_quiz + '..');
                         const res = await fetch(`${API}/quizzes/${slug}`, {
                             method: 'PUT',
                             headers: { 
@@ -454,16 +514,17 @@
                         hideLoader();
 
                         if (res.ok) {
-                            await showModal('Success', 'Quiz updated successfully!');
+                            await showModal(translations.success, translations.quiz_updated);
                             location.reload();
                         } else {
                             const err = await res.json();
-                            await showModal('Save Failed', 'Failed to save quiz: ' + (err.detail || 'Unknown error'));
+                            const errorMsg = err.detail === 'No quizzes found in content' ? translations.no_quizzes_found : (err.detail || 'Unknown error');
+                            await showModal(translations.save_failed, translations.save_failed_detail.replace('{}', errorMsg));
                         }
                     } catch (e) {
                         hideLoader();
                         console.error(e);
-                        await showModal('Save Failed', 'Failed to save quiz. Please try again.');
+                        await showModal(translations.save_failed, translations.save_failed_retry);
                     }
                 });
             }
@@ -478,16 +539,16 @@
                     const slug = deleteQuizSelect.value;
 
                     if (!slug) {
-                        await showModal('Validation Error', 'Please select a quiz to delete.');
+                        await showModal(translations.validation_error, translations.select_quiz_to_delete);
                         return;
                     }
 
                     const confirmed = await showModal(
-                        'Delete Quiz',
-                        'Are you sure you want to delete this quiz? This action cannot be undone.',
+                        translations.delete_quiz,
+                        translations.delete_quiz_confirm,
                         async () => {
                             try {
-                                showLoader('Deleting quiz...');
+                                showLoader(translations.deleting_quiz + '..');
                                 const res = await fetch(`${API}/quizzes/${slug}`, {
                                     method: 'DELETE',
                                     headers: { 'Accept': 'application/json' }
@@ -496,16 +557,17 @@
                                 hideLoader();
 
                                 if (res.ok) {
-                                    await showModal('Success', 'Quiz deleted successfully!');
+                                    await showModal(translations.success, translations.quiz_deleted);
                                     location.reload();
                                 } else {
                                     const err = await res.json();
-                                    await showModal('Delete Failed', 'Failed to delete quiz: ' + (err.detail || 'Unknown error'));
+                                    const errorMsg = err.detail || 'Unknown error';
+                                    await showModal(translations.delete_failed, translations.delete_failed_detail.replace('{}', errorMsg));
                                 }
                             } catch (e) {
                                 hideLoader();
                                 console.error(e);
-                                await showModal('Delete Failed', 'Failed to delete quiz. Please try again.');
+                                await showModal(translations.delete_failed, translations.delete_failed_retry);
                             }
                         }
                     );
@@ -518,8 +580,8 @@
 
             if (isCompleted) {
                 const confirmed = await showModal(
-                    'Retake Quiz',
-                    'You have already taken this quiz. Start a new attempt?',
+                    translations.retake_quiz,
+                    translations.retake_confirm,
                     async () => {
                         await startQuizSession(slug);
                     }
@@ -553,10 +615,10 @@
         
         async function generateMoreQuestions(slug) {
             const confirmed = await showModal(
-                'Generate More Questions',
-                'This will add 15 new questions to this quiz. Continue?',
+                translations.generate_more_questions,
+                translations.generate_more_confirm,
                 async () => {
-                    showLoader('Generating 15 new questions...');
+                    showLoader(translations.generating_quiz + '..');
                     try {
                         const res = await fetch(`${API}/quizzes/${slug}/generate`, {
                             method: 'POST',
@@ -567,7 +629,7 @@
                         
                         if (res.ok) {
                             const data = await res.json();
-                            await showModal('Success', `Successfully generated ${data.new_count} questions! Total: ${data.total_questions}`);
+                            await showModal(translations.success, translations.generated_success.replace('{}', data.new_count).replace('{}', data.total_questions));
                             location.reload();
                         } else {
                             const err = await res.json();
@@ -599,7 +661,7 @@
                 submitBtn.disabled = true;
                 
                 // Show generating loader
-                showLoader('Generating Quiz..');
+                showLoader(translations.generating_quiz + '..');
                 
                 const res = await fetch(`${API}/quizzes/generate`, {
                     method: 'POST',
@@ -677,8 +739,8 @@
         
         async function resetQuizzes() {
             const confirmed = await showModal(
-                'Reset All Quizzes',
-                'Are you sure you want to delete all quizzes? This action cannot be undone.',
+                translations.reset_all_quizzes,
+                translations.delete_all_confirm,
                 async () => {
                     try {
                         const res = await fetch(`${API}/quizzes`, {
@@ -700,6 +762,36 @@
                 }
             );
         }
+    </script>
+    
+    <script>
+        // Language selection
+        const languageSelect = document.getElementById('languageSelect');
+        if (languageSelect) {
+            languageSelect.addEventListener('change', async function() {
+                const selectedLang = this.value;
+                try {
+                    const response = await fetch(`{{ api_base_url }}/quizzes/language?lang=${selectedLang}`, {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                    if (response.ok) {
+                        window.location.reload();
+                    }
+                } catch (error) {
+                    console.error('Failed to set language:', error);
+                }
+            });
+        }
+        
+        // Make translations available globally for modal.js
+        window.translations = translations;
+        
+        // Update modal button text from translations
+        const modalOk = document.getElementById('modalOk');
+        const modalCancel = document.getElementById('modalCancel');
+        if (modalOk) modalOk.textContent = translations.ok || 'OK';
+        if (modalCancel) modalCancel.textContent = translations.cancel || 'Cancel';
     </script>
 </body>
 </html>

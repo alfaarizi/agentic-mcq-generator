@@ -11,6 +11,13 @@ function showModal(title, message, onConfirm = null) {
         modalTitle.textContent = title;
         modalMessage.textContent = message;
 
+        // Set button text from translations if available (check both window.translations and global translations)
+        const trans = typeof translations !== 'undefined' ? translations : (typeof window.translations !== 'undefined' ? window.translations : null);
+        if (trans) {
+            modalOk.textContent = trans.ok || 'OK';
+            modalCancel.textContent = trans.cancel || 'Cancel';
+        }
+
         // Show/hide cancel button based on whether this is a confirm dialog
         if (onConfirm) {
             modalCancel.classList.remove('hidden');

@@ -26,7 +26,7 @@
       data-time-limit="{{ quiz.time_limit|default(0) }}" 
       data-started-at="{{ started_at|default('') }}" 
       data-status="{{ status }}">
-    <a href="{{ api_base_url }}/quizzes" class="text-gray-600 text-base hover:underline">← Back</a>
+    <a href="{{ api_base_url }}/quizzes" class="text-gray-600 text-base hover:underline">← {{ t.back }}</a>
 
     <div class="flex justify-between items-baseline border-b-2 border-gray-800 pb-2 mb-2 mt-4">
         <h1 class="text-3xl text-gray-800">{{ quiz.topic }}</h1>
@@ -38,9 +38,9 @@
     </div>
     
     <p class="text-gray-600 text-base mb-6">
-        {{ quiz.questions|length }} question{% if quiz.questions|length != 1 %}s{% endif %}
+        {{ quiz.questions|length }} {% if quiz.questions|length == 1 %}{{ t.question }}{% else %}{{ t.questions }}{% endif %}
     {% if quiz.time_limit > 0 %}
-        | Time limit: {{ quiz.time_limit // 60 }} minute{% if (quiz.time_limit // 60) != 1 %}s{% endif %}
+        | {{ t.time_limit }}: {{ quiz.time_limit // 60 }} {% if (quiz.time_limit // 60) == 1 %}{{ t.minute }}{% else %}{{ t.minutes }}{% endif %}
     {% endif %}
     </p>
 
@@ -55,7 +55,7 @@
                         <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
                         </svg>
-                        Topics Covered
+                        {{ t.topics_covered }}
                     </h3>
                     {% if quiz_context.covered_concepts %}
                     <ul class="topics-list space-y-3 min-h-[280px] max-h-[280px] overflow-y-auto pr-2 border border-gray-300 p-4">
@@ -74,13 +74,18 @@
                 <!-- Sidebar - Metadata -->
                 <div class="lg:col-span-1 bg-gray-50 p-6 mt-6 lg:mt-0 space-y-6">
                     <div>
-                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Quiz Details</h3>
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">{{ t.quiz_details }}</h3>
                         
                         <!-- Complexity -->
                         <div class="mb-5">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-medium text-gray-700">Complexity</span>
-                                <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold">{{ quiz_context.complexity|capitalize }}</span>
+                                <span class="text-sm font-medium text-gray-700">{{ t.complexity }}</span>
+                                <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold">
+                                    {% if quiz_context.complexity == 'beginner' %}{{ t.complexity_beginner }}
+                                    {% elif quiz_context.complexity == 'intermediate' %}{{ t.complexity_intermediate }}
+                                    {% elif quiz_context.complexity == 'advanced' %}{{ t.complexity_advanced }}
+                                    {% else %}{{ t.complexity_expert }}{% endif %}
+                                </span>
                             </div>
                             <div class="flex gap-1">
                                 {% if quiz_context.complexity == 'beginner' %}
@@ -109,18 +114,29 @@
 
                         <!-- Style -->
                         <div class="mb-5 pb-5 border-b border-gray-200">
-                            <span class="text-sm font-medium text-gray-700 block mb-2">Style</span>
-                            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-semibold">{{ quiz_context.style|capitalize }}</span>
+                            <span class="text-sm font-medium text-gray-700 block mb-2">{{ t.style }}</span>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-semibold">
+                                {% if quiz_context.style == 'academic' %}{{ t.style_academic }}
+                                {% elif quiz_context.style == 'conversational' %}{{ t.style_conversational }}
+                                {% elif quiz_context.style == 'practical' %}{{ t.style_practical }}
+                                {% else %}{{ t.style_concise }}{% endif %}
+                            </span>
                         </div>
 
                         <!-- Target Audience -->
                         <div>
-                            <span class="text-sm font-medium text-gray-700 block mb-2">Target Audience</span>
+                            <span class="text-sm font-medium text-gray-700 block mb-2">{{ t.target_audience }}</span>
                             <div class="flex items-center gap-2">
                                 <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
                                 </svg>
-                                <span class="text-sm font-semibold text-gray-900">{{ quiz_context.target_audience|replace('_', ' ')|title }}</span>
+                                <span class="text-sm font-semibold text-gray-900">
+                                    {% if quiz_context.target_audience == 'high_school' %}{{ t.audience_high_school }}
+                                    {% elif quiz_context.target_audience == 'undergraduate' %}{{ t.audience_undergraduate }}
+                                    {% elif quiz_context.target_audience == 'graduate' %}{{ t.audience_graduate }}
+                                    {% elif quiz_context.target_audience == 'professional' %}{{ t.audience_professional }}
+                                    {% else %}{{ t.audience_general }}{% endif %}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -129,10 +145,10 @@
         </div>
         {% endif %}
         <div class="border-t border-gray-300 pt-6">
-            <p class="text-gray-600 text-base mb-4 text-right">Ready to start the quiz?</p>
+            <p class="text-gray-600 text-base mb-4 text-right">{{ t.ready_to_start }}</p>
             <div class="flex flex-col sm:flex-row gap-3 justify-end items-center">
-                <button id="startBtn" class="bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-8 text-base">Start Quiz</button>
-                <button id="generateBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-8 text-base">Generate More (+15)</button>
+                <button id="startBtn" class="bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-8 text-base">{{ t.start_quiz }}</button>
+                <button id="generateBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-8 text-base">{{ t.generate_more }}</button>
             </div>
         </div>
     </div>
@@ -166,7 +182,7 @@
         <!-- Right: Question Navigator -->
         <div class="w-full md:w-auto md:flex-shrink-0">
             <div class="p-3 md:border md:border-gray-300 md:py-5 md:px-6 md:min-h-[calc(100vh-250px)]">
-                <h3 class="hidden md:block text-xl mb-3 text-gray-800">Questions</h3>
+                <h3 class="hidden md:block text-xl mb-3 text-gray-800">{{ t.questions|title }}</h3>
                 <div class="hidden md:grid grid-cols-5 gap-2 mb-4">
                     {% for question in quiz.questions %}
                     <button data-question="{{ loop.index0 }}"
@@ -175,7 +191,7 @@
                     </button>
                     {% endfor %}
                 </div>
-                <button id="submitBtn" class="submit-retake-btn bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">Submit Quiz</button>
+                <button id="submitBtn" class="submit-retake-btn bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">{{ t.submit_quiz }}</button>
             </div>
         </div>
     </div>
@@ -221,7 +237,7 @@
         <!-- Right: Question Navigator -->
         <div class="w-full md:w-auto md:flex-shrink-0">
             <div class="p-3 md:border md:border-gray-300 md:py-5 md:px-6 md:min-h-[calc(100vh-250px)]">
-                <h3 class="hidden md:block text-xl mb-3 text-gray-800">Questions</h3>
+                <h3 class="hidden md:block text-xl mb-3 text-gray-800">{{ t.questions|title }}</h3>
                 <div class="hidden md:grid grid-cols-5 gap-2 mb-4">
                     {% for question in quiz.questions %}
                     {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
@@ -231,7 +247,7 @@
                     </button>
                     {% endfor %}
                 </div>
-                <button id="retakeBtn" class="submit-retake-btn bg-blue-600 hover:bg-blue-700 text-white py-2 px-4">Retake Quiz</button>
+                <button id="retakeBtn" class="submit-retake-btn bg-blue-600 hover:bg-blue-700 text-white py-2 px-4">{{ t.retake_quiz }}</button>
             </div>
         </div>
     </div>
@@ -240,7 +256,7 @@
     <div id="loading" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="flex flex-col items-center">
             <div class="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-            <p id="loadingText" class="text-white mt-5">Processing...</p>
+            <p id="loadingText" class="text-white mt-5">{{ t.processing }}</p>
         </div>
     </div>
 
@@ -248,6 +264,16 @@
 
     <script>
         const API = '{{ api_base_url }}';
+        const translations = {
+            generating_quiz: '{{ t.generating_quiz }}',
+            generated_success: '{{ t.generated_success }}',
+            success: '{{ t.success }}',
+            retake_quiz: '{{ t.retake_quiz }}',
+            retake_confirm: '{{ t.retake_confirm }}',
+            evaluating: '{{ t.evaluating }}',
+            time_is_up: '{{ t.time_is_up }}',
+            quiz_will_be_submitted: '{{ t.quiz_will_be_submitted }}'
+        };
         const SLUG = '{{ quiz.slug }}';
         const SID = '{{ session_id }}' || null;
         const STATUS = document.body.dataset.status;
@@ -292,7 +318,7 @@
         
         // Quiz action functions
         async function submitQuiz() {
-            showLoader('Evaluating answers...');
+            showLoader('{{ t.evaluating }}..');
             const answers = {};
             document.querySelectorAll('#quizForm input[data-q]:checked').forEach(inp => {
                 const q = inp.dataset.q;
@@ -349,8 +375,8 @@
         
         async function retakeQuiz() {
             const confirmed = await showModal(
-                'Retake Quiz',
-                'Are you sure you want to retake this quiz? Your current results will be cleared.',
+                '{{ t.retake_quiz }}',
+                '{{ t.retake_confirm }}',
                 async () => {
                     localStorage.removeItem('quiz_' + SLUG);
                     localStorage.removeItem('quiz_' + SLUG + '_completed');
@@ -361,7 +387,7 @@
         }
 
         async function generateQuestions() {
-            showLoader('Generating 15 new questions...');
+            showLoader(translations.generating_quiz + '..');
             try {
                 const res = await fetch(`${API}/quizzes/${SLUG}/generate`, {
                     method: 'POST',
@@ -370,7 +396,7 @@
                 if (res.ok) {
                     const data = await res.json();
                     hideLoader();
-                    await showModal('Success', `Successfully generated ${data.new_count} questions! Total: ${data.total_questions}`);
+                    await showModal(translations.success, translations.generated_success.replace('{}', data.new_count).replace('{}', data.total_questions));
                     location.reload();
                 } else {
                     const err = await res.json();
@@ -422,7 +448,7 @@
                 // Auto-submit when time expires
                 if (remaining <= 0) {
                     clearInterval(timerInterval);
-                    await showModal('Time is up!', 'Your quiz will now be submitted.');
+                    await showModal(translations.time_is_up, translations.quiz_will_be_submitted);
                     submitQuiz();
                 }
             };
@@ -471,6 +497,15 @@
                 if (retakeBtn) retakeBtn.addEventListener('click', retakeQuiz);
             }
         });
+        
+        // Make translations available globally for modal.js
+        window.translations = translations;
+        
+        // Update modal button text from translations
+        const modalOk = document.getElementById('modalOk');
+        const modalCancel = document.getElementById('modalCancel');
+        if (modalOk) modalOk.textContent = translations.ok || 'OK';
+        if (modalCancel) modalCancel.textContent = translations.cancel || 'Cancel';
     </script>
 </body>
 </html>
