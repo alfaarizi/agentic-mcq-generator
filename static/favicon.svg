@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- White circular background -->
+  <circle cx="50" cy="50" r="50" fill="#FFFFFF"/>
+  
+  <!-- Bold blue circle border -->
+  <circle cx="50" cy="50" r="45" fill="#3B82F6"/>
+  
+  <!-- Three large circles in a row (multiple choice) -->
+  <circle cx="35" cy="50" r="10" fill="#FFFFFF"/>
+  <circle cx="50" cy="50" r="10" fill="#10B981"/>
+  <circle cx="65" cy="50" r="10" fill="#FFFFFF"/>
+  
+  <!-- Checkmark on middle circle -->
+  <path d="M 47 50 L 49 52 L 53 48" 
+        stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

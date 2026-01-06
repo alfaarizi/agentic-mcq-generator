@@ -481,3 +481,70 @@ async def generate_questions(
         import logging
         logging.error(f"Failed to generate questions: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to generate questions: {str(e)}")
+
+
+@router.get("/{slug}/content")
+async def get_quiz_content(
+    slug: str,
+    storage: QuizStorage = Depends(get_storage)
+):
+    """Get raw markdown content of a quiz."""
+    content = storage.get_quiz_content(slug)
+    if not content:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    return JSONResponse({"content": content})
+
+
+@router.put("/{slug}")
+async def update_quiz(
+    slug: str,
+    request: Request,
+    storage: QuizStorage = Depends(get_storage)
+):
+    """Update quiz content."""
+    try:
+        body = await request.json()
+        content = body.get("content", "")
+        if not content:
+            raise HTTPException(status_code=400, detail="No content provided")
+        
+        # Verify quiz exists
+        existing_quiz = storage.get_quiz(slug)
+        if not existing_quiz:
+            raise HTTPException(status_code=404, detail="Quiz not found")
+        
+        # Parse new content
+        quizzes = QuizParser.from_string(content)
+        if not quizzes:
+            raise HTTPException(status_code=400, detail="No quizzes found in content")
+        
+        if len(quizzes) > 1:
+            raise HTTPException(
+                status_code=400, 
+                detail="Only one quiz is allowed per edit."
+            )
+        
+        # Update the quiz
+        updated_quiz = quizzes[0]
+        storage.save_quiz(updated_quiz)
+        
+        return JSONResponse({
+            "message": f"Updated quiz '{updated_quiz.topic}'",
+            "slug": updated_quiz.slug
+        })
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to update quiz: {str(e)}")
+
+
+@router.delete("/{slug}")
+async def delete_quiz(
+    slug: str,
+    storage: QuizStorage = Depends(get_storage)
+):
+    """Delete a quiz by slug."""
+    deleted = storage.delete_quiz(slug)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    return JSONResponse({"message": f"Quiz deleted successfully"})

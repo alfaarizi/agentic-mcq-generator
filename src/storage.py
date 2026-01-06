@@ -30,6 +30,27 @@ class QuizStorage:
                 return quiz
         return None
 
+    def get_quiz_content(self, slug: str) -> Optional[str]:
+        """Get raw markdown content of a quiz by slug."""
+        quiz = self.get_quiz(slug)
+        if not quiz:
+            return None
+        
+        # Format opening tag: include time limit if present
+        minutes = quiz.time_limit // 60 if quiz.time_limit > 0 else None
+        opening_tag = f"<{quiz.topic}:{minutes}>" if minutes else f"<{quiz.topic}>"
+        
+        lines = [opening_tag, ""]
+        for question in quiz.questions:
+            lines.append(question.text)
+            for choice in question.original_choices:
+                prefix = ">" if choice.is_correct else "-"
+                lines.append(f"{prefix} {choice.text}")
+            lines.append("")
+        lines.append(f"</{quiz.topic}>")
+        
+        return "\n".join(lines)
+
 
     # Write operations
     def save_quiz(self, quiz: Quiz) -> str:
@@ -53,6 +74,24 @@ class QuizStorage:
         file_path.write_text("\n".join(lines), encoding='utf-8')
         return str(file_path)
 
+
+    def delete_quiz(self, slug: str) -> bool:
+        """Delete a quiz by slug.
+        
+        Returns:
+            bool: True if quiz was deleted, False if not found
+        """
+        quiz = self.get_quiz(slug)
+        if not quiz:
+            return False
+        
+        filename = f"{quiz.topic.replace(' ', '_').lower()}.md"
+        file_path = self.storage_dir / filename
+        
+        if file_path.exists():
+            file_path.unlink()
+            return True
+        return False
 
     def delete_quizzes(self) -> int:
         """Delete all quiz files except those in examples directory.

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Platform</title>
+    <title>QuizAI</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/static/modal.js"></script>
     <style>
@@ -15,7 +16,7 @@
 </head>
 <body class="bg-white text-gray-800 max-w-full md:max-w-6xl mx-auto p-4 md:p-8">
     <div class="flex justify-between items-center border-b-2 border-gray-800 pb-2 mb-6">
-        <h1 class="text-3xl text-gray-800">Quiz Platform</h1>
+        <h1 class="text-3xl text-gray-800">QuizAI</h1>
         <a href="https://github.com/alfaarizi/agentic-mcq-generator" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-gray-800 transition-colors" title="View on GitHub">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
@@ -88,8 +89,11 @@
                     <button onclick="switchTab('create')" id="tab-create" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
                         Create
                     </button>
-                    <button onclick="switchTab('upload')" id="tab-upload" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
-                        Upload
+                    <button onclick="switchTab('edit')" id="tab-edit" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
+                        Edit
+                    </button>
+                    <button onclick="switchTab('delete')" id="tab-delete" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
+                        Delete
                     </button>
                     <button onclick="switchTab('reset')" id="tab-reset" class="flex-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 tab-button">
                         Reset
@@ -101,21 +105,20 @@
                     <!-- Generate Quiz Tab -->
                     <div id="content-generate" class="tab-content">
                         <h3 class="text-xl font-semibold mb-3">Generate Quiz</h3>
-                        <form id="generateQuizForm" class="flex flex-col space-y-3">
+                        <form id="generateQuizForm" class="flex flex-col">
                             <div>
-                                <label for="topicInput" class="block text-base font-medium text-gray-700 mb-1">Topic Description</label>
                                 <textarea 
                                     id="topicInput" 
                                     name="topic" 
                                     placeholder="Describe the topic...&#10;e.g., 'neural networks for CS students'" 
                                     required 
                                     class="w-full p-2 border border-gray-300 text-base resize-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800" 
-                                    style="height: 309px;"
+                                    style="height: 423px;"
                                     aria-label="Topic description for quiz generation"
                                 ></textarea>
                             </div>
                             
-                            <div class="grid grid-cols-3 gap-2">
+                            <div class="grid grid-cols-3 gap-2 mb-3">
                                 <div>
                                     <label for="complexitySelect" class="block text-sm font-medium text-gray-700 mb-1">Complexity</label>
                                     <select 
@@ -170,18 +173,33 @@
                         </form>
                     </div>
 
-                    <!-- Upload Quiz Tab -->
-                    <div id="content-upload" class="tab-content hidden">
-                        <h3 class="text-xl font-semibold mb-4">Upload Quiz</h3>
-                        <form action="{{ api_base_url }}/quizzes" method="post" enctype="multipart/form-data" class="space-y-3">
-                            <input type="file" name="file" accept=".md" required class="w-full p-2 border border-gray-300 text-base">
-                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">Upload</button>
+                    <!-- Delete Quiz Tab -->
+                    <div id="content-delete" class="tab-content hidden">
+                        <h3 class="text-xl font-semibold mb-3">Delete Quiz</h3>
+                        <form id="deleteQuizForm" class="flex flex-col">
+                            <div class="mb-4">
+                                <select 
+                                    id="deleteQuizSelect" 
+                                    name="quiz"
+                                    required
+                                    class="w-full py-3.5 px-4 border border-gray-300 text-base focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+                                >
+                                    <option value="">-- Select a quiz --</option>
+                                    {% for quiz in quizzes %}
+                                    <option value="{{ quiz.slug }}">{{ quiz.topic }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 text-base">Delete</button>
                         </form>
                     </div>
 
                     <!-- Create Quiz Tab -->
                     <div id="content-create" class="tab-content hidden">
                         <h3 class="text-xl font-semibold mb-3">Create Quiz</h3>
+                        <form id="uploadFileForm" class="mb-4">
+                            <input type="file" id="uploadFileInput" accept=".md" class="w-full p-2 border border-gray-300 text-base">
+                        </form>
                         <form id="createQuizForm" class="flex flex-col space-y-3">
                             <textarea 
                                 id="quizContent" 
@@ -189,16 +207,47 @@
                                 placeholder="Paste quiz content..&#10;&#10;e.g.,&#10;&lt;Math Basics&gt;&#10;What is 2 + 2?&#10;- 3&#10;&gt; 4&#10;&lt;/Math Basics&gt;&#10;&#10;For timed quiz:&#10;&lt;Math Basics:5&gt;&#10;What is 2 + 2?&#10;- 3&#10;&gt; 4&#10;&lt;/Math Basics&gt;" 
                                 required 
                                 class="w-full p-2 border border-gray-300 text-base resize-none" 
-                                style="height: 415px;"
+                                style="height: 425px;"
                             ></textarea>
                             <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">Create</button>
+                        </form>
+                    </div>
+
+                    <!-- Edit Quiz Tab -->
+                    <div id="content-edit" class="tab-content hidden">
+                        <h3 class="text-xl font-semibold mb-3">Edit Quiz</h3>
+                        <form id="editQuizForm" class="flex flex-col">
+                            <div class="mb-4">
+                                <select 
+                                    id="quizSelect" 
+                                    name="quiz"
+                                    required
+                                    class="w-full py-3.5 px-4 border border-gray-300 text-base focus:ring-2 focus:ring-gray-800 focus:border-gray-800"
+                                >
+                                    <option value="">-- Select a quiz --</option>
+                                    {% for quiz in quizzes %}
+                                    <option value="{{ quiz.slug }}">{{ quiz.topic }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-1">
+                                <textarea 
+                                    id="editQuizContent" 
+                                    name="content" 
+                                    required 
+                                    class="w-full p-2 border border-gray-300 text-base resize-none" 
+                                    style="height: 425px;"
+                                    readonly
+                                ></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">Save</button>
                         </form>
                     </div>
 
                     <!-- Reset Quizzes Tab -->
                     <div id="content-reset" class="tab-content hidden">
                         <h3 class="text-xl font-semibold mb-3">Reset Quizzes</h3>
-                        <p class="text-gray-600 text-base mb-4">This action permanently deletes all quizzes. This cannot be undone.</p>
+                        <p class="text-gray-600 text-base mb-[17px]">This action permanently deletes all quizzes. This cannot be undone.</p>
                         <button onclick="resetQuizzes()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 text-base">Reset All</button>
                     </div>
                 </div>
@@ -333,6 +382,135 @@
                     }
                 }
             });
+
+            // Edit Quiz functionality
+            const quizSelect = document.getElementById('quizSelect');
+            const editQuizContent = document.getElementById('editQuizContent');
+            const editQuizForm = document.getElementById('editQuizForm');
+
+            if (quizSelect) {
+                quizSelect.addEventListener('change', async (e) => {
+                    const slug = e.target.value;
+                    if (!slug) {
+                        editQuizContent.value = '';
+                        editQuizContent.readOnly = true;
+                        return;
+                    }
+
+                    try {
+                        showLoader('Loading quiz content...');
+                        const res = await fetch(`${API}/quizzes/${slug}/content`, {
+                            headers: { 'Accept': 'application/json' }
+                        });
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            editQuizContent.value = data.content;
+                            editQuizContent.readOnly = false;
+                        } else {
+                            const err = await res.json();
+                            await showModal('Load Failed', 'Failed to load quiz: ' + (err.detail || 'Unknown error'));
+                            editQuizContent.value = '';
+                            editQuizContent.readOnly = true;
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        await showModal('Load Failed', 'Failed to load quiz. Please try again.');
+                        editQuizContent.value = '';
+                        editQuizContent.readOnly = true;
+                    } finally {
+                        hideLoader();
+                    }
+                });
+            }
+
+            if (editQuizForm) {
+                editQuizForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const slug = quizSelect.value;
+                    const content = editQuizContent.value.trim();
+
+                    if (!slug) {
+                        await showModal('Validation Error', 'Please select a quiz to edit.');
+                        return;
+                    }
+
+                    if (!content) {
+                        await showModal('Validation Error', 'Quiz content cannot be empty.');
+                        return;
+                    }
+
+                    try {
+                        showLoader('Saving quiz...');
+                        const res = await fetch(`${API}/quizzes/${slug}`, {
+                            method: 'PUT',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ content })
+                        });
+
+                        hideLoader();
+
+                        if (res.ok) {
+                            await showModal('Success', 'Quiz updated successfully!');
+                            location.reload();
+                        } else {
+                            const err = await res.json();
+                            await showModal('Save Failed', 'Failed to save quiz: ' + (err.detail || 'Unknown error'));
+                        }
+                    } catch (e) {
+                        hideLoader();
+                        console.error(e);
+                        await showModal('Save Failed', 'Failed to save quiz. Please try again.');
+                    }
+                });
+            }
+
+            // Delete Quiz functionality
+            const deleteQuizSelect = document.getElementById('deleteQuizSelect');
+            const deleteQuizForm = document.getElementById('deleteQuizForm');
+
+            if (deleteQuizForm) {
+                deleteQuizForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const slug = deleteQuizSelect.value;
+
+                    if (!slug) {
+                        await showModal('Validation Error', 'Please select a quiz to delete.');
+                        return;
+                    }
+
+                    const confirmed = await showModal(
+                        'Delete Quiz',
+                        'Are you sure you want to delete this quiz? This action cannot be undone.',
+                        async () => {
+                            try {
+                                showLoader('Deleting quiz...');
+                                const res = await fetch(`${API}/quizzes/${slug}`, {
+                                    method: 'DELETE',
+                                    headers: { 'Accept': 'application/json' }
+                                });
+
+                                hideLoader();
+
+                                if (res.ok) {
+                                    await showModal('Success', 'Quiz deleted successfully!');
+                                    location.reload();
+                                } else {
+                                    const err = await res.json();
+                                    await showModal('Delete Failed', 'Failed to delete quiz: ' + (err.detail || 'Unknown error'));
+                                }
+                            } catch (e) {
+                                hideLoader();
+                                console.error(e);
+                                await showModal('Delete Failed', 'Failed to delete quiz. Please try again.');
+                            }
+                        }
+                    );
+                });
+            }
         });
         
         async function handleQuiz(slug) {
@@ -452,6 +630,28 @@
             }
         });
         
+        // Handle file upload for Create Quiz tab
+        const uploadFileInput = document.getElementById('uploadFileInput');
+        const quizContent = document.getElementById('quizContent');
+        
+        if (uploadFileInput && quizContent) {
+            uploadFileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                try {
+                    const content = await file.text();
+                    quizContent.value = content;
+                } catch (err) {
+                    console.error('Failed to read file:', err);
+                    await showModal('Upload Failed', 'Failed to read file. Please try again.');
+                }
+                
+                // Reset the input so the same file can be selected again
+                e.target.value = '';
+            });
+        }
+
         document.getElementById('createQuizForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const content = document.getElementById('quizContent').value;
