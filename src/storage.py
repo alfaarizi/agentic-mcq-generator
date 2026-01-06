@@ -13,6 +13,7 @@ class QuizStorage:
         self.storage_dir = Path(storage_dir)
         self.storage_dir.mkdir(exist_ok=True)
 
+
     # Read operations
     def get_quizzes(self) -> List[Quiz]:
         """Get all quizzes from markdown files."""
@@ -21,9 +22,6 @@ class QuizStorage:
             for quiz in QuizParser.from_file(str(file_path))
         ]
 
-    def get_topics(self) -> List[str]:
-        """Get all topic names."""
-        return [quiz.topic for quiz in self.get_quizzes()]
 
     def get_quiz(self, slug: str) -> Optional[Quiz]:
         """Get quiz by slug."""
@@ -32,18 +30,8 @@ class QuizStorage:
                 return quiz
         return None
 
+
     # Write operations
-    def create_quiz(self, topic: str, questions: List[Question]) -> Quiz:
-        """Create and save new quiz."""
-        quiz = Quiz(topic=topic, questions=questions)
-        self.save_quiz(quiz)
-        return quiz
-
-    def add_questions(self, quiz: Quiz, questions: List[Question]) -> None:
-        """Add questions to quiz and save."""
-        quiz.questions.extend(questions)
-        self.save_quiz(quiz)
-
     def save_quiz(self, quiz: Quiz) -> str:
         """Save quiz to markdown file."""
         filename = f"{quiz.topic.replace(' ', '_').lower()}.md"
@@ -60,6 +48,7 @@ class QuizStorage:
 
         file_path.write_text("\n".join(lines), encoding='utf-8')
         return str(file_path)
+
 
     def delete_quizzes(self) -> int:
         """Delete all quiz files except those in examples directory.
