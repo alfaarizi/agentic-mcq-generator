@@ -30,7 +30,7 @@ f"""You are an expert educational assessment analyst specializing in quiz design
     sample_questions = []
     for q in quiz.questions[:5]:  # Analyze up to 5 questions
         choices_text = ", ".join([c.text for c in q.original_choices[:3]])
-        sample_questions.append(f"Q: {q.text[:100]}... | Choices: {choices_text[:50]}...")
+        sample_questions.append(f"{q.text[:100]}... | Choices: {choices_text[:50]}...")
     
     questions_text = "\n".join(sample_questions)
     

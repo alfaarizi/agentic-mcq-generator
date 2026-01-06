@@ -134,7 +134,7 @@ async def upload_quiz(
     """Upload quiz markdown file."""
     try:
         content = await file.read()
-        quizzes = QuizParser.from_string(content.decode('utf-8'), source=file.filename)
+        quizzes = QuizParser.from_string(content.decode('utf-8'), source_file=file.filename)
         if not quizzes:
             raise HTTPException(status_code=400, detail="No quizzes found in file")
         for quiz in quizzes:
@@ -156,7 +156,7 @@ async def create_quiz(
         if not content:
             raise HTTPException(status_code=400, detail="No content provided")
         
-        quizzes = QuizParser.from_string(content, source="pasted")
+        quizzes = QuizParser.from_string(content)
         if not quizzes:
             raise HTTPException(status_code=400, detail="No quizzes found in content")
         

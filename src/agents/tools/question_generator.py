@@ -40,7 +40,7 @@ You are a master educator and subject matter expert specializing in quiz design,
     # Format sample questions
     sample_text = []
     for q in samples[:3]:
-        lines = [f"Q: {q.text}"]
+        lines = [q.text]
         for c in q.original_choices:
             prefix = ">" if c.is_correct else "-"
             lines.append(f"{prefix} {c.text}")
@@ -101,7 +101,7 @@ f"""
    - Avoid trick questions or ambiguous wording
 
 5. **Format Requirements:**
-   - Start each question with "Q: " followed by the question text
+   - Write the question text directly (no prefix)
    - Use "-" prefix for incorrect answer choices
    - Use ">" prefix for correct answer choices
    - Include 2-6 choices per question (match the pattern from examples)
@@ -115,7 +115,7 @@ f"""
 - Ensure questions are numbered sequentially if examples show numbering
 
 **Output Format:**
-Q: [Question text]
+[Question text]
 - [Incorrect choice 1]
 - [Incorrect choice 2]
 > [Correct choice]
