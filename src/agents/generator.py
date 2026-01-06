@@ -36,7 +36,7 @@ class GeneratorAgent(Agent):
     ) -> Quiz:
         """Generate a new quiz from a high-level topic description."""
 
-        quiz_topic, quiz_profile, suggested_time_limit, suggested_question_count: Tuple[str, QuizProfile, int, int] = extract_quiz_profile(
+        quiz_topic, quiz_profile, suggested_time_limit, suggested_question_count = extract_quiz_profile(
             topic_description=topic_description,
             agent=self,
             quiz_profile=profile
@@ -57,7 +57,7 @@ class GeneratorAgent(Agent):
             agent=self
         )
         
-        new_questions, time_limit: Tuple[List[Question], int] = generate_questions(
+        new_questions, time_limit = generate_questions(
             topic=quiz_topic,
             samples=[], # No existing samples for new quiz
             count=question_count,
