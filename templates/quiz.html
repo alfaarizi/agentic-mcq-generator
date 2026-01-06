@@ -30,15 +30,15 @@
         <span class="text-3xl font-semibold text-green-800">{{ score }}/{{ total }}</span>
         {% elif status == 'in_progress' and quiz.time_limit > 0 %}
         <span id="timer" class="text-3xl font-semibold text-gray-800">--:--</span>
-        {% elif status == 'in_progress' %}
-        <span class="text-3xl font-semibold text-gray-800">📚</span>
         {% endif %}
     </div>
     
-    <p class="text-gray-600 text-base mb-2">{{ quiz.questions|length }} questions</p>
-    {% if quiz.time_limit > 0 %}
-    <p class="text-gray-600 text-base mb-6">Time limit: {{ "%02d"|format(quiz.time_limit // 60) }}:{{ "%02d"|format(quiz.time_limit % 60) }}</p>
-    {% endif %}
+    <p class="text-gray-600 text-base mb-6">
+        {{ quiz.questions|length }} question{% if quiz.questions|length != 1 %}s{% endif %}
+        {% if quiz.time_limit > 0 %}
+        | Time limit: {{ quiz.time_limit // 60 }} minute{% if (quiz.time_limit // 60) != 1 %}s{% endif %}
+        {% endif %}
+    </p>
 
     {% if status == 'preview' %}
     <div class="border border-gray-300 p-8 text-center">
@@ -338,28 +338,52 @@
             }
         }
         
-        // Timer function
+        // Timer function - countdown timer for timed quizzes
         function startTimer() {
             const timer = document.getElementById('timer');
             if (!timer) return;
             
-            const start = new Date(STARTED_AT);
-            timerInterval = setInterval(async () => {
-                const elapsed = (new Date() - start) / 1000;
-                const remaining = Math.max(0, TIME_LIMIT - elapsed);
-                const mins = Math.floor(remaining / 60);
-                const secs = Math.floor(remaining % 60);
-                timer.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-
+            // Parse start time (ISO 8601 format, 'Z' indicates UTC)
+            const parseStartTime = () => {
+                if (!STARTED_AT?.trim()) return Date.now();
+                const isoString = STARTED_AT.endsWith('Z') ? STARTED_AT : STARTED_AT + 'Z';
+                const parsed = new Date(isoString);
+                return isNaN(parsed.getTime()) ? Date.now() : parsed.getTime();
+            };
+            
+            const startTime = parseStartTime();
+            const endTime = startTime + TIME_LIMIT * 1000;
+            
+            // Format seconds as MM:SS
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            };
+            
+            // Update timer display
+            const updateTimer = async () => {
+                const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+                timer.textContent = formatTime(remaining);
+                
+                // Visual warning when time is running out
                 if (remaining <= 60 && remaining > 0) {
                     timer.classList.add('text-red-500');
+                } else {
+                    timer.classList.remove('text-red-500');
                 }
-                if (remaining === 0) {
+                
+                // Auto-submit when time expires
+                if (remaining <= 0) {
                     clearInterval(timerInterval);
                     await showModal('Time is up!', 'Your quiz will now be submitted.');
                     submitQuiz();
                 }
-            }, 1000);
+            };
+            
+            // Update immediately and then every second
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
         }
         
         // Initialize on page load
@@ -393,9 +417,7 @@
                 });
                 updateQuestionStatus();
                 
-                if (TIME_LIMIT > 0 && STARTED_AT) {
                     startTimer();
-                }
             }
             
             if (STATUS === 'completed') {

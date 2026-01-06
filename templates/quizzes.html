@@ -44,15 +44,15 @@
                         <div>
                             <h3 class="text-2xl quiz-title">{{ quiz.topic }}</h3>
                         </div>
-                        <span class="text-gray-600 text-sm">
-                            {% if quiz.time_limit > 0 %}
-                                ⏱️ {{ "%02d"|format(quiz.time_limit // 60) }}:{{ "%02d"|format(quiz.time_limit % 60) }}
-                            {% else %}
-                                📚 No limit
-                            {% endif %}
+                        {% if quiz.time_limit > 0 %}
+                        <span class="text-gray-600 text-2xl">
+                            ⏱️ {{ (quiz.time_limit // 60) }}m
                         </span>
+                        {% endif %}
                     </div>
-                    <p class="text-gray-600 text-base mb-4">{{ quiz.questions }} questions</p>
+                    <p class="text-gray-600 text-base mb-4">
+                        {{ quiz.questions }} question{% if quiz.questions != 1 %}s{% endif %}
+                    </p>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <button onclick="handleQuiz('{{ quiz.slug }}')" class="quiz-btn flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">
                         Start Quiz
@@ -311,7 +311,7 @@
                     btn.className = btn.className.replace('bg-gray-800 hover:bg-gray-700', 'bg-blue-600 hover:bg-blue-700');
                     if (score) {
                         const scoreSpan = document.createElement('span');
-                        scoreSpan.className = 'text-blue-600 text-lg ml-2';
+                        scoreSpan.className = 'text-blue-600 text-2xl ml-2';
                         scoreSpan.textContent = `(${score})`;
                         title.appendChild(scoreSpan);
                     }

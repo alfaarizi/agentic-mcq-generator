@@ -113,14 +113,14 @@ def serialize_evaluation(
         import logging
         logging.error(f"AI evaluation failed: {type(e).__name__}: {str(e)}")
         # Fallback response
-        return {
-            "correct": is_correct,
+    return {
+        "correct": is_correct,
             "feedback": None,
             "error_evaluation": None,
             "suggestions": None,
-            "your_answer": [c.text for c in selected],
-            "correct_answers": correct_choices
-        }
+        "your_answer": [c.text for c in selected],
+        "correct_answers": correct_choices
+    }
 
 # ============================================
 # API Endpoints
@@ -251,8 +251,8 @@ async def get_quiz(
         },
         "session_id": session_id,
         "status": session["status"],
-        "started_at": session["started_at"].isoformat(),
-        "submitted_at": session["submitted_at"].isoformat() if session.get("submitted_at") else None,
+        "started_at": session["started_at"].isoformat() + "Z",
+        "submitted_at": session["submitted_at"].isoformat() + "Z" if session.get("submitted_at") else None,
         "score": session.get("score"),
         "total": session.get("total"),
         "api_base_url": settings.API_BASE_URL

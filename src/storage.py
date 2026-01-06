@@ -37,7 +37,11 @@ class QuizStorage:
         filename = f"{quiz.topic.replace(' ', '_').lower()}.md"
         file_path = self.storage_dir / filename
 
-        lines = [f"<{quiz.topic}>", ""]
+        # Format opening tag: include time limit if present
+        minutes = quiz.time_limit // 60 if quiz.time_limit > 0 else None
+        opening_tag = f"<{quiz.topic}:{minutes}>" if minutes else f"<{quiz.topic}>"
+        
+        lines = [opening_tag, ""]
         for question in quiz.questions:
             lines.append(question.text)
             for choice in question.original_choices:
