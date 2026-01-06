@@ -212,7 +212,9 @@ async def generate_quiz(
             {
                 "message": f"Generated quiz '{quiz.topic}'",
                 "slug": quiz.slug,
+                "topic": quiz.topic,
                 "questions": quiz.total_questions,
+                "time_limit": quiz.time_limit,
             },
             status_code=201,
         )

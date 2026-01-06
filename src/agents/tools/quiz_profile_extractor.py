@@ -12,8 +12,8 @@ def extract_quiz_profile(
     topic_description: str,
     agent: "Agent",
     quiz_profile: Optional[QuizProfile] = None
-) -> QuizProfile:
-    """Extract quiz profile from topic description, optionally refining an existing profile.
+) -> tuple[str, QuizProfile, int]:
+    """Extract quiz profile, inferred topic name, and suggested time limit from topic description.
     
     Args:
         topic_description: User-provided description of the topic.
@@ -21,7 +21,8 @@ def extract_quiz_profile(
         quiz_profile: Optional initial QuizProfile to refine. If None, creates a new profile.
     
     Returns:
-        QuizProfile with extracted domain, language, and characteristics.
+        Tuple of (inferred_topic_name, QuizProfile, suggested_time_limit) where suggested_time_limit
+        is in seconds (0 if quiz should not be timed).
     """
     
     system_prompt = \
@@ -51,6 +52,12 @@ f"""
 **Instructions:**
 Analyze the topic description systematically and provide:
 
+0. **Topic Name**: 
+    - Infer a concise, professional topic name (3-8 words) that best represents the quiz subject. 
+    - This will be used as the quiz title. 
+    - The topic name MUST be in the detected language (see Language section below). 
+    - Examples: "Python Basics", "Neural Networks Fundamentals", "World War II History", "Photosynthesis in Plants" (for English); "Fundamentos de Python", "Redes Neuronales Fundamentales" (for Spanish)
+
 1. **Domain**: 
    - Identify the primary subject domain (e.g., "computer_science", "biology", "mathematics", "medicine", "engineering", "history", "literature", "general")
    - Be specific and use standard domain names
@@ -79,6 +86,14 @@ Analyze the topic description systematically and provide:
    - Professional: Industry/workplace context, practical application, professional terminology
    - General: Broad public audience, accessible to non-specialists, minimal assumptions about prior knowledge
 
+6. **Suggested Time Limit**: Determine if the quiz should be timed and suggest an initial time limit in seconds. Consider:
+   - If the time is explicitly mentioned in the description (e.g., "5 minutes", "30 minutes", "1 hour", "90 seconds"), extract that exact value and convert it to seconds for the suggested_time_limit
+   - Keywords: "exam", "test", "timed", "assessment", "evaluation", "certification"
+   - Context: Formal assessments, professional certifications, academic exams
+   - If timed but no explicit time mentioned, estimate based on complexity level (beginner: ~60s/question, intermediate: ~120s/question, advanced: ~180s/question, expert: ~240s/question)
+   - Return 0 if description suggests self-paced learning, practice, or casual study
+   - This is a preliminary estimate; the actual time limit will be refined based on generated questions (unless explicitly mentioned)
+
 **Guidelines:**
 - Extract domain and language from the actual content of the description
 {f'- Be conservative with refinements - Only refine complexity, style, or target_audience if the description provides clear indicators' if quiz_profile else 'Determine complexity, style, and target_audience based on the description content'}
@@ -87,11 +102,13 @@ Analyze the topic description systematically and provide:
 
 **Output Format (JSON):**
 {{
+  "topic": "concise topic name (3-8 words)",
   "domain": "subject domain",
   "language": "language code (e.g., 'en', 'es', 'fr', 'de', 'hu')",
   "complexity": "beginner|intermediate|advanced|expert",
   "style": "academic|conversational|practical|concise",
-  "target_audience": "high_school|undergraduate|graduate|professional|general"
+  "target_audience": "high_school|undergraduate|graduate|professional|general",
+  "suggested_time_limit": 0
 }}
 """
     
@@ -103,6 +120,7 @@ Analyze the topic description systematically and provide:
     )
     
     # Default values based on whether profile exists
+    default_topic = topic_description.strip()[:50] if topic_description.strip() else "Custom Quiz"
     default_domain = quiz_profile.domain if quiz_profile else "general"
     default_language = quiz_profile.language if quiz_profile else "en"
     default_complexity = quiz_profile.complexity.value if quiz_profile else "intermediate"
@@ -110,19 +128,27 @@ Analyze the topic description systematically and provide:
     default_audience = quiz_profile.target_audience.value if quiz_profile else "undergraduate"
     
     parsed = agent._parse_json(resp, {
+        "topic": default_topic,
         "domain": default_domain,
         "language": default_language,
         "complexity": default_complexity,
         "style": default_style,
-        "target_audience": default_audience
+        "target_audience": default_audience,
+        "suggested_time_limit": 0
     })
     
     # Create profile
-    return QuizProfile(
+    profile = QuizProfile(
         complexity=Complexity(parsed.get("complexity", default_complexity)),
         style=Style(parsed.get("style", default_style)),
         target_audience=TargetAudience(parsed.get("target_audience", default_audience)),
         language=parsed.get("language", default_language),
         domain=parsed.get("domain", default_domain)
+    )
+    
+    return (
+        parsed.get("topic", default_topic).strip(), 
+        profile, 
+        max(0, int(parsed.get("suggested_time_limit", 0)))
     )
 

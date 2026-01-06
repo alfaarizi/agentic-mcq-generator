@@ -34,13 +34,14 @@ class AugmenterAgent(Agent):
         
         topic_coverage: TopicCoverage = analyze_topic_coverage(quiz, quiz_context, agent=self, target_count=target_count)
         
-        new_questions: List[Question] = generate_questions(
+        new_questions, _ = generate_questions(
             topic=quiz.topic,
             samples=quiz.questions[:5], # Use first 5 as samples
             count=target_count,
             quiz_context=quiz_context,
             topic_coverage=topic_coverage,
-            agent=self
+            agent=self,
+            suggested_time_limit=-1 # Preserve existing time limit
         )
         
         validated_questions: List[Question] = validate_questions(

@@ -36,16 +36,15 @@ class GeneratorAgent(Agent):
     ) -> Quiz:
         """Generate a new quiz from a high-level topic description."""
 
-        quiz_profile: QuizProfile = extract_quiz_profile(
+        quiz_topic, quiz_profile, suggested_time_limit = extract_quiz_profile(
             topic_description=topic_description,
             agent=self,
             quiz_profile=profile
         )
         
-        topic = topic_description.strip() or "Custom Quiz"
         quiz_context: QuizContext = QuizContext(
             profile=quiz_profile,
-            covered_concepts=[] # Empty for new quiz
+            covered_concepts=[]  # Empty for new quiz
         )
         
         topic_coverage: TopicCoverage = plan_topic_coverage(
@@ -55,13 +54,14 @@ class GeneratorAgent(Agent):
             agent=self
         )
         
-        new_questions: List[Question] = generate_questions(
-            topic=topic,
+        new_questions, time_limit = generate_questions(
+            topic=quiz_topic,
             samples=[], # No existing samples for new quiz
             count=question_count,
             quiz_context=quiz_context,
             topic_coverage=topic_coverage,
-            agent=self
+            agent=self,
+            suggested_time_limit=suggested_time_limit
         )
         
         validated_questions: List[Question] = validate_questions(
@@ -70,7 +70,11 @@ class GeneratorAgent(Agent):
             quiz_context=quiz_context,
             agent=self
         )
-        
-        return Quiz(topic=topic, questions=validated_questions or new_questions)
+                
+        return Quiz(
+            topic=quiz_topic,
+            questions=validated_questions or new_questions,
+            time_limit=time_limit
+        )
 
 

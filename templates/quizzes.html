@@ -166,7 +166,7 @@
                 </div>
             </div>
 
-                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base transition-colors">Generate Quiz</button>
+                            <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base transition-colors">Generate</button>
                         </form>
                     </div>
 
@@ -418,9 +418,10 @@
             
             try {
                 const submitBtn = e.target.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Generating...';
+                
+                // Show generating loader
+                showLoader('Generating Quiz..');
                 
                 const res = await fetch(`${API}/quizzes/generate`, {
                     method: 'POST',
@@ -433,12 +434,10 @@
                     })
                 });
                 
+                hideLoader();
                 submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
                 
                 if (res.ok) {
-                    const data = await res.json();
-                    await showModal('Success', `Successfully generated quiz: ${data.topic || 'Quiz'}`);
                     location.reload();
                 } else {
                     const err = await res.json();
@@ -446,8 +445,8 @@
                 }
             } catch (e) {
                 const submitBtn = e.target.querySelector('button[type="submit"]');
+                hideLoader();
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Generate Quiz';
                 console.error(e);
                 await showModal('Generation Failed', 'Failed to generate quiz. Please try again.');
             }
