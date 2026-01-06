@@ -121,6 +121,6 @@ Provide the indices (0-based) of valid questions only.
         new_questions[i] for i in valid_indices
         if 0 <= i < len(new_questions)
     ]
-
+    
     return valid_questions
 

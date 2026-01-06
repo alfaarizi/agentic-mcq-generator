@@ -1,12 +1,12 @@
 """Tool for generating AI-powered learning suggestions and tracking progress."""
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
     from ..agent import Agent
     from ...models import Question
 
-from ..schemas import ErrorEvaluation, ErrorType, PedagogicalContext, LearningProfile, LearningSuggestion, TopicProficiency
+from ..schemas import ErrorEvaluation, ErrorType, PedagogicalContext, LearningProfile, LearningSuggestion, TopicProficiency, QuizContext
 
 
 def generate_suggestions(
@@ -15,17 +15,19 @@ def generate_suggestions(
     topic: str,
     learning_profile: LearningProfile,
     eval_context: PedagogicalContext,
-    agent: "Agent"
+    agent: "Agent",
+    quiz_context: Optional["QuizContext"] = None
 ) -> List[LearningSuggestion]:
     """Generate AI-powered learning suggestions and update learning profile.
     
     Args:
         question: The question answered.
-        error_analysis: Error analysis result.
+        error_analysis: Error evaluation result.
         topic: Topic of the quiz.
         learning_profile: Current user learning profile (modified in place).
-        eval_context: Context information.
+        eval_context: Pedagogical context information.
         agent: Agent instance for LLM access.
+        quiz_context: Optional quiz context (style, complexity, language, etc.) to adapt suggestions.
     
     Returns:
         List of AI-generated learning suggestions. Profile is updated in place.
@@ -39,18 +41,26 @@ def generate_suggestions(
         learning_profile.topic_proficiencies.append(topic_entry)
     topic_entry.error_counts[err_type] = topic_entry.error_counts.get(err_type, 0) + 1
     
+    # Style description
+    style_descriptions = {
+        "academic": "formal, precise, scholarly language",
+        "conversational": "friendly, explanatory, accessible tone",
+        "practical": "applied, scenario-based, real-world focus",
+        "concise": "direct, minimal explanation, to-the-point"
+    }
+
     # Generate suggestions
     if err_type == ErrorType.CORRECT:
         system_prompt = \
 f"""
-You are an encouraging learning coach and academic advisor specializing in student motivation and continued learning. Your expertise includes recognizing achievement, providing positive reinforcement, and guiding students toward advanced learning opportunities. You help students build on their successes and maintain momentum.
+You are an encouraging learning coach and academic advisor specializing in student motivation and continued learning. Your expertise includes recognizing achievement, providing positive reinforcement, and guiding students toward advanced learning opportunities.
 """
         
         user_prompt = \
 f"""
 **Task:** Generate encouraging, forward-looking learning suggestions for a student who answered correctly.
 
-**Context:**
+**Learning Situation:**
 - **Topic:** {topic}
 - **Question:** {question.text}
 - **Performance:** Student answered correctly
@@ -61,6 +71,13 @@ Generate 1-2 brief, encouraging suggestions that:
 - Suggest next steps for continued learning
 - Recommend resources or activities to deepen understanding
 - Maintain motivation and engagement
+
+{f"""**Adaptation Requirements:**
+- Match the quiz's communication style ({quiz_context.profile.style}) - use {style_descriptions.get(quiz_context.profile.style, "clear, accessible language")}
+- Recommend resources appropriate for {quiz_context.profile.complexity} level
+- Tailor suggestions for {quiz_context.profile.target_audience} level
+- Provide resources in {quiz_context.profile.language} language
+- Focus on {quiz_context.profile.domain} domain when relevant""" if quiz_context else ""}
 
 **Guidelines:**
 - Be specific and actionable
@@ -93,7 +110,7 @@ You are an expert learning advisor and educational consultant specializing in pe
 f"""
 **Task:** Generate personalized, actionable learning suggestions to help the student improve their understanding.
 
-**Learning Context:**
+**Learning Situation:**
 - **Topic:** {topic}
 - **Question:** {question.text}
 - **Error Type:** {err_type}
@@ -111,10 +128,17 @@ Generate 2-3 personalized learning suggestions that:
 - Provide concrete, actionable steps
 - Include specific, relevant learning resources
 
+{f"""**Adaptation Requirements:**
+- Match the quiz's communication style ({quiz_context.profile.style}) - use {style_descriptions.get(quiz_context.profile.style, "clear, accessible language")}
+- Recommend resources appropriate for {quiz_context.profile.complexity} level
+- Tailor suggestions for {quiz_context.profile.target_audience} level
+- Provide resources in {quiz_context.profile.language} language
+- Focus on {quiz_context.profile.domain} domain when relevant""" if quiz_context else ""}
+
 **For Each Suggestion, Include:**
-1. **Title:** Brief, actionable title (5-8 words) that clearly states what to do
-2. **Explanation:** What to learn, why it matters, and how it addresses their specific error (2-3 sentences)
-3. **Resources:** 1-2 specific learning resources (prefer real URLs to articles, tutorials, videos, or practice materials; if URLs aren't available, use descriptive resource names)
+1. **Title:** Brief, actionable title (5-8 words) that clearly states what to do, using language appropriate for the quiz's style
+2. **Explanation:** What to learn, why it matters, and how it addresses their specific error (2-3 sentences), written in a tone matching the quiz's style
+3. **Resources:** 1-2 specific learning resources (prefer real URLs to articles, tutorials, videos, or practice materials; if URLs aren't available, use descriptive resource names) that match the complexity level and language
 
 **Guidelines:**
 - Prioritize suggestions that directly address the error type

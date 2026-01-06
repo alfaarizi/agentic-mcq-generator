@@ -6,7 +6,7 @@ from ..models import Question, Choice
 from .agent import Agent
 from .schemas import (
     ErrorEvaluation, PedagogicalContext, Feedback, 
-    LearningProfile, LearningSuggestion, EvaluationResult
+    LearningProfile, LearningSuggestion, EvaluationResult, QuizContext
 )
 from .tools import evaluate_error, extract_pedagogical_context, generate_feedback, generate_suggestions
 
@@ -28,9 +28,21 @@ class EvaluatorAgent(Agent):
         question: Question,
         selected: List[Choice],
         topic: str = "general",
-        learning_profile: Optional[Union[LearningProfile, Dict[str, Any]]] = None
+        learning_profile: Optional[Union[LearningProfile, Dict[str, Any]]] = None,
+        quiz_context: Optional[QuizContext] = None
     ) -> EvaluationResult:
-        """Evaluate answer and generate adaptive feedback."""
+        """Evaluate answer and generate adaptive feedback.
+        
+        Args:
+            question: The question being answered.
+            selected: User's selected choices.
+            topic: Topic of the quiz.
+            learning_profile: Optional learning profile for personalized feedback.
+            quiz_context: Optional quiz context (style, complexity, language, etc.) to adapt suggestions.
+        
+        Returns:
+            EvaluationResult with feedback, error analysis, and suggestions.
+        """
         if learning_profile is None:
             learning_profile = LearningProfile()
         elif isinstance(learning_profile, dict):
@@ -42,7 +54,9 @@ class EvaluatorAgent(Agent):
         
         feedback: Feedback = generate_feedback(question, selected, error_analysis, eval_context, agent=self)
         
-        suggestions: List[LearningSuggestion] = generate_suggestions(question, error_analysis, topic, learning_profile, eval_context, agent=self)
+        suggestions: List[LearningSuggestion] = generate_suggestions(
+            question, error_analysis, topic, learning_profile, eval_context, agent=self, quiz_context=quiz_context
+        )
         
         return EvaluationResult(
             feedback=feedback,

@@ -5,7 +5,7 @@ from typing import List, Dict, Optional
 from .models import Question, Choice, Quiz
 from .agents.evaluator import EvaluatorAgent
 from .agents.augmenter import AugmenterAgent
-from .agents.schemas import LearningProfile
+from .agents.schemas import LearningProfile, QuizContext
 
 
 class QuizAI:
@@ -62,6 +62,7 @@ class QuizAI:
         selected: List[Choice],
         topic: Optional[str] = None,
         learning_profile: Optional[LearningProfile] = None,
+        quiz_context: Optional[QuizContext] = None
     ) -> Dict[str, any]:
         """Evaluate answer using EvaluatorAgent.
 
@@ -70,6 +71,7 @@ class QuizAI:
             selected: User's selected choices.
             topic: Topic of the quiz (defaults to "general").
             learning_profile: Optional learning profile for personalized feedback.
+            quiz_context: Optional quiz context (style, complexity, language, etc.) to adapt suggestions.
 
         Returns:
             Dictionary with evaluation result including structured feedback.
@@ -79,7 +81,8 @@ class QuizAI:
             question=question,
             selected=selected,
             topic=topic or "general",
-            learning_profile=learning_profile
+            learning_profile=learning_profile,
+            quiz_context=quiz_context
         )
         
         # Convert to dict format for backward compatibility

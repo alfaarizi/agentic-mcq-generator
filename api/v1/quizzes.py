@@ -69,7 +69,8 @@ def serialize_evaluation(
     question: Question,
     selected: List[Choice],
     topic: str = "general",
-    learning_profile: Optional[Dict] = None
+    learning_profile: Optional[Dict] = None,
+    quiz_context: Optional[Any] = None
 ) -> Dict:
     """Serialize evaluation with AI-generated feedback using EvaluatorAgent."""
     is_correct = set(selected) == set(question.correct_choices)
@@ -87,7 +88,8 @@ def serialize_evaluation(
             question=question,
             selected=selected,
             topic=topic,
-            learning_profile=profile
+            learning_profile=profile,
+            quiz_context=quiz_context
         )
         
         # Extract structured feedback
@@ -357,6 +359,10 @@ async def submit_session(
     quiz = session["quiz"]
     body = await request.json()
     
+    # Extract quiz context once for all evaluations
+    from src.agents.tools.quiz_context_extractor import extract_quiz_context
+    quiz_context = extract_quiz_context(quiz, agent=ai.evaluator)
+    
     # Parse and evaluate answers
     answers = {}
     evaluations = {}
@@ -375,7 +381,8 @@ async def submit_session(
                 question, 
                 selected,
                 topic=quiz.topic,
-                learning_profile=learning_profile
+                learning_profile=learning_profile,
+                quiz_context=quiz_context
             )
             evaluations[idx] = evaluation_result
             # Update learning profile from evaluation result if available
