@@ -107,10 +107,10 @@ class Feedback:
 
 
 @dataclass
-class EvaluationResult:
+class ResponseEvaluation:
     """Result from evaluate method."""
     feedback: "Feedback"
-    error_analysis: ErrorEvaluation
+    error_evaluation: ErrorEvaluation
     learning_profile: "LearningProfile"
     suggestions: Optional[List["LearningSuggestion"]] = None
     
@@ -118,7 +118,7 @@ class EvaluationResult:
         """Convert to dictionary."""
         data = {
             "feedback": self.feedback.to_dict(),
-            "error_analysis": self.error_analysis.to_dict(),
+            "error_evaluation": self.error_evaluation.to_dict(),
             "learning_profile": self.learning_profile.to_dict(),
             "suggestions": [s.to_dict() for s in self.suggestions] if self.suggestions else None
         }
@@ -175,8 +175,8 @@ class LearningProfile:
     def from_dict(cls, data: Dict[str, Any]) -> "LearningProfile":
         """Create from dictionary."""
         topic_proficiencies = []
-        topic_stats = data.get("topic_stats", {})
-        for topic, stats in topic_stats.items():
+        topic_proficiencies_data = data.get("topic_proficiencies", {})
+        for topic, stats in topic_proficiencies_data.items():
             topic_proficiencies.append(TopicProficiency(
                 topic=topic,
                 error_counts={ErrorType(k): v for k, v in stats.items()}
@@ -185,11 +185,11 @@ class LearningProfile:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
-        topic_stats = {
+        topic_proficiencies = {
             tp.topic: {k.value: v for k, v in tp.error_counts.items()}
             for tp in self.topic_proficiencies
         }
-        return {"topic_stats": topic_stats}
+        return {"topic_proficiencies": topic_proficiencies}
 
 
 @dataclass

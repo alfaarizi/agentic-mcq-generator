@@ -14,7 +14,7 @@ def generate_suggestions(
     error_analysis: ErrorEvaluation,
     topic: str,
     learning_profile: LearningProfile,
-    eval_context: PedagogicalContext,
+    pedagogical_context: PedagogicalContext,
     agent: "Agent",
     quiz_context: Optional["QuizContext"] = None
 ) -> List[LearningSuggestion]:
@@ -99,7 +99,7 @@ Generate 1-2 brief, encouraging suggestions that:
     else:
         struggling_topics_str = ", ".join(list(learning_profile.struggling_topics.keys())[:3]) if learning_profile.struggling_topics else "None identified"
         mistake_count = sum(tp.get_error_count(err_type) for tp in learning_profile.topic_proficiencies)
-        related_concepts_str = ", ".join(eval_context.related_concepts[:3]) if eval_context.related_concepts else "None identified"
+        related_concepts_str = ", ".join(pedagogical_context.related_concepts[:3]) if pedagogical_context.related_concepts else "None identified"
         
         system_prompt = \
 f"""

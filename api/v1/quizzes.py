@@ -98,7 +98,7 @@ def serialize_evaluation(
         result = {
             "correct": is_correct,
             "feedback": feedback,
-            "error_analysis": evaluation.get("error_analysis", {}),
+            "error_evaluation": evaluation.get("error_evaluation", {}),
             "suggestions": evaluation.get("suggestions"),
             "your_answer": [c.text for c in selected],
             "correct_answers": correct_choices
@@ -116,7 +116,7 @@ def serialize_evaluation(
         return {
             "correct": is_correct,
             "feedback": None,
-            "error_analysis": None,
+            "error_evaluation": None,
             "suggestions": None,
             "your_answer": [c.text for c in selected],
             "correct_answers": correct_choices
