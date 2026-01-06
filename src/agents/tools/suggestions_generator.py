@@ -49,6 +49,19 @@ def generate_suggestions(
         "concise": "direct, minimal explanation, to-the-point"
     }
 
+    # Build adaptation requirements section if quiz_context is provided
+    adaptation_requirements = ""
+    if quiz_context:
+        style_desc = style_descriptions.get(quiz_context.profile.style, "clear, accessible language")
+        adaptation_requirements = f"""
+**Adaptation Requirements:**
+- Match the quiz's communication style ({quiz_context.profile.style}) - use {style_desc}
+- Recommend resources appropriate for {quiz_context.profile.complexity} level
+- Tailor suggestions for {quiz_context.profile.target_audience} level
+- Provide resources in {quiz_context.profile.language} language
+- Focus on {quiz_context.profile.domain} domain when relevant
+"""
+
     # Generate suggestions
     if err_type == ErrorType.CORRECT:
         system_prompt = \
@@ -72,12 +85,7 @@ Generate 1-2 brief, encouraging suggestions that:
 - Recommend resources or activities to deepen understanding
 - Maintain motivation and engagement
 
-{f"""**Adaptation Requirements:**
-- Match the quiz's communication style ({quiz_context.profile.style}) - use {style_descriptions.get(quiz_context.profile.style, "clear, accessible language")}
-- Recommend resources appropriate for {quiz_context.profile.complexity} level
-- Tailor suggestions for {quiz_context.profile.target_audience} level
-- Provide resources in {quiz_context.profile.language} language
-- Focus on {quiz_context.profile.domain} domain when relevant""" if quiz_context else ""}
+{adaptation_requirements}
 
 **Guidelines:**
 - Be specific and actionable
@@ -128,12 +136,7 @@ Generate 2-3 personalized learning suggestions that:
 - Provide concrete, actionable steps
 - Include specific, relevant learning resources
 
-{f"""**Adaptation Requirements:**
-- Match the quiz's communication style ({quiz_context.profile.style}) - use {style_descriptions.get(quiz_context.profile.style, "clear, accessible language")}
-- Recommend resources appropriate for {quiz_context.profile.complexity} level
-- Tailor suggestions for {quiz_context.profile.target_audience} level
-- Provide resources in {quiz_context.profile.language} language
-- Focus on {quiz_context.profile.domain} domain when relevant""" if quiz_context else ""}
+{adaptation_requirements}
 
 **For Each Suggestion, Include:**
 1. **Title:** Brief, actionable title (5-8 words) that clearly states what to do, using language appropriate for the quiz's style

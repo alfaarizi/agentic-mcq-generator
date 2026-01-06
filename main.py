@@ -24,6 +24,12 @@ async def root():
     return RedirectResponse(url=f"{settings.API_BASE_URL}/quizzes")
 
 
+@app.get("/health")
+async def health():
+    """Health check endpoint for Fly.io."""
+    return {"status": "ok"}
+
+
 # Include v1 routers
 app.include_router(
     quizzes.router,

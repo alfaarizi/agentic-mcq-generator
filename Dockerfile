@@ -15,8 +15,8 @@ COPY src/ ./src/
 COPY templates/ ./templates/
 COPY static/ ./static/
 
-# Create quizzes directory
-RUN mkdir -p /app/quizzes
+# Create quizzes directory (will be mounted at runtime)
+RUN mkdir -p /app/quizzes && chmod 755 /app/quizzes
 
 # Expose port
 EXPOSE 8080
