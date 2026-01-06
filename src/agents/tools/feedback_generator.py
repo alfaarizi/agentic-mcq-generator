@@ -6,14 +6,14 @@ if TYPE_CHECKING:
     from ..agent import Agent
     from ...models import Question, Choice
 
-from ..schemas import ErrorAnalysis, ErrorType, EvaluationContext, Feedback
+from ..schemas import ErrorEvaluation, ErrorType, PedagogicalContext, Feedback
 
 
 def generate_feedback(
     question: "Question",
     selected: list["Choice"],
-    error_analysis: ErrorAnalysis,
-    eval_context: EvaluationContext,
+    error_analysis: ErrorEvaluation,
+    eval_context: PedagogicalContext,
     agent: "Agent"
 ) -> Feedback:
     """Generate adaptive feedback based on error type and context.

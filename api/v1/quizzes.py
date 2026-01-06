@@ -56,7 +56,6 @@ def serialize_questions(
             data["your_answer"] = eval_data.get("your_answer", [])
             data["correct_answers"] = eval_data.get("correct_answers", [])
             data["correct"] = eval_data.get("correct", False)
-            data["explanation"] = eval_data.get("explanation", "")
             # Add structured feedback and suggestions
             if eval_data.get("feedback"):
                 data["feedback"] = eval_data["feedback"]
@@ -70,54 +69,50 @@ def serialize_evaluation(
     question: Question,
     selected: List[Choice],
     topic: str = "general",
-    learning_history: Optional[Dict] = None
+    learning_profile: Optional[Dict] = None
 ) -> Dict:
     """Serialize evaluation with AI-generated feedback using EvaluatorAgent."""
     is_correct = set(selected) == set(question.correct_choices)
     correct_choices = [c.text for c in question.correct_choices]
 
     try:
-        from src.agents.schemas import LearningHistory
+        from src.agents.schemas import LearningProfile
         
-        # Convert dict to LearningHistory if provided
-        history = None
-        if learning_history:
-            history = LearningHistory.from_dict(learning_history)
+        # Convert dict to LearningProfile if provided
+        profile = None
+        if learning_profile:
+            profile = LearningProfile.from_dict(learning_profile)
         
         evaluation = ai.evaluate_answer(
             question=question,
             selected=selected,
             topic=topic,
-            learning_history=history
+            learning_profile=profile
         )
         
         # Extract structured feedback
         feedback = evaluation.get("feedback", {})
-        explanation = evaluation.get("explanation", "")  # Backward compatible string format
         
         result = {
             "correct": is_correct,
-            "explanation": explanation,
-            "feedback": feedback,  # Structured feedback
+            "feedback": feedback,
             "error_analysis": evaluation.get("error_analysis", {}),
             "suggestions": evaluation.get("suggestions"),
             "your_answer": [c.text for c in selected],
             "correct_answers": correct_choices
         }
         
-        # Include learning_history in result for session updates
-        if evaluation.get("learning_history"):
-            result["learning_history"] = evaluation["learning_history"]
+        # Include learning_profile in result for session updates
+        if evaluation.get("learning_profile"):
+            result["learning_profile"] = evaluation["learning_profile"]
         
         return result
     except Exception as e:
         import logging
         logging.error(f"AI evaluation failed: {type(e).__name__}: {str(e)}")
-        # Fallback to simple explanation
-        result_header = "Correct!" if is_correct else "Incorrect."
+        # Fallback response
         return {
             "correct": is_correct,
-            "explanation": result_header,
             "feedback": None,
             "error_analysis": None,
             "suggestions": None,
@@ -291,7 +286,8 @@ async def start_session(
         "answers": {},
         "evaluations": {},
         "score": None,
-        "total": quiz.total_questions
+        "total": quiz.total_questions,
+        "learning_profile": {}
     }
     
     if accepts_json(request):
@@ -364,7 +360,7 @@ async def submit_session(
     # Parse and evaluate answers
     answers = {}
     evaluations = {}
-    learning_history = session.get("learning_history", {})
+    learning_profile = session.get("learning_profile", {})
     
     for idx_str, texts in body.get("answers", {}).items():
         idx = int(idx_str)
@@ -379,12 +375,12 @@ async def submit_session(
                 question, 
                 selected,
                 topic=quiz.topic,
-                learning_history=learning_history
+                learning_profile=learning_profile
             )
             evaluations[idx] = evaluation_result
-            # Update learning history from evaluation result if available
-            if evaluation_result.get("learning_history"):
-                learning_history = evaluation_result["learning_history"]
+            # Update learning profile from evaluation result if available
+            if evaluation_result.get("learning_profile"):
+                learning_profile = evaluation_result["learning_profile"]
     
     # Update session
     session["status"] = "completed"
@@ -392,7 +388,7 @@ async def submit_session(
     session["answers"] = answers
     session["evaluations"] = evaluations
     session["score"] = sum(1 for e in evaluations.values() if e.get("correct"))
-    session["learning_history"] = learning_history  # Store updated learning history
+    session["learning_profile"] = learning_profile
     
     return JSONResponse({"score": session["score"], "total": quiz.total_questions})
 

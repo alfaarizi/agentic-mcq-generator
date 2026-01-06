@@ -29,8 +29,8 @@ class ErrorType(StrEnum):
         return cls.CONCEPTUAL_MISUNDERSTANDING
 
 @dataclass
-class ErrorAnalysis:
-    """Error analysis result from error_analyzer tool.
+class ErrorEvaluation:
+    """Error evaluation result from error_evaluator tool.
     
     Attributes:
         error_type: Classification of the error type.
@@ -42,7 +42,7 @@ class ErrorAnalysis:
     reasoning: str
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ErrorAnalysis":
+    def from_dict(cls, data: Dict[str, Any]) -> "ErrorEvaluation":
         """Create from dictionary."""
         return cls(
             error_type=ErrorType(data.get("error_type", "conceptual_misunderstanding")),
@@ -64,14 +64,14 @@ class ErrorAnalysis:
 # ==============================
 
 @dataclass
-class EvaluationContext:
-    """Context information for feedback generation."""
+class PedagogicalContext:
+    """Pedagogical context information for feedback generation."""
     topic: str
     related_concepts: List[str] = field(default_factory=list)
     common_misconceptions: List[str] = field(default_factory=list)
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "EvaluationContext":
+    def from_dict(cls, data: Dict[str, Any]) -> "PedagogicalContext":
         """Create from dictionary."""
         return cls(
             topic=data.get("topic", ""),
@@ -104,37 +104,22 @@ class Feedback:
             "key_points": self.key_points,
             "hints": self.hints
         }
-    
-    def to_string(self) -> str:
-        """Convert to formatted string for backward compatibility."""
-        parts = [
-            f"<mark>{self.concept}</mark>",
-            self.explanation
-        ]
-        if self.key_points:
-            points = "\n".join(f"• {p}" for p in self.key_points)
-            parts.append(f"<u>Key Points:</u>\n{points}")
-        if self.hints:
-            hints_text = "\n".join(f"💡 {h}" for h in self.hints)
-            parts.append(f"<u>Hints:</u>\n{hints_text}")
-        return "\n\n".join(parts)
 
 
 @dataclass
 class EvaluationResult:
     """Result from evaluate method."""
     feedback: "Feedback"
-    error_analysis: ErrorAnalysis
-    learning_history: "LearningHistory"
+    error_analysis: ErrorEvaluation
+    learning_profile: "LearningProfile"
     suggestions: Optional[List["LearningSuggestion"]] = None
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         data = {
-            "explanation": self.feedback.to_string(),  # For backward compatibility
             "feedback": self.feedback.to_dict(),
             "error_analysis": self.error_analysis.to_dict(),
-            "learning_history": self.learning_history.to_dict(),
+            "learning_profile": self.learning_profile.to_dict(),
             "suggestions": [s.to_dict() for s in self.suggestions] if self.suggestions else None
         }
         return data
@@ -146,63 +131,63 @@ class EvaluationResult:
 
 
 @dataclass
-class TopicStats:
-    """Statistics for a single topic."""
+class TopicProficiency:
+    """Proficiency statistics for a single topic."""
     topic: str
-    stats: Dict[ErrorType, int] = field(default_factory=dict)
+    error_counts: Dict[ErrorType, int] = field(default_factory=dict)
     
     @property
-    def total_questions(self) -> int:
-        """Total questions answered for this topic."""
-        return sum(self.stats.values())
+    def total_answers(self) -> int:
+        """Total answers for this topic."""
+        return sum(self.error_counts.values())
     
     @property
     def correct_answers(self) -> int:
         """Number of correct answers."""
-        return self.stats.get(ErrorType.CORRECT, 0)
+        return self.error_counts.get(ErrorType.CORRECT, 0)
     
     @property
     def accuracy(self) -> float:
         """Accuracy ratio (0.0-1.0)."""
-        return self.correct_answers / self.total_questions if self.total_questions > 0 else 0.0
+        return self.correct_answers / self.total_answers if self.total_answers > 0 else 0.0
     
-    def get_count(self, error_type: ErrorType) -> int:
+    def get_error_count(self, error_type: ErrorType) -> int:
         """Get count for a specific error type."""
-        return self.stats.get(error_type, 0)
+        return self.error_counts.get(error_type, 0)
 
 
 @dataclass
-class LearningHistory:
-    """User learning performance history."""
-    topics: List[TopicStats] = field(default_factory=list)
+class LearningProfile:
+    """User learning performance profile."""
+    topic_proficiencies: List[TopicProficiency] = field(default_factory=list)
     
     @property
-    def total_questions(self) -> int:
-        """Total questions answered across all topics."""
-        return sum(ts.total_questions for ts in self.topics)
+    def total_answers(self) -> int:
+        """Total answers across all topics."""
+        return sum(tp.total_answers for tp in self.topic_proficiencies)
     
     @property
     def struggling_topics(self) -> Dict[str, float]:
         """Topics with accuracy < 0.5."""
-        return {ts.topic: ts.accuracy for ts in self.topics if ts.accuracy < 0.5}
+        return {tp.topic: tp.accuracy for tp in self.topic_proficiencies if tp.accuracy < 0.5}
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "LearningHistory":
+    def from_dict(cls, data: Dict[str, Any]) -> "LearningProfile":
         """Create from dictionary."""
-        topics = []
+        topic_proficiencies = []
         topic_stats = data.get("topic_stats", {})
         for topic, stats in topic_stats.items():
-            topics.append(TopicStats(
+            topic_proficiencies.append(TopicProficiency(
                 topic=topic,
-                stats={ErrorType(k): v for k, v in stats.items()}
+                error_counts={ErrorType(k): v for k, v in stats.items()}
             ))
-        return cls(topics=topics)
+        return cls(topic_proficiencies=topic_proficiencies)
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         topic_stats = {
-            ts.topic: {k.value: v for k, v in ts.stats.items()}
-            for ts in self.topics
+            tp.topic: {k.value: v for k, v in tp.error_counts.items()}
+            for tp in self.topic_proficiencies
         }
         return {"topic_stats": topic_stats}
 
@@ -299,13 +284,13 @@ class QuizProfile:
 
 
 @dataclass
-class QuizAnalysis:
-    """Analysis result from quiz_analyzer tool."""
+class QuizContext:
+    """Context extracted from quiz_context_extractor tool."""
     profile: QuizProfile
     covered_concepts: List[str] = field(default_factory=list)
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "QuizAnalysis":
+    def from_dict(cls, data: Dict[str, Any]) -> "QuizContext":
         """Create from dictionary."""
         return cls(
             profile=QuizProfile.from_dict(data),
@@ -322,13 +307,13 @@ class QuizAnalysis:
 
 
 @dataclass
-class CoverageAnalysis:
-    """Coverage gap analysis result from coverage_analyzer tool."""
+class TopicCoverage:
+    """Topic coverage analysis result from topic_coverage_analyzer tool."""
     gaps: List[str] = field(default_factory=list)
     suggested_concepts: List[str] = field(default_factory=list)
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "CoverageAnalysis":
+    def from_dict(cls, data: Dict[str, Any]) -> "TopicCoverage":
         """Create from dictionary."""
         return cls(
             gaps=data.get("gaps", []),
@@ -340,22 +325,4 @@ class CoverageAnalysis:
         return {
             "gaps": self.gaps,
             "suggested_concepts": self.suggested_concepts
-        }
-
-
-@dataclass
-class QuestionValidation:
-    """Validation result from question_validator tool."""
-    valid_questions: List[Question] = field(default_factory=list)
-    invalid_questions: List[Question] = field(default_factory=list)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary.
-        
-        Note: Serializes questions as text only for API responses.
-        Full Question objects are preserved in the dataclass.
-        """
-        return {
-            "valid_questions": [q.text for q in self.valid_questions],
-            "invalid_questions": [q.text for q in self.invalid_questions]
         }

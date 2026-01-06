@@ -6,25 +6,25 @@ if TYPE_CHECKING:
     from ..agent import Agent
     from ...models import Question
 
-from ..schemas import QuizAnalysis, QuestionValidation, QuizProfile
+from ..schemas import QuizContext, QuizProfile
 
 
 def validate_questions(
     new_questions: List["Question"],
     existing_questions: List["Question"],
-    quiz_analysis: QuizAnalysis,
+    quiz_context: QuizContext,
     agent: "Agent"
-) -> QuestionValidation:
+) -> List["Question"]:
     """Validate new questions for quality, consistency, and uniqueness.
     
     Args:
         new_questions: Newly generated questions to validate.
         existing_questions: Existing questions to compare against.
-        quiz_analysis: Result from quiz_analyzer tool.
+        quiz_context: Result from quiz_context_extractor tool.
         agent: Agent instance for LLM access.
     
     Returns:
-        QuestionValidation with validation results and filtered questions.
+        List of validated Question objects.
     """
     
     system_prompt = \
@@ -41,7 +41,7 @@ You are a quality assurance expert specializing in educational content validatio
     for i, q in enumerate(new_questions, 0):
         new_text.append(f"Index {i}: {q.text[:200]}")
     
-    profile = quiz_analysis.profile
+    profile = quiz_context.profile
     
     user_prompt = \
 f"""
@@ -97,11 +97,10 @@ For each new question, evaluate against these criteria:
 
 **Output Format (JSON):**
 {{
-  "valid_questions": [0, 1, 3, 4],
-  "invalid_questions": [2, 5]
+  "valid_questions": [0, 1, 3, 4]
 }}
 
-Provide the indices (0-based) of valid and invalid questions in separate arrays.
+Provide the indices (0-based) of valid questions only.
 """
     
     resp = agent._generate(
@@ -112,26 +111,16 @@ Provide the indices (0-based) of valid and invalid questions in separate arrays.
     )
     
     parsed = agent._parse_json(resp, {
-        "valid_questions": list(range(len(new_questions))),
-        "invalid_questions": []
+        "valid_questions": list(range(len(new_questions)))
     })
     
     # Filter questions based on validation
     valid_indices = parsed.get("valid_questions", [])
-    invalid_indices = parsed.get("invalid_questions", [])
     
     valid_questions = [
         new_questions[i] for i in valid_indices
         if 0 <= i < len(new_questions)
     ]
-    
-    invalid_questions = [
-        new_questions[i] for i in invalid_indices
-        if 0 <= i < len(new_questions)
-    ]
 
-    return QuestionValidation(
-        valid_questions=valid_questions,
-        invalid_questions=invalid_questions
-    )
+    return valid_questions
 

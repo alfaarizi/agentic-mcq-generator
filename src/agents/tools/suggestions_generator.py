@@ -6,38 +6,38 @@ if TYPE_CHECKING:
     from ..agent import Agent
     from ...models import Question
 
-from ..schemas import ErrorAnalysis, ErrorType, EvaluationContext, LearningHistory, LearningSuggestion, TopicStats
+from ..schemas import ErrorEvaluation, ErrorType, PedagogicalContext, LearningProfile, LearningSuggestion, TopicProficiency
 
 
 def generate_suggestions(
     question: "Question",
-    error_analysis: ErrorAnalysis,
+    error_analysis: ErrorEvaluation,
     topic: str,
-    learning_history: LearningHistory,
-    eval_context: EvaluationContext,
+    learning_profile: LearningProfile,
+    eval_context: PedagogicalContext,
     agent: "Agent"
 ) -> List[LearningSuggestion]:
-    """Generate AI-powered learning suggestions and update learning history.
+    """Generate AI-powered learning suggestions and update learning profile.
     
     Args:
         question: The question answered.
         error_analysis: Error analysis result.
         topic: Topic of the quiz.
-        learning_history: Current user history (modified in place).
+        learning_profile: Current user learning profile (modified in place).
         eval_context: Context information.
         agent: Agent instance for LLM access.
     
     Returns:
-        List of AI-generated learning suggestions. History is updated in place.
+        List of AI-generated learning suggestions. Profile is updated in place.
     """
     err_type = error_analysis.error_type
     
-    # Update learning history
-    topic_entry = next((ts for ts in learning_history.topics if ts.topic == topic), None)
+    # Update learning profile
+    topic_entry = next((tp for tp in learning_profile.topic_proficiencies if tp.topic == topic), None)
     if topic_entry is None:
-        topic_entry = TopicStats(topic=topic)
-        learning_history.topics.append(topic_entry)
-    topic_entry.stats[err_type] = topic_entry.stats.get(err_type, 0) + 1
+        topic_entry = TopicProficiency(topic=topic)
+        learning_profile.topic_proficiencies.append(topic_entry)
+    topic_entry.error_counts[err_type] = topic_entry.error_counts.get(err_type, 0) + 1
     
     # Generate suggestions
     if err_type == ErrorType.CORRECT:
@@ -80,8 +80,8 @@ Generate 1-2 brief, encouraging suggestions that:
 }}
 """
     else:
-        struggling_topics_str = ", ".join(list(learning_history.struggling_topics.keys())[:3]) if learning_history.struggling_topics else "None identified"
-        mistake_count = sum(ts.get_count(err_type) for ts in learning_history.topics)
+        struggling_topics_str = ", ".join(list(learning_profile.struggling_topics.keys())[:3]) if learning_profile.struggling_topics else "None identified"
+        mistake_count = sum(tp.get_error_count(err_type) for tp in learning_profile.topic_proficiencies)
         related_concepts_str = ", ".join(eval_context.related_concepts[:3]) if eval_context.related_concepts else "None identified"
         
         system_prompt = \

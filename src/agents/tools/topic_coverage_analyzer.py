@@ -1,4 +1,4 @@
-"""Tool for analyzing quiz coverage gaps and planning additional questions."""
+"""Tool for analyzing topic coverage gaps and planning additional questions."""
 
 from typing import TYPE_CHECKING
 
@@ -6,25 +6,25 @@ if TYPE_CHECKING:
     from ..agent import Agent
     from ...models import Quiz
 
-from ..schemas import QuizAnalysis, CoverageAnalysis, QuizProfile
+from ..schemas import QuizContext, TopicCoverage, QuizProfile
 
 
-def analyze_coverage(
+def analyze_topic_coverage(
     quiz: "Quiz",
-    quiz_analysis: QuizAnalysis,
+    quiz_context: QuizContext,
     agent: "Agent",
     target_count: int = 15
-) -> CoverageAnalysis:
-    """Analyze quiz coverage gaps and plan additional questions.
+) -> TopicCoverage:
+    """Analyze topic coverage gaps and plan additional questions.
     
     Args:
         quiz: The existing quiz.
-        quiz_analysis: Result from quiz_analyzer tool.
+        quiz_context: Result from quiz_context_extractor tool.
         agent: Agent instance for LLM access.
         target_count: Target number of additional questions to generate.
     
     Returns:
-        CoverageAnalysis with gap analysis and question generation plan.
+        TopicCoverage with gap analysis and question generation plan.
     """
     
     system_prompt = \
@@ -32,10 +32,10 @@ f"""
 You are an expert curriculum designer and educational content strategist specializing in knowledge gap analysis and comprehensive learning coverage. Your expertise includes identifying missing concepts, planning question distribution, ensuring balanced topic coverage, and recommending specific learning objectives for assessment. You analyze existing content systematically to identify opportunities for educational enhancement.
 """
     
-    covered_concepts = ", ".join(quiz_analysis.covered_concepts[:10])
+    covered_concepts = ", ".join(quiz_context.covered_concepts[:10])
     topic = quiz.topic
     existing_count = len(quiz.questions)
-    profile = quiz_analysis.profile
+    profile = quiz_context.profile
     
     user_prompt = \
 f"""
@@ -98,5 +98,5 @@ Analyze the quiz systematically to identify gaps and opportunities:
         "suggested_concepts": []
     })
     
-    return CoverageAnalysis.from_dict(parsed)
+    return TopicCoverage.from_dict(parsed)
 

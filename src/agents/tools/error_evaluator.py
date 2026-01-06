@@ -1,4 +1,4 @@
-"""Tool for analyzing answer errors and classifying error types."""
+"""Tool for evaluating answer errors and classifying error types."""
 
 from typing import TYPE_CHECKING
 
@@ -6,14 +6,14 @@ if TYPE_CHECKING:
     from ..agent import Agent
     from ...models import Question, Choice
 
-from ..schemas import ErrorAnalysis, ErrorType
+from ..schemas import ErrorEvaluation, ErrorType
 
 
-def analyze_error(
+def evaluate_error(
     question: "Question",
     selected: list["Choice"],
     agent: "Agent"
-) -> ErrorAnalysis:
+) -> ErrorEvaluation:
     """Analyze error type in student answers.
     
     Args:
@@ -26,7 +26,7 @@ def analyze_error(
     """
     correct = question.correct_choices
     if set(selected) == set(correct):
-        return ErrorAnalysis(
+        return ErrorEvaluation(
             error_type=ErrorType.CORRECT,
             confidence=1.0,
             reasoning="Exact match"
@@ -80,5 +80,5 @@ f"""
         "confidence": 0.5,
         "reasoning": "Unable to parse"
     })
-    return ErrorAnalysis.from_dict(result_dict)
+    return ErrorEvaluation.from_dict(result_dict)
 

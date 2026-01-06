@@ -1,4 +1,4 @@
-"""Tool for gathering context for personalized feedback."""
+"""Tool for extracting pedagogical context for personalized feedback."""
 
 from typing import TYPE_CHECKING
 
@@ -6,27 +6,27 @@ if TYPE_CHECKING:
     from ..agent import Agent
     from ...models import Question
 
-from ..schemas import ErrorAnalysis, ErrorType, EvaluationContext, LearningHistory
+from ..schemas import ErrorEvaluation, ErrorType, PedagogicalContext, LearningProfile
 
 
-def gather_context(
+def extract_pedagogical_context(
     question: "Question",
-    error_analysis: ErrorAnalysis,
+    error_analysis: ErrorEvaluation,
     topic: str,
-    history: LearningHistory,
+    learning_profile: LearningProfile,
     agent: "Agent"
-) -> EvaluationContext:
-    """Gather context for feedback generation.
+) -> PedagogicalContext:
+    """Extract pedagogical context for feedback generation.
     
     Args:
         question: The question being answered.
-        error_analysis: Error analysis result.
+        error_analysis: Error evaluation result.
         topic: Topic of the quiz.
-        history: User's performance history.
+        learning_profile: User's learning profile.
         agent: Agent instance for LLM access.
     
     Returns:
-        EvaluationContext with context information.
+        PedagogicalContext with context information.
     """
     
     system_prompt = \
@@ -71,7 +71,7 @@ f"""
     
     parsed = agent._parse_json(resp, {})
     
-    return EvaluationContext(
+    return PedagogicalContext(
         topic=topic,
         related_concepts=parsed.get("related_concepts", []),
         common_misconceptions=parsed.get("common_misconceptions", [])

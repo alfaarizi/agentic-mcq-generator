@@ -1,4 +1,4 @@
-"""Tool for analyzing existing quiz structure, style, and characteristics."""
+"""Tool for extracting context from existing quiz structure, style, and characteristics."""
 
 from typing import TYPE_CHECKING
 
@@ -6,21 +6,21 @@ if TYPE_CHECKING:
     from ..agent import Agent
     from ...models import Quiz
 
-from ..schemas import QuizAnalysis
+from ..schemas import QuizContext
 
 
-def analyze_quiz(
+def extract_quiz_context(
     quiz: "Quiz",
     agent: "Agent"
-) -> QuizAnalysis:
-    """Analyze existing quiz to extract style, complexity, and characteristics.
+) -> QuizContext:
+    """Extract context from existing quiz to determine style, complexity, and characteristics.
     
     Args:
-        quiz: The existing quiz to analyze.
+        quiz: The existing quiz to extract context from.
         agent: Agent instance for LLM access.
     
     Returns:
-        QuizAnalysis with style, complexity, language, and other characteristics.
+        QuizContext with style, complexity, language, and other characteristics.
     """
     system_prompt = \
 f"""You are an expert educational assessment analyst specializing in quiz design, content analysis, and curriculum evaluation. Your expertise includes identifying question styles, complexity levels, language patterns, educational characteristics, and learning objectives. You analyze educational content with precision and provide comprehensive assessments that inform content generation strategies.
@@ -106,5 +106,5 @@ Analyze the quiz systematically and provide the following characteristics:
         "target_audience": "undergraduate"
     })
     
-    return QuizAnalysis.from_dict(parsed)
+    return QuizContext.from_dict(parsed)
 

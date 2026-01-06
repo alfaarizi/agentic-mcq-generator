@@ -6,9 +6,9 @@ from typing import Dict, Any, List, Optional, Callable
 from ..models import Quiz, Question
 from .agent import Agent
 from .schemas import (
-    QuizAnalysis, CoverageAnalysis, QuestionValidation
+    QuizContext, TopicCoverage
 )
-from .tools import analyze_quiz, analyze_coverage, generate_questions, validate_questions
+from .tools import extract_quiz_context, analyze_topic_coverage, generate_questions, validate_questions
 
 
 class AugmenterAgent(Agent):
@@ -19,7 +19,7 @@ class AugmenterAgent(Agent):
         model: str = "google/gemini-2.5-flash",
         tools: Optional[List[Callable]] = None
     ) -> None:
-        default_tools = [analyze_quiz, analyze_coverage, generate_questions, validate_questions]
+        default_tools = [extract_quiz_context, analyze_topic_coverage, generate_questions, validate_questions]
         super().__init__(model, tools=tools or default_tools)
     
     
@@ -30,25 +30,25 @@ class AugmenterAgent(Agent):
     ) -> List[Question]:
         """Augment quiz with additional questions matching existing style."""
         
-        quiz_analysis: QuizAnalysis = analyze_quiz(quiz, agent=self)
+        quiz_context: QuizContext = extract_quiz_context(quiz, agent=self)
         
-        coverage_analysis: CoverageAnalysis = analyze_coverage(quiz, quiz_analysis, agent=self, target_count=target_count)
+        topic_coverage: TopicCoverage = analyze_topic_coverage(quiz, quiz_context, agent=self, target_count=target_count)
         
         new_questions: List[Question] = generate_questions(
             topic=quiz.topic,
             samples=quiz.questions[:5], # Use first 5 as samples
             count=target_count,
-            quiz_analysis=quiz_analysis,
-            coverage_analysis=coverage_analysis,
+            quiz_context=quiz_context,
+            topic_coverage=topic_coverage,
             agent=self
         )
         
-        question_validation: QuestionValidation = validate_questions(
+        validated_questions: List[Question] = validate_questions(
             new_questions=new_questions,
             existing_questions=quiz.questions,
-            quiz_analysis=quiz_analysis,
+            quiz_context=quiz_context,
             agent=self
         )
         
-        return question_validation.valid_questions
+        return validated_questions
 

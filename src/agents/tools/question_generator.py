@@ -7,15 +7,15 @@ if TYPE_CHECKING:
     from ...models import Question
 
 from ...parser import parse_questions
-from ..schemas import QuizAnalysis, CoverageAnalysis, QuizProfile
+from ..schemas import QuizContext, TopicCoverage, QuizProfile
 
 
 def generate_questions(
     topic: str,
     samples: List["Question"],
     count: int,
-    quiz_analysis: QuizAnalysis,
-    coverage_analysis: CoverageAnalysis,
+    quiz_context: QuizContext,
+    topic_coverage: TopicCoverage,
     agent: "Agent"
 ) -> List["Question"]:
     """Generate questions matching existing quiz style and complexity.
@@ -24,8 +24,8 @@ def generate_questions(
         topic: The quiz topic.
         samples: Sample questions to match style from.
         count: Number of questions to generate.
-        quiz_analysis: Result from quiz_analyzer tool.
-        coverage_analysis: Result from coverage_analyzer tool.
+        quiz_context: Result from quiz_context_extractor tool.
+        topic_coverage: Result from topic_coverage_analyzer tool.
         agent: Agent instance for LLM access.
     
     Returns:
@@ -49,10 +49,10 @@ You are a master educator and subject matter expert specializing in quiz design,
     examples = "\n\n".join(sample_text)
     
     # Extract relevant context
-    profile = quiz_analysis.profile
-    covered_concepts = ", ".join(quiz_analysis.covered_concepts[:5]) or "Various topics"
-    gaps = ", ".join(coverage_analysis.gaps[:5]) or "None specifically identified"
-    suggested_concepts = ", ".join(coverage_analysis.suggested_concepts[:5]) or "Continue existing coverage patterns"
+    profile = quiz_context.profile
+    covered_concepts = ", ".join(quiz_context.covered_concepts[:5]) or "Various topics"
+    gaps = ", ".join(topic_coverage.gaps[:5]) or "None specifically identified"
+    suggested_concepts = ", ".join(topic_coverage.suggested_concepts[:5]) or "Continue existing coverage patterns"
     
     user_prompt = \
 f"""

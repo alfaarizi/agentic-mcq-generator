@@ -16,12 +16,6 @@
         @media (min-width: 768px) {
             .submit-retake-btn { width: calc(5 * 2.5rem + 4 * 0.5rem); }
         }
-        .explanation-content p { margin-bottom: 0.5rem; }
-        .explanation-content ul, .explanation-content ol { margin-left: 1.25rem; margin-bottom: 0.5rem; }
-        .explanation-content li { margin-bottom: 0.25rem; }
-        .explanation-content strong { font-weight: bold; }
-        .explanation-content em { font-style: italic; }
-        .explanation-content code { background-color: #e5e7eb; padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-family: monospace; }
     </style>
 </head>
 <body class="bg-white text-gray-800 max-w-6xl mx-auto p-4 md:p-8" 
@@ -154,11 +148,6 @@
                         </ul>
                     </div>
                     {% endif %}
-                </div>
-                {% elif question.explanation %}
-                {# Fallback to markdown explanation if structured feedback not available #}
-                <div class="border border-gray-400 bg-gray-50 p-3 mt-3 explanation-content" id="explanation-{{ q_idx }}">
-                    <script type="text/template" class="markdown-source">{{ question.explanation }}</script>
                 </div>
                 {% endif %}
                 {% if question.suggestions %}
@@ -412,20 +401,6 @@
             if (STATUS === 'completed') {
                 const retakeBtn = document.getElementById('retakeBtn');
                 if (retakeBtn) retakeBtn.addEventListener('click', retakeQuiz);
-
-                // Render markdown explanations
-                document.querySelectorAll('.explanation-content').forEach(el => {
-                    const template = el.querySelector('.markdown-source');
-                    if (template) {
-                        const textarea = document.createElement('textarea');
-                        textarea.innerHTML = template.textContent;
-                        const markdown = textarea.value;
-                        template.remove();
-                        // Configure marked to allow HTML
-                        marked.setOptions({ breaks: true });
-                        el.innerHTML = marked.parse(markdown);
-                    }
-                });
             }
         });
     </script>
