@@ -250,6 +250,13 @@
             const activeTab = document.getElementById(`tab-${tabName}`);
             activeTab.classList.add('bg-white', 'border-b-2', 'border-gray-800', 'text-gray-800');
             activeTab.classList.remove('text-gray-600');
+
+            // Persist active tab selection
+            try {
+                localStorage.setItem('quizzes_active_tab', tabName);
+            } catch (e) {
+                console.warn('Could not persist active tab:', e);
+            }
         }
 
         async function copyQuizLink(e, slug) {
@@ -287,6 +294,15 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Restore last active tab, default to 'generate'
+            try {
+                const activeTab = localStorage.getItem('quizzes_active_tab') || 'generate';
+                const hasActiveTab = document.getElementById(`tab-${activeTab}`) && document.getElementById(`content-${activeTab}`);
+                switchTab(hasActiveTab ? activeTab : 'generate');
+            } catch (e) {
+                switchTab('generate');
+            }
+
             document.querySelectorAll('[data-slug]').forEach(el => {
                 const slug = el.dataset.slug;
                 const sessionId = localStorage.getItem('quiz_' + slug);
