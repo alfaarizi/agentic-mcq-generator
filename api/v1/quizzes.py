@@ -596,9 +596,29 @@ async def set_language(
     """Set user's preferred language.
     
     Args:
-        lang: Language code (en, hu, de, id)
+        lang: Language code. Supported languages:
+            - en: English
+            - hu: Hungarian
+            - de: German
+            - id: Indonesian (Bahasa)
+            - zh: Mandarin Chinese
+            - hi: Hindi
+            - es: Spanish
+            - fr: French
+            - ar: Arabic
+            - ru: Russian
+            - ko: Korean
+            - ja: Japanese
+            - it: Italian
+            - rm: Romansh
+            - ur: Urdu
+            - bn: Bengali
+            - th: Thai
+            - lo: Lao
+            - mn: Mongolian
     """
-    if lang not in ["en", "hu", "de", "id"]:
+    valid_languages = ["en", "hu", "de", "id", "zh", "hi", "es", "fr", "ar", "ru", "ko", "ja", "it", "rm", "ur", "bn", "th", "lo", "mn"]
+    if lang not in valid_languages:
         raise HTTPException(status_code=400, detail="Invalid language code")
     
     # Get or create session ID

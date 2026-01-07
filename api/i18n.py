@@ -15,7 +15,7 @@ def load_translations(lang: str = "en") -> Dict[str, str]:
         return _translations[lang]
     
     # Validate and default to English if invalid
-    if lang not in ["en", "hu", "de", "id"]:
+    if lang not in ["en", "hu", "de", "id", "zh", "hi", "es", "fr", "ar", "ru", "ko", "ja", "it", "rm", "ur", "bn", "th", "lo", "mn"]:
         lang = "en"
     
     translation_file = _translations_dir / f"{lang}.json"

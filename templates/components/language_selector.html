@@ -1,0 +1,175 @@
+<style>
+    /* Language dropdown */
+    .lang-dropdown {
+        display: none;
+    }
+    
+    .lang-dropdown.active {
+        display: block;
+    }
+    
+    .lang-chevron {
+        transition: transform 0.2s ease;
+    }
+    
+    .lang-dropdown.active ~ button .lang-chevron,
+    .lang-dropdown.active + button .lang-chevron {
+        transform: rotate(180deg);
+    }
+    
+    /* Language dropdown scrollbar - matches quiz-list style exactly */
+    .lang-dropdown-content {
+        max-height: 480px;
+        overflow-y: scroll;
+    }
+    
+    .lang-dropdown-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .lang-dropdown-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    .lang-dropdown-content::-webkit-scrollbar-thumb {
+        background: #ccc;
+    }
+</style>
+
+<div class="relative" style="z-index: 50;">
+    <button onclick="toggleLangDropdown()" 
+            class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+        </svg>
+        <span class="text-sm font-medium text-gray-700">{{ lang|upper }}</span>
+        <svg class="w-4 h-4 text-gray-500 lang-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+    </button>
+
+    <div id="langDropdown" class="lang-dropdown absolute right-0 mt-2 w-48 z-50">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-xl lang-dropdown-content">
+            <button onclick="selectLanguage('en')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'en' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">English</span>
+                <span class="text-xs {% if lang == 'en' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">EN</span>
+            </button>
+            <button onclick="selectLanguage('ar')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'ar' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">العربية</span>
+                <span class="text-xs {% if lang == 'ar' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">AR</span>
+            </button>
+            <button onclick="selectLanguage('bn')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'bn' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">বাংলা</span>
+                <span class="text-xs {% if lang == 'bn' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">BN</span>
+            </button>
+            <button onclick="selectLanguage('zh')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'zh' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">中文</span>
+                <span class="text-xs {% if lang == 'zh' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">ZH</span>
+            </button>
+            <button onclick="selectLanguage('fr')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'fr' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">Français</span>
+                <span class="text-xs {% if lang == 'fr' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">FR</span>
+            </button>
+            <button onclick="selectLanguage('de')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'de' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">Deutsch</span>
+                <span class="text-xs {% if lang == 'de' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">DE</span>
+            </button>
+            <button onclick="selectLanguage('hi')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'hi' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">हिन्दी</span>
+                <span class="text-xs {% if lang == 'hi' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">HI</span>
+            </button>
+            <button onclick="selectLanguage('id')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'id' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">Bahasa</span>
+                <span class="text-xs {% if lang == 'id' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">ID</span>
+            </button>
+            <button onclick="selectLanguage('it')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'it' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">Italiano</span>
+                <span class="text-xs {% if lang == 'it' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">IT</span>
+            </button>
+            <button onclick="selectLanguage('ja')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'ja' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">日本語</span>
+                <span class="text-xs {% if lang == 'ja' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">JA</span>
+            </button>
+            <button onclick="selectLanguage('ko')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'ko' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">한국어</span>
+                <span class="text-xs {% if lang == 'ko' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">KO</span>
+            </button>
+            <button onclick="selectLanguage('lo')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'lo' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">ລາວ</span>
+                <span class="text-xs {% if lang == 'lo' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">LO</span>
+            </button>
+            <button onclick="selectLanguage('mn')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'mn' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">Монгол</span>
+                <span class="text-xs {% if lang == 'mn' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">MN</span>
+            </button>
+            <button onclick="selectLanguage('rm')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'rm' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">Rumantsch</span>
+                <span class="text-xs {% if lang == 'rm' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">RM</span>
+            </button>
+            <button onclick="selectLanguage('ru')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'ru' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">Русский</span>
+                <span class="text-xs {% if lang == 'ru' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">RU</span>
+            </button>
+            <button onclick="selectLanguage('es')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'es' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">Español</span>
+                <span class="text-xs {% if lang == 'es' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">ES</span>
+            </button>
+            <button onclick="selectLanguage('th')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'th' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">ไทย</span>
+                <span class="text-xs {% if lang == 'th' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">TH</span>
+            </button>
+            <button onclick="selectLanguage('ur')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors border-b border-gray-100 flex items-center justify-between {% if lang == 'ur' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">اردو</span>
+                <span class="text-xs {% if lang == 'ur' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">UR</span>
+            </button>
+            <button onclick="selectLanguage('hu')" class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors flex items-center justify-between {% if lang == 'hu' %}bg-blue-50{% endif %}">
+                <span class="text-gray-900 font-medium">Magyar</span>
+                <span class="text-xs {% if lang == 'hu' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} px-2 py-1 rounded">HU</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Language dropdown toggle
+    function toggleLangDropdown() {
+        const dropdown = document.getElementById('langDropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('active');
+        }
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const langSelector = event.target.closest('.relative[style*="z-index: 50"]');
+        const dropdown = document.getElementById('langDropdown');
+        if (!langSelector && dropdown && dropdown.classList.contains('active')) {
+            dropdown.classList.remove('active');
+        }
+    });
+    
+    // Select language
+    function selectLanguage(langCode) {
+        const dropdown = document.getElementById('langDropdown');
+        if (dropdown) {
+            dropdown.classList.remove('active');
+        }
+        
+        // Set language via API
+        fetch(`{{ api_base_url }}/quizzes/language?lang=${langCode}`, {
+            method: 'POST',
+            credentials: 'include'
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                console.error('Failed to set language');
+            }
+        })
+        .catch(error => {
+            console.error('Error setting language:', error);
+        });
+    }
+</script>
+
