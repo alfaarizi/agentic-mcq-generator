@@ -12,6 +12,15 @@
         .quiz-list::-webkit-scrollbar { width: 8px; }
         .quiz-list::-webkit-scrollbar-track { background: #f1f1f1; }
         .quiz-list::-webkit-scrollbar-thumb { background: #888; }
+        .tab-content-container::-webkit-scrollbar { width: 8px; }
+        .tab-content-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .tab-content-container::-webkit-scrollbar-thumb { background: #ccc; }
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: #f1f1f1; }
+        textarea::-webkit-scrollbar-thumb { background: #ccc; }
+        select::-webkit-scrollbar { width: 8px; }
+        select::-webkit-scrollbar-track { background: #f1f1f1; }
+        select::-webkit-scrollbar-thumb { background: #ccc; }
     </style>
 </head>
 <body class="bg-white text-gray-800 max-w-full md:max-w-6xl mx-auto p-4 md:p-8">
@@ -37,7 +46,7 @@
                 <div class="flex-1 overflow-y-auto md:pr-1 md:pl-2 quiz-list p-4 bg-gray-100 {% if not quizzes %}flex items-center justify-center{% endif %}">
             {% if quizzes %}
             {% for quiz in quizzes %}
-                    <div class="border border-gray-300 bg-white p-5 mb-4 mx-2 group relative" data-slug="{{ quiz.slug }}">
+                    <div class="border border-gray-300 bg-white p-5 mb-4 mx-2 group relative" data-slug="{{ quiz.slug }}" data-is-context-cached="{{ quiz.is_context_cached|lower }}">
                 <button onclick="copyQuizLink(event, '{{ quiz.slug }}')" class="absolute left-2 top-7 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-all" title="Copy link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
@@ -82,7 +91,7 @@
         <hr class="md:hidden border-gray-400">
 
         <!-- Right: Fixed Action Section with Tabs -->
-        <div class="w-full md:w-96 md:flex-shrink-0 md:flex md:flex-col">
+        <div class="w-full md:w-96 md:flex-shrink-0 md:flex md:flex-col md:max-h-[calc(100vh-200px)]">
             <div class="border border-gray-300 md:flex md:flex-col md:min-h-[calc(100vh-200px)]">
                 <!-- Tab Navigation -->
                 <div class="flex border-b border-gray-300 bg-gray-50">
@@ -101,7 +110,7 @@
                 </div>
 
                 <!-- Tab Content -->
-                <div class="p-4 flex-1 overflow-y-auto">
+                <div class="flex-1 overflow-y-auto overflow-x-hidden tab-content-container p-4">
                     <!-- Generate Quiz Tab -->
                     <div id="content-generate" class="tab-content">
                         <h3 class="text-xl font-semibold mb-3">{{ t.generate_quiz }}</h3>
@@ -112,8 +121,8 @@
                                     name="topic" 
                                     placeholder="{{ t.topic_description_placeholder }}" 
                                     required 
-                                    class="w-full p-2 border border-gray-300 text-base resize-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800" 
-                                    style="height: 423px;"
+                                    class="w-full p-2 border border-gray-300 text-base resize-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800 overflow-y-auto" 
+                                    style="height: 165px;"
                                     aria-label="Topic description for quiz generation"
                                 ></textarea>
                             </div>
@@ -194,7 +203,7 @@
                         </form>
                         
                         <!-- Separator -->
-                        <div class="my-4 flex items-center">
+                        <div class="my-2 flex items-center">
                             <div class="flex-1 border-t border-gray-300"></div>
                             <span class="px-3 text-sm text-gray-500">{{ t.get('or', 'or') }}</span>
                             <div class="flex-1 border-t border-gray-300"></div>
@@ -220,8 +229,8 @@
                                 name="content" 
                                 placeholder="{{ t.create_quiz_placeholder }}" 
                                 required 
-                                class="w-full p-2 border border-gray-300 text-base resize-none" 
-                                style="height: 425px;"
+                                class="w-full p-2 border border-gray-300 text-base resize-none overflow-y-auto" 
+                                style="height: 350px;"
                             ></textarea>
                             <button type="submit" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">{{ t.create }}</button>
                         </form>
@@ -249,8 +258,8 @@
                                     id="editQuizContent" 
                                     name="content" 
                                     required 
-                                    class="w-full p-2 border border-gray-300 text-base resize-none" 
-                                    style="height: 425px;"
+                                    class="w-full p-2 border border-gray-300 text-base resize-none overflow-y-auto" 
+                                    style="height: 350px;"
                                     readonly
                                 ></textarea>
                             </div>
@@ -305,6 +314,7 @@
             delete_failed_detail: '{{ t.delete_failed_detail }}',
             delete_failed_retry: '{{ t.delete_failed_retry }}',
             deleting_quiz: '{{ t.deleting_quiz }}',
+            loading_quiz: '{{ t.loading_quiz }}',
             ok: '{{ t.ok }}',
             cancel: '{{ t.cancel }}',
             processing: '{{ t.processing }}',
@@ -384,7 +394,7 @@
                 }, 1500);
             } catch (err) {
                 console.error('Failed to copy:', err);
-                await showModal('Copy Failed', 'Failed to copy link. Please copy manually: ' + url);
+                await showModal(translations.copy_failed, translations.copy_failed_detail.replace('{}', url));
             }
         }
 
@@ -408,10 +418,19 @@
                 
                 title.className += ' text-blue-700 cursor-pointer';
                 title.onclick = () => {
-                    const url = isCompleted 
-                        ? `${API}/quizzes/${slug}?session_id=${sessionId}`
-                        : `${API}/quizzes/${slug}`;
-                    location.href = url;
+                    // Check if quiz context is cached
+                    const isContextCached = el.dataset.isContextCached === 'true';                    
+                    if (!isContextCached) {
+                        showLoader(translations.loading_quiz + '..');
+                    }
+                    
+                    // Small delay to ensure spinner is visible if shown, then navigate
+                    setTimeout(() => {
+                        const url = isCompleted 
+                            ? `${API}/quizzes/${slug}?session_id=${sessionId}`
+                            : `${API}/quizzes/${slug}`;
+                        location.href = url;
+                    }, 100);
                 };
                 
                 const titleText = title.textContent;
@@ -455,7 +474,7 @@
                             editQuizContent.readOnly = false;
                         } else {
                             const err = await res.json();
-                            const errorMsg = err.detail || 'Unknown error';
+                            const errorMsg = err.detail || translations.unknown_error;
                             await showModal(translations.load_failed, translations.load_failed_detail.replace('{}', errorMsg));
                             editQuizContent.value = '';
                             editQuizContent.readOnly = true;
@@ -505,7 +524,7 @@
                             location.reload();
                         } else {
                             const err = await res.json();
-                            const errorMsg = err.detail === 'No quizzes found in content' ? translations.no_quizzes_found : (err.detail || 'Unknown error');
+                            const errorMsg = err.detail === 'No quizzes found in content' ? translations.no_quizzes_found : (err.detail || translations.unknown_error);
                             await showModal(translations.save_failed, translations.save_failed_detail.replace('{}', errorMsg));
                         }
                     } catch (e) {
@@ -548,7 +567,7 @@
                                     location.reload();
                                 } else {
                                     const err = await res.json();
-                                    const errorMsg = err.detail || 'Unknown error';
+                                    const errorMsg = err.detail || translations.unknown_error;
                                     await showModal(translations.delete_failed, translations.delete_failed_detail.replace('{}', errorMsg));
                                 }
                             } catch (e) {
@@ -592,7 +611,7 @@
                     localStorage.removeItem('quiz_' + slug + '_score');
                     location.href = `${API}/quizzes/${slug}?session_id=${data.session_id}`;
                 } else {
-                    await showModal('Start Failed', 'Failed to start quiz. Please try again.');
+                    await showModal(translations.start_failed, translations.start_failed_detail);
                 }
             } catch (e) {
                 console.error(e);
@@ -620,12 +639,12 @@
                             location.reload();
                         } else {
                             const err = await res.json();
-                            await showModal('Generation Failed', 'Failed to generate questions: ' + (err.detail || 'Unknown error'));
+                            await showModal(translations.generation_failed, translations.generation_failed_detail.replace('{}', err.detail || translations.error));
                         }
                     } catch (e) {
                         console.error(e);
                         hideLoader();
-                        await showModal('Generation Failed', 'Failed to generate questions. Please try again.');
+                        await showModal(translations.generation_failed, translations.generation_failed_retry);
                     }
                 }
             );
@@ -639,7 +658,7 @@
             const targetAudience = document.getElementById('targetAudienceSelect').value;
             
             if (!topic) {
-                await showModal('Validation Error', 'Please enter a topic description.');
+                await showModal(translations.validation_error, translations.topic_description_required);
                 return;
             }
             
@@ -668,14 +687,14 @@
                     location.reload();
                 } else {
                     const err = await res.json();
-                    await showModal('Generation Failed', 'Failed to generate quiz: ' + (err.detail || 'Unknown error'));
+                    await showModal(translations.generation_failed, translations.generation_quiz_failed_detail.replace('{}', err.detail || translations.error));
                 }
             } catch (e) {
                 const submitBtn = e.target.querySelector('button[type="submit"]');
                 hideLoader();
                 submitBtn.disabled = false;
                 console.error(e);
-                await showModal('Generation Failed', 'Failed to generate quiz. Please try again.');
+                await showModal(translations.generation_failed, translations.generation_quiz_failed_retry);
             }
         });
         
@@ -693,7 +712,7 @@
                     quizContent.value = content;
                 } catch (err) {
                     console.error('Failed to read file:', err);
-                    await showModal('Upload Failed', 'Failed to read file. Please try again.');
+                    await showModal(translations.upload_failed, translations.upload_failed_retry);
                 }
                 
                 // Reset the input so the same file can be selected again
@@ -716,11 +735,11 @@
                     location.reload();
                 } else {
                     const err = await res.json();
-                    await showModal('Creation Failed', 'Failed to create quiz: ' + (err.detail || 'Unknown error'));
+                    await showModal(translations.creation_failed, translations.creation_failed_detail.replace('{}', err.detail || translations.error));
                 }
             } catch (e) {
                 console.error(e);
-                await showModal('Creation Failed', 'Failed to create quiz. Please try again.');
+                await showModal(translations.creation_failed, translations.creation_failed_retry);
             }
         });
         
@@ -740,11 +759,11 @@
                             location.reload();
                         } else {
                             const err = await res.json();
-                            await showModal('Reset Failed', 'Failed to reset quizzes: ' + (err.detail || 'Unknown error'));
+                            await showModal(translations.reset_failed, translations.reset_failed_detail.replace('{}', err.detail || translations.error));
                         }
                     } catch (e) {
                         console.error(e);
-                        await showModal('Reset Failed', 'Failed to reset quizzes. Please try again.');
+                        await showModal(translations.reset_failed, translations.reset_failed_retry);
                     }
                 }
             );

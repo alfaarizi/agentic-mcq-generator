@@ -379,17 +379,16 @@
                 } else {
                     const err = await res.json();
                     hideLoader();
-                    await showModal('Submission Failed', 'Failed to submit: ' + (err.detail || 'Unknown error'));
+                    await showModal(translations.submission_failed, translations.submission_failed_detail.replace('{}', err.detail || translations.error));
                 }
             } catch (e) {
                 console.error(e);
                 hideLoader();
-                await showModal('Submission Failed', 'Failed to submit. Please try again.');
+                await showModal(translations.submission_failed, translations.submission_failed_retry);
             }
         }
         
         async function startQuiz() {
-            showLoader('Starting quiz...');
             try {
                 const res = await fetch(`${API}/quizzes/${SLUG}/sessions`, {
                     method: 'POST',
@@ -402,12 +401,10 @@
                     localStorage.removeItem('quiz_' + SLUG + '_score');
                     location.href = `${API}/quizzes/${SLUG}?session_id=${data.session_id}`;
                 } else {
-                    hideLoader();
-                    await showModal('Start Failed', 'Failed to start. Please try again.');
+                    await showModal(translations.start_failed, translations.start_failed_retry);
                 }
             } catch (e) {
                 console.error(e);
-                hideLoader();
                 await showModal('Start Failed', 'Failed to start. Please try again.');
             }
         }
@@ -440,12 +437,12 @@
                 } else {
                     const err = await res.json();
                     hideLoader();
-                    await showModal('Generation Failed', 'Failed to generate questions: ' + (err.detail || 'Unknown error'));
+                    await showModal(translations.generation_failed, translations.generation_failed_detail.replace('{}', err.detail || translations.error));
                 }
             } catch (e) {
                 console.error(e);
                 hideLoader();
-                await showModal('Generation Failed', 'Failed to generate questions. Please try again.');
+                await showModal(translations.generation_failed, translations.generation_failed_retry);
             }
         }
         

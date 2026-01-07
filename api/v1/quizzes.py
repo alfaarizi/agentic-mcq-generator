@@ -33,17 +33,22 @@ def accepts_json(request: Request) -> bool:
     return "application/json" in accept
 
 
-def serialize_quizzes(quizzes: List[Quiz]) -> List[Dict]:
+def serialize_quizzes(
+    quizzes: List[Quiz], 
+    quiz_contexts: Optional[Dict[str, Any]] = None
+) -> List[Dict]:
     """Serialize quiz objects to API response format.
     
-    Returns a list of quiz summaries with slug, topic, question count, and time limit.
+    Returns a list of quiz summaries with slug, topic, question count, time limit, and context status.
     """
+    contexts = quiz_contexts or {}
     return [
         {
             "slug": q.slug,
             "topic": q.topic,
             "questions": q.total_questions,
-            "time_limit": q.time_limit
+            "time_limit": q.time_limit,
+            "is_context_cached": q.slug in contexts
         }
         for q in quizzes
     ]
@@ -395,10 +400,11 @@ async def generate_questions(
 @router.get("")
 async def get_quizzes(
     request: Request, 
-    storage: QuizStorage = Depends(get_storage)
+    storage: QuizStorage = Depends(get_storage),
+    quiz_contexts: Dict[str, Any] = Depends(get_quiz_contexts)
 ):
     """List all quizzes."""
-    quizzes = serialize_quizzes(storage.get_quizzes())
+    quizzes = serialize_quizzes(storage.get_quizzes(), quiz_contexts)
     lang = get_user_language(request)
     translations = load_translations(lang)
     
