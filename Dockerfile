@@ -14,6 +14,7 @@ COPY api/ ./api/
 COPY src/ ./src/
 COPY templates/ ./templates/
 COPY static/ ./static/
+COPY translations/ ./translations/
 
 # Create quizzes directory (will be mounted at runtime)
 RUN mkdir -p /app/quizzes && chmod 755 /app/quizzes

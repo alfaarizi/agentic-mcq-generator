@@ -22,11 +22,19 @@ def load_translations(lang: str = "en") -> Dict[str, str]:
     if not translation_file.exists():
         translation_file = _translations_dir / "en.json"
     
+    if not translation_file.exists():
+        # Log error but don't crash - return empty dict
+        import logging
+        logging.error(f"Translation file not found: {translation_file} (translations dir: {_translations_dir})")
+        return {}
+    
     try:
         with open(translation_file, "r", encoding="utf-8") as f:
             translations = json.load(f)
             _translations[lang] = translations
             return translations
-    except Exception:
+    except Exception as e:
+        import logging
+        logging.error(f"Error loading translation file {translation_file}: {e}")
         return {}
 
