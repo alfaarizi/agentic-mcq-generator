@@ -35,6 +35,7 @@
   "load_failed_retry": "クイズの読み込みに失敗しました。もう一度お試しください。",
   "save": "保存",
   "delete": "削除",
+  "delete_quiz": "クイズを削除",
   "reset": "リセット",
   "delete_quizzes": "クイズを削除",
   "or": "または",

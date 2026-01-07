@@ -35,6 +35,7 @@
   "load_failed_retry": "Impossibile caricare il quiz. Riprova.",
   "save": "Salva",
   "delete": "Elimina",
+  "delete_quiz": "Elimina Quiz",
   "reset": "Reimposta",
   "delete_quizzes": "Elimina Quiz",
   "or": "o",

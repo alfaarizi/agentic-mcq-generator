@@ -35,6 +35,7 @@
   "load_failed_retry": "Failed to load quiz. Please try again.",
   "save": "Save",
   "delete": "Delete",
+  "delete_quiz": "Delete Quiz",
   "reset": "Reset",
   "delete_quizzes": "Delete Quizzes",
   "or": "or",

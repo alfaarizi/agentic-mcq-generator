@@ -35,6 +35,7 @@
   "load_failed_retry": "퀴즈를 로드하지 못했습니다. 다시 시도해 주세요.",
   "save": "저장",
   "delete": "삭제",
+  "delete_quiz": "퀴즈 삭제",
   "reset": "재설정",
   "delete_quizzes": "퀴즈 삭제",
   "or": "또는",

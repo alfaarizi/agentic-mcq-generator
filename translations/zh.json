@@ -35,6 +35,7 @@
   "load_failed_retry": "加载测验失败。请重试。",
   "save": "保存",
   "delete": "删除",
+  "delete_quiz": "删除测验",
   "reset": "重置",
   "delete_quizzes": "删除测验",
   "or": "或",

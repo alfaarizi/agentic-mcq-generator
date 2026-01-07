@@ -35,6 +35,7 @@
   "load_failed_retry": "Échec du chargement du quiz. Veuillez réessayer.",
   "save": "Enregistrer",
   "delete": "Supprimer",
+  "delete_quiz": "Supprimer le Quiz",
   "reset": "Réinitialiser",
   "delete_quizzes": "Supprimer les Quiz",
   "or": "ou",

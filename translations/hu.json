@@ -35,6 +35,7 @@
   "load_failed_retry": "A kvíz betöltése sikertelen. Kérjük, próbálja újra.",
   "save": "Mentés",
   "delete": "Törlés",
+  "delete_quiz": "Kvíz törlése",
   "reset": "Visszaállítás",
   "delete_quizzes": "Kvízek törlése",
   "or": "vagy",
