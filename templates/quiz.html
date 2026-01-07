@@ -238,13 +238,14 @@
         <div class="flex-1 md:overflow-y-auto md:max-h-[calc(100vh-250px)] md:pr-1 quiz-content">
             {% for question in quiz.questions %}
             {% set q_idx = loop.index0 %}
-            {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
-            <div id="q{{ q_idx }}" class="p-5 mb-4 {{ 'border-2 border-green-600 bg-green-50' if question.correct|default(False) else ('border-2 border-red-600 bg-red-50' if was_answered else 'border border-gray-300') }}">
+            {% set response_data = response[q_idx] if response and q_idx in response else {} %}
+            {% set was_answered = response_data.your_answer is defined and response_data.your_answer|length > 0 %}
+            <div id="q{{ q_idx }}" class="p-5 mb-4 {{ 'border-2 border-green-600 bg-green-50' if response_data.correct|default(False) else ('border-2 border-red-600 bg-red-50' if was_answered else 'border border-gray-300') }}">
                 <p class="mb-3 text-base markdown-content"><span class="text-lg">{{ loop.index }}.</span> {{ question.text }}</p>
                 <div class="ml-4 space-y-1">
                     {% for choice_text in question.choices %}
-                    {% set user_chose = choice_text in question.your_answer|default([]) %}
-                    {% set is_correct = choice_text in question.correct_answers|default([]) %}
+                    {% set user_chose = choice_text in response_data.your_answer|default([]) %}
+                    {% set is_correct = choice_text in response_data.correct_answers|default([]) %}
                     <label class="block py-1.5 text-base flex items-center justify-between {% if user_chose and is_correct %}bg-green-100{% elif user_chose %}bg-red-100{% endif %}">
                         <div class="flex items-center flex-1">
                         <input type="{{ 'checkbox' if question.multiple else 'radio' }}" 
@@ -276,9 +277,11 @@
                 <h3 class="hidden md:block text-xl mb-3 text-gray-800">{{ t.questions|title }}</h3>
                 <div class="hidden md:grid grid-cols-5 gap-2 mb-4">
                     {% for question in quiz.questions %}
-                    {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
+                    {% set nav_q_idx = loop.index0 %}
+                    {% set nav_response_data = response[nav_q_idx] if response and nav_q_idx in response else {} %}
+                    {% set was_answered = nav_response_data.your_answer is defined and nav_response_data.your_answer|length > 0 %}
                     <button data-question="{{ loop.index0 }}"
-                            class="question-nav w-10 h-10 border flex items-center justify-center text-base {{ 'border-green-600 bg-green-100' if question.correct|default(False) else ('border-red-600 bg-red-100' if was_answered else 'border-gray-400') }}">
+                            class="question-nav w-10 h-10 border flex items-center justify-center text-base {{ 'border-green-600 bg-green-100' if nav_response_data.correct|default(False) else ('border-red-600 bg-red-100' if was_answered else 'border-gray-400') }}">
                         {{ loop.index }}
                     </button>
                     {% endfor %}
