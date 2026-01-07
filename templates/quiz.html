@@ -86,7 +86,7 @@
         <div class="mb-6">
             <div class="grid grid-cols-1 lg:grid-cols-3">
                 <!-- Main Content - Topics -->
-                <div class="lg:col-span-2 pr-6">
+                <div class="lg:col-span-2 lg:pr-6 w-full">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
@@ -94,7 +94,7 @@
                         {{ t.topics_covered }}
                     </h3>
                     {% if quiz_context.covered_concepts %}
-                    <ul class="topics-list space-y-3 min-h-[280px] max-h-[280px] overflow-y-auto pr-2 border border-gray-300 p-4">
+                    <ul class="topics-list space-y-3 min-h-[280px] max-h-[280px] overflow-y-auto pr-2 border border-gray-300 p-4 w-full">
                         {% for concept in quiz_context.covered_concepts %}
                         <li class="flex items-start gap-3 pb-3 {% if not loop.last %}border-b border-gray-100{% endif %}">
                             <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -183,7 +183,7 @@
         <div class="border-t border-gray-300 pt-6">
             <p class="text-gray-600 text-base mb-4 text-center sm:text-right">{{ t.ready_to_start }}</p>
             <div class="flex flex-col sm:flex-row gap-3 justify-end items-center">
-                <button id="startBtn" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-8 text-base">{{ t.start_quiz }}</button>
+                <button id="startBtn" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-12 text-base">{{ t.start_quiz }}</button>
                 <button id="generateBtn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-8 text-base">{{ t.generate_more }}</button>
             </div>
         </div>
