@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "agentic-mcq-generator"
 version = "0.1.0"
-description = "AI-powered quiz platform with Streamlit"
+description = "Agentic AI-powered quiz platform with autonomous quiz generation, evaluation, and augmentation"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [

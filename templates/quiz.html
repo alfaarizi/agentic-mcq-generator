@@ -20,6 +20,42 @@
         @media (min-width: 768px) {
             .submit-retake-btn { width: calc(5 * 2.5rem + 4 * 0.5rem); }
         }
+        /* Ensure markdown-rendered content maintains consistent font size and family */
+        .markdown-content,
+        .markdown-content * {
+            font-family: inherit;
+            font-size: inherit;
+        }
+        .markdown-content strong, 
+        .markdown-content b { 
+            font-weight: 700; 
+            font-size: inherit;
+        }
+        .markdown-content em, 
+        .markdown-content i { 
+            font-style: italic; 
+            font-size: inherit;
+        }
+        .markdown-content code { 
+            font-size: inherit;
+            font-family: inherit;
+        }
+        .markdown-content pre,
+        .markdown-content pre code {
+            font-size: inherit;
+            font-family: inherit;
+        }
+        .markdown-content table {
+            font-size: inherit;
+            font-family: inherit;
+        }
+        .markdown-content p,
+        .markdown-content ul,
+        .markdown-content ol,
+        .markdown-content li {
+            font-size: inherit;
+            font-family: inherit;
+        }
     </style>
 </head>
 <body class="bg-white text-gray-800 max-w-6xl mx-auto p-4 md:p-8" 
@@ -161,7 +197,7 @@
                 {% for question in quiz.questions %}
                 {% set q_idx = loop.index0 %}
                 <div id="q{{ q_idx }}" class="border border-gray-300 p-5 mb-4">
-                    <p class="mb-3 text-base"><span class="text-lg">{{ loop.index }}.</span> {{ question.text }}</p>
+                    <p class="mb-3 text-base markdown-content"><span class="text-lg">{{ loop.index }}.</span> {{ question.text }}</p>
                     <div class="ml-4 space-y-1">
                         {% for choice_text in question.choices %}
                         <label class="block py-1.5 cursor-pointer text-base">
@@ -170,7 +206,7 @@
                                    data-q="{{ q_idx }}" 
                                    value="{{ choice_text }}" 
                                    class="mr-2">
-                            {{ choice_text }}
+                            <span class="markdown-content">{{ choice_text }}</span>
                         </label>
                         {% endfor %}
                     </div>
@@ -204,7 +240,7 @@
             {% set q_idx = loop.index0 %}
             {% set was_answered = question.your_answer is defined and question.your_answer|length > 0 %}
             <div id="q{{ q_idx }}" class="p-5 mb-4 {{ 'border-2 border-green-600 bg-green-50' if question.correct|default(False) else ('border-2 border-red-600 bg-red-50' if was_answered else 'border border-gray-300') }}">
-                <p class="mb-3 text-base"><span class="text-lg">{{ loop.index }}.</span> {{ question.text }}</p>
+                <p class="mb-3 text-base markdown-content"><span class="text-lg">{{ loop.index }}.</span> {{ question.text }}</p>
                 <div class="ml-4 space-y-1">
                     {% for choice_text in question.choices %}
                     {% set user_chose = choice_text in question.your_answer|default([]) %}
@@ -215,7 +251,7 @@
                                {% if user_chose %}checked{% endif %} 
                                disabled 
                                class="mr-2">
-                            <span>{{ choice_text }}</span>
+                            <span class="markdown-content">{{ choice_text }}</span>
                         </div>
                         {% if is_correct %}
                         <svg class="w-6 h-6 text-green-600 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -506,6 +542,65 @@
         const modalCancel = document.getElementById('modalCancel');
         if (modalOk) modalOk.textContent = translations.ok || 'OK';
         if (modalCancel) modalCancel.textContent = translations.cancel || 'Cancel';
+        
+        // Configure marked.js for flexible spacing
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                breaks: true,  // Treat single line breaks as <br>
+                gfm: true,     // GitHub Flavored Markdown (more flexible)
+                headerIds: false,
+                mangle: false
+            });
+        }
+        
+        // Render markdown for questions and choices
+        function renderMarkdownInElement(element) {
+            if (typeof marked === 'undefined') return;
+            
+            const parseInline = (text) => {
+                if (typeof marked.parseInline === 'function') return marked.parseInline(text);
+                const parsed = marked.parse(text);
+                const div = document.createElement('div');
+                div.innerHTML = parsed;
+                return div.textContent || parsed;
+            };
+            
+            element.querySelectorAll('.markdown-content:not([data-rendered])').forEach(el => {
+                const text = el.textContent;
+                const isInline = ['SPAN', 'P'].includes(el.tagName);
+                
+                if (isInline) {
+                    el.innerHTML = parseInline(text);
+                } else {
+                    const parsed = marked.parse(text);
+                    if (parsed.match(/^<(p|div|ul|ol|li)/i)) {
+                        const div = document.createElement('div');
+                        div.innerHTML = parsed;
+                        el.innerHTML = div.textContent || parsed;
+                    } else {
+                        el.innerHTML = parsed;
+                    }
+                }
+                el.dataset.rendered = 'true';
+            });
+        }
+        
+        // Render markdown on page load
+        (function() {
+            function initMarkdown() {
+                if (typeof marked === 'undefined') {
+                    setTimeout(initMarkdown, 100);
+                    return;
+                }
+                renderMarkdownInElement(document.body);
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMarkdown);
+            } else {
+                initMarkdown();
+            }
+        })();
     </script>
 </body>
 </html>

@@ -93,6 +93,20 @@ Generate 1-2 brief, encouraging suggestions that:
 - Suggest resources that are relevant and accessible
 - Keep tone positive and encouraging
 
+**Formatting Guidelines:**
+Use markdown formatting to enhance readability and emphasize important information:
+- **Bold** (`**text**`): Use for key learning objectives, important concepts, or action items
+- *Italic* (`*text*`): Use for emphasis or subtle highlights
+- `Inline code` (`` `code` ``): Use for technical terms, function names, or short code snippets
+- Code blocks (```` ```language\ncode\n```` ```): Use for longer code examples or multi-line snippets when demonstrating concepts. Example: `` ```python\ndef example():\n    pass\n``` ``
+- **Spacing**: Single line breaks are preserved. For additional spacing, use HTML: `<br>` for line breaks, `&nbsp;` for extra spaces, or multiple line breaks for paragraph spacing.
+- Use formatting judiciously—only when it adds clarity or emphasis
+
+Examples:
+- "Master **recursive algorithms** to understand how functions call themselves."
+- "Practice implementing `data structures` like stacks and queues."
+- "Focus on *understanding the underlying principles* rather than memorizing syntax."
+
 **Output Format (JSON):**
 {{
   "suggestions": [
@@ -149,6 +163,21 @@ Generate 2-3 personalized learning suggestions that:
 - Be specific and actionable (avoid vague advice)
 - Focus on resources that are accessible and appropriate for the topic
 - Maintain a supportive, encouraging tone
+
+**Formatting Guidelines:**
+Use markdown formatting to enhance readability and emphasize important information:
+- **Bold** (`**text**`): Use for key learning objectives, important concepts, critical terms, or action items
+- *Italic* (`*text*`): Use for emphasis, definitions, or subtle highlights
+- `Inline code` (`` `code` ``): Use for technical terms, function names, variables, or short code snippets
+- Code blocks (```` ```language\ncode\n```` ```): Use for longer code examples or multi-line snippets when demonstrating concepts. Example: `` ```python\ndef example():\n    pass\n``` ``
+- **Spacing**: Single line breaks are preserved. For additional spacing, use HTML: `<br>` for line breaks, `&nbsp;` for extra spaces, or multiple line breaks for paragraph spacing.
+- Use formatting judiciously—only when it adds clarity or emphasis, not excessively
+
+Examples:
+- "Focus on understanding **method resolution order** in Python inheritance."
+- "Practice implementing `recursive functions` to solve tree traversal problems."
+- "Review the *fundamental principles* before moving to advanced topics."
+- For code examples: Use code blocks when showing implementation patterns or longer snippets
 
 **Output Format (JSON):**
 {{

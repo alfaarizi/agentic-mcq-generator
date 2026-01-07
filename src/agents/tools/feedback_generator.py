@@ -1,12 +1,12 @@
 """Tool for generating adaptive feedback based on error type and context."""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from ..agent import Agent
     from ...models import Question, Choice
 
-from ..schemas import ErrorEvaluation, ErrorType, PedagogicalContext, Feedback
+from ..schemas import ErrorEvaluation, ErrorType, PedagogicalContext, Feedback, QuizContext
 
 
 def generate_feedback(
@@ -14,7 +14,8 @@ def generate_feedback(
     selected: list["Choice"],
     error_analysis: ErrorEvaluation,
     eval_context: PedagogicalContext,
-    agent: "Agent"
+    agent: "Agent",
+    quiz_context: Optional["QuizContext"] = None
 ) -> Feedback:
     """Generate adaptive feedback based on error type and context.
     
@@ -24,12 +25,22 @@ def generate_feedback(
         error_analysis: Error analysis result.
         eval_context: Context information.
         agent: Agent instance for LLM access.
+        quiz_context: Optional quiz context (language, style, etc.) to adapt feedback.
     
     Returns:
         Structured Feedback object.
     """
     
     err_type = error_analysis.error_type
+    
+    # Build language requirement section if quiz_context is provided
+    language_requirement = f"""
+**Language Requirement:**
+- Generate ALL feedback components (concept, explanation, key points, and hints) in {quiz_context.profile.language} language
+- Write naturally and idiomatically in {quiz_context.profile.language}
+- Do not mix languages or translate terms unnecessarily
+- Ensure grammatical correctness and appropriate tone for {quiz_context.profile.language}
+""" if quiz_context else ""
     
     system_prompt = \
 f"""
@@ -58,6 +69,8 @@ f"""
 - **Related Concepts:** {concepts}
 - **Common Misconceptions:** {misconceptions}
 
+{language_requirement}
+
 **Instructions:**
 Generate feedback with the following components:
 
@@ -74,6 +87,21 @@ Generate feedback with the following components:
 - Focus on learning, not just correctness
 - Use clear, accessible language
 - Avoid condescension or judgment
+
+**Formatting Guidelines:**
+Use markdown formatting to enhance readability and emphasize important information:
+- **Bold** (`**text**`): Use for key terms, important concepts, or critical information that students should remember
+- *Italic* (`*text*`): Use for emphasis, definitions, or subtle highlights
+- `Inline code` (`` `code` ``): Use for technical terms, function names, variables, or short code snippets
+- Code blocks (```` ```language\ncode\n```` ```): Use for longer code examples or multi-line snippets when demonstrating concepts. Example: `` ```python\ndef example():\n    pass\n``` ``
+- **Spacing**: Single line breaks are preserved. For additional spacing, use HTML: `<br>` for line breaks, `&nbsp;` for extra spaces, or multiple line breaks for paragraph spacing.
+- Use formatting judiciously—only when it adds clarity or emphasis, not excessively
+
+Examples:
+- "The **agent** in agentic AI refers to an autonomous entity that *perceives and acts* in its environment."
+- "In Python, the `__init__` method is called when creating a new instance."
+- "Remember that **autonomy** is the key characteristic, not just *intelligence*."
+- For code examples: Use code blocks when showing implementation patterns or longer snippets
 
 **Output Format (JSON):**
 {{

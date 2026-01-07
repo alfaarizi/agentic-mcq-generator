@@ -1,23 +1,24 @@
-# AI-Powered Quiz Platform
+# QuizAI
 
-A modern quiz platform built with FastAPI and OpenRouter AI for intelligent answer evaluation and autonomous quiz generation using agentic AI architecture.
+An agentic AI-powered quiz platform built with FastAPI and OpenRouter AI for intelligent quiz generation, answer evaluation, and question augmentation. Features autonomous agents that orchestrate specialized tools to create, evaluate, and enhance educational quizzes.
 
 ## Features
 
 - **Autonomous Quiz Generation** - Generate complete quizzes from topic descriptions using AI agents
-- **AI-Powered Evaluation** - Expert feedback with detailed explanations using OpenRouter API (Google Gemini 2.5 Flash)
-- **Question Augmentation** - Generate additional questions matching existing quiz style
-- **Session Tracking** - Persistent sessions with localStorage
-- **Quiz Management** - Upload markdown files, paste content, or generate from descriptions
-- **Custom Modals** - Professional Tailwind-styled dialogs
-- **Quiz Link Sharing** - Copy quiz links with visual feedback
+- **AI-Powered Evaluation** - Expert feedback with detailed explanations, core concepts, key points, and hints
+- **Question Augmentation** - Generate additional questions matching existing quiz style and characteristics
+- **Internationalization** - Support for 19 languages with session-based preference storage
+- **Quiz Management** - Upload markdown files, paste content, generate from descriptions, edit, and delete quizzes
+- **Session Tracking** - Persistent sessions with localStorage and server-side session management
+- **Learning Profile** - Track topic proficiencies and error patterns across quiz attempts
+- **Personalized Suggestions** - Context-aware learning suggestions based on quiz characteristics and performance
 - **Timer Support** - Optional time limits with countdown (auto-calculated for generated quizzes)
 - **Responsive Design** - Mobile-first UI with Tailwind CSS
 
 ## Quick Start
 
 ```bash
-# Install
+# Install dependencies
 pip install -e .
 
 # Configure
@@ -73,29 +74,40 @@ Which are valid types in Python?
 
 ```
 .
-├── main.py                 # FastAPI entry point
+├── main.py                      # FastAPI entry point with health check
 ├── api/
-│   ├── config.py           # Configuration
-│   ├── dependencies.py     # DI (storage, AI, sessions)
-│   └── v1/quizzes.py       # API endpoints
+│   ├── config.py                # Configuration
+│   ├── dependencies.py          # DI (storage, AI, sessions, caches)
+│   ├── i18n.py                  # Translation utilities
+│   └── v1/
+│       └── quizzes.py           # API endpoints
 ├── templates/
-│   ├── quizzes.html        # Quiz list
-│   ├── quiz.html           # Quiz/results
-│   └── modal.html          # Shared modal
+│   ├── components/
+│   │   └── language_selector.html  # Reusable language selector
+│   ├── quizzes.html             # Quiz list and management
+│   ├── quiz.html                # Quiz taking and results
+│   ├── feedback.html            # Structured feedback display
+│   └── modal.html               # Shared modal component
 ├── static/
-│   └── modal.js            # Modal functions
+│   ├── favicon.svg              # Application favicon
+│   └── modal.js                 # Modal functions
+├── translations/                # i18n JSON files (19 languages)
+│   ├── en.json
+│   ├── hu.json
+│   ├── de.json
+│   └── ... (16 more languages)
 ├── src/
-│   ├── models.py           # Data models (Quiz, Question, Choice)
-│   ├── parser.py           # Markdown parser
-│   ├── storage.py          # Persistence
-│   ├── quiz_ai.py          # Main AI orchestrator
-│   └── agents/             # Agentic AI architecture
-│       ├── agent.py        # Base Agent class
-│       ├── generator.py    # GeneratorAgent
-│       ├── augmenter.py    # AugmenterAgent
-│       ├── evaluator.py    # EvaluatorAgent
-│       ├── schemas.py      # Data schemas
-│       └── tools/          # Agent tools
+│   ├── models.py                # Data models (Quiz, Question, Choice)
+│   ├── parser.py                # Markdown parser with time limit support
+│   ├── storage.py               # Persistence (file-based)
+│   ├── quiz_ai.py               # Main AI orchestrator
+│   └── agents/                  # Agentic AI architecture
+│       ├── agent.py             # Base Agent class
+│       ├── generator.py         # GeneratorAgent (Workflow 1)
+│       ├── augmenter.py         # AugmenterAgent (Workflow 2)
+│       ├── evaluator.py         # EvaluatorAgent (Workflow 3)
+│       ├── schemas.py           # Data schemas (dataclasses, StrEnums)
+│       └── tools/               # Specialized agent tools
 │           ├── quiz_profile_extractor.py
 │           ├── topic_coverage_planner.py
 │           ├── question_generator.py
@@ -106,24 +118,32 @@ Which are valid types in Python?
 │           ├── pedagogy_extractor.py
 │           ├── feedback_generator.py
 │           └── suggestions_generator.py
-├── quizzes/                # Quiz files
-│   └── examples/           # Samples (git-ignored)
-└── pyproject.toml
+├── quizzes/                     # Quiz files storage
+│   └── examples/                # Sample quizzes
+├── Dockerfile                   # Docker configuration
+├── fly.toml                     # Fly.io deployment config
+├── pyproject.toml               # Project metadata
+└── requirements.txt             # Python dependencies
 ```
 
 ## API Endpoints
 
 ```
-POST   /api/v1/quizzes/generate                      # Generate quiz from description
-POST   /api/v1/quizzes                               # Upload file
-POST   /api/v1/quizzes/create                        # Create from content
-DELETE /api/v1/quizzes                               # Delete all
-GET    /api/v1/quizzes                               # List quizzes
-GET    /api/v1/quizzes/{slug}                        # Get quiz
-POST   /api/v1/quizzes/{slug}/sessions               # Start session
-GET    /api/v1/quizzes/{slug}/sessions/latest        # Get session
+POST   /api/v1/quizzes/generate              # Generate quiz from description
+POST   /api/v1/quizzes                       # Upload file
+POST   /api/v1/quizzes/create                # Create from content
+DELETE /api/v1/quizzes                       # Delete all quizzes
+GET    /api/v1/quizzes                       # List quizzes
+GET    /api/v1/quizzes/{slug}                # Get quiz
+GET    /api/v1/quizzes/{slug}/content        # Get raw markdown content
+PUT    /api/v1/quizzes/{slug}                # Update quiz content
+DELETE /api/v1/quizzes/{slug}                # Delete single quiz
+POST   /api/v1/quizzes/{slug}/sessions       # Start session
+GET    /api/v1/quizzes/{slug}/sessions/latest        # Get latest session
 POST   /api/v1/quizzes/{slug}/sessions/latest/submit # Submit answers
-POST   /api/v1/quizzes/{slug}/generate               # Generate +15 questions 
+POST   /api/v1/quizzes/{slug}/generate       # Generate +15 questions
+POST   /api/v1/quizzes/language              # Set user language preference
+GET    /health                               # Health check endpoint
 ```
 
 All endpoints support JSON/HTML via `Accept` header.
@@ -132,21 +152,22 @@ All endpoints support JSON/HTML via `Accept` header.
 
 **Autonomous Quiz Generation (Workflow 1):**
 - Generate complete quizzes from topic descriptions
-- Automatically infers complexity, style, target audience, and domain
-- Calculates appropriate time limits based on complexity
-- Extracts question count from description or calculates from time limit
-- Uses agentic architecture with specialized tools
+- Automatically infers complexity, style, target audience, domain, and language
+- Calculates appropriate time limits based on complexity and question count
+- Uses `GeneratorAgent` with tools for profile extraction, coverage planning, question generation, and validation
 
 **Answer Evaluation (Workflow 3):**
-- Structured feedback with key concepts, explanations, and hints
-- Detailed analysis of misconceptions
+- Structured feedback with core concepts, explanations, key points, and hints
+- Detailed analysis of misconceptions using error classification
 - Learning profile tracking with topic proficiencies
 - Personalized suggestions based on quiz context
+- Uses `EvaluatorAgent` with tools for context extraction, error evaluation, pedagogical analysis, feedback generation, and suggestions
 
 **Question Augmentation (Workflow 2):**
 - Generates additional questions matching existing quiz style
 - Analyzes coverage gaps and suggests concepts
 - Maintains consistency with original quiz characteristics
+- Uses `AugmenterAgent` with tools for context extraction, coverage analysis, question generation, and validation
 
 ## Dependencies
 
@@ -173,6 +194,47 @@ GeneratorAgent(model="google/gemini-2.5-flash")  # For quiz generation
 EvaluatorAgent(model="google/gemini-2.5-flash")  # For evaluation
 AugmenterAgent(model="google/gemini-2.5-flash")  # For augmentation
 ```
+
+## Deployment
+
+The application is configured for deployment on Fly.io:
+
+```bash
+# Install flyctl
+# Login: flyctl auth login
+# Deploy: flyctl deploy
+```
+
+The `fly.toml` configuration includes:
+- Health check endpoint (`/health`)
+- Volume mount for quiz storage
+- Auto-scaling (min 2 machines)
+- HTTPS enforcement
+
+## Internationalization
+
+The application supports 19 languages with session-based language preference storage. Users can select their preferred language via a dropdown in the header. All UI text, enum values, and messages are translated.
+
+Supported languages:
+- English (en)
+- Hungarian (hu)
+- German (de)
+- Indonesian/Bahasa (id)
+- Mandarin Chinese (zh)
+- Hindi (hi)
+- Spanish (es)
+- French (fr)
+- Arabic (ar)
+- Russian (ru)
+- Korean (ko)
+- Japanese (ja)
+- Italian (it)
+- Romansh (rm)
+- Urdu (ur)
+- Bengali (bn)
+- Thai (th)
+- Lao (lo)
+- Mongolian (mn)
 
 ## License
 

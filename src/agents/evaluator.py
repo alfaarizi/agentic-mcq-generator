@@ -52,7 +52,7 @@ class EvaluatorAgent(Agent):
         
         pedagogical_context: PedagogicalContext = extract_pedagogical_context(question, error_evaluation, topic, learning_profile, agent=self)
         
-        feedback: Feedback = generate_feedback(question, selected, error_evaluation, pedagogical_context, agent=self)
+        feedback: Feedback = generate_feedback(question, selected, error_evaluation, pedagogical_context, agent=self, quiz_context=quiz_context)
         
         suggestions: List[LearningSuggestion] = generate_suggestions(
             question, error_evaluation, topic, learning_profile, pedagogical_context, agent=self, quiz_context=quiz_context

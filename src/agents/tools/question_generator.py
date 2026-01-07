@@ -63,7 +63,7 @@ You are a master educator and subject matter expert specializing in quiz design,
     
     # Time limit calculation section (if suggested_time_limit > 0, skip if -1)
     time_limit_section = f"""
-6. **Time Limit Calculation:**
+7. **Time Limit Calculation:**
    - A suggested time limit of {suggested_time_limit // 60} minutes ({suggested_time_limit} seconds) was provided based on topic analysis
    - Refine this time limit based on the actual complexity of the questions you generate:
      * Question complexity ({profile.complexity} level)
@@ -174,6 +174,16 @@ class D(B, C): pass
    - Include 2-6 choices per question (match the pattern from examples)
    - Multiple correct answers are allowed (use ">" for each correct choice)
    - Do NOT use "all of the above" or "none of the above" as choices
+
+6. **Formatting Guidelines:**
+   Use markdown formatting to enhance readability and emphasize important information:
+   - **Bold** (`**text**`): Use sparingly for key terms or critical concepts that need emphasis. Avoid overuse.
+   - *Italic* (`*text*`): Use minimally for subtle emphasis only when necessary.
+   - `Inline code` (`` `code` ``): Use for technical terms, function names, variables, or short code snippets
+   - Code blocks (```` ```language\ncode\n```` ```): Use for code examples, syntax demonstrations, or technical snippets when relevant. Essential for programming/technical questions. Example: `` ```python\ndef example():\n    pass\n``` ``
+   - **Tables**: Use markdown tables when presenting structured data, comparisons, or relationships that benefit from tabular format. Format: `` | Header 1 | Header 2 |\n|----------|----------|\n| Cell 1   | Cell 2   | ``
+   - **Spacing**: Single line breaks are preserved as line breaks. For additional spacing, use HTML: `<br>` for line breaks, `&nbsp;` for extra spaces, or multiple line breaks for paragraph spacing.
+   - Use formatting judiciously—only when it adds clarity or emphasis. Keep formatting minimal—clarity and readability are paramount.
 
 {time_limit_section}
 
