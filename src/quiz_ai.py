@@ -15,20 +15,18 @@ from .agents.schemas import (
     TargetAudience,
 )
 
-# Model configuration for different agents
-GENERATOR_MODEL = "anthropic/claude-3.5-haiku"  # Excellent reasoning, cost-effective for question generation
-AUGMENTER_MODEL = "google/gemini-2.5-flash"     # Fast, cost-effective, excellent pattern matching for style consistency
-EVALUATOR_MODEL = "google/gemini-2.5-flash"     # Fast, accurate evaluation, good structured output
-
 
 class QuizAI:
-    """AI service for quiz operations using OpenRouter"""
+    """AI service for quiz operations using OpenRouter."""
 
-    def __init__(self):
+    def __init__(self, model: str = "google/gemini-2.5-flash"):
         """Initialize QuizAI with model configuration.
-        
-        Uses predefined model constants for each agent type.
+
+        Args:
+            model: Model identifier (e.g., "google/gemini-2.5-flash").
         """
+
+        self.model = model
         self._generator = None  # Lazy initialization
         self._augmenter = None  # Lazy initialization
         self._evaluator = None  # Lazy initialization
@@ -38,7 +36,7 @@ class QuizAI:
     def generator(self) -> GeneratorAgent:
         """Get or create GeneratorAgent instance."""
         if self._generator is None:
-            self._generator = GeneratorAgent(model=GENERATOR_MODEL)
+            self._generator = GeneratorAgent(model=self.model)
         return self._generator
 
 
@@ -46,7 +44,7 @@ class QuizAI:
     def augmenter(self) -> AugmenterAgent:
         """Get or create AugmenterAgent instance."""
         if self._augmenter is None:
-            self._augmenter = AugmenterAgent(model=AUGMENTER_MODEL)
+            self._augmenter = AugmenterAgent(model=self.model)
         return self._augmenter
 
 
@@ -54,7 +52,7 @@ class QuizAI:
     def evaluator(self) -> EvaluatorAgent:
         """Get or create EvaluatorAgent instance."""
         if self._evaluator is None:
-            self._evaluator = EvaluatorAgent(model=EVALUATOR_MODEL)
+            self._evaluator = EvaluatorAgent(model=self.model)
         return self._evaluator
 
 

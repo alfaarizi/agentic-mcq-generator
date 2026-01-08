@@ -150,26 +150,24 @@ All endpoints support JSON/HTML via `Accept` header.
 
 ## AI Integration
 
-The platform uses specialized AI models optimized for each task via OpenRouter:
-
 **Autonomous Quiz Generation (Workflow 1):**
 - Generate complete quizzes from topic descriptions
 - Automatically infers complexity, style, target audience, domain, and language
 - Calculates appropriate time limits based on complexity and question count
-- Uses `GeneratorAgent` (Claude 3.5 Haiku) with tools for profile extraction, coverage planning, question generation, and validation
+- Uses `GeneratorAgent` with tools for profile extraction, coverage planning, question generation, and validation
 
 **Answer Evaluation (Workflow 3):**
 - Structured feedback with core concepts, explanations, key points, and hints
 - Detailed analysis of misconceptions using error classification
 - Learning profile tracking with topic proficiencies
 - Personalized suggestions based on quiz context
-- Uses `EvaluatorAgent` (Gemini 2.5 Flash) with tools for context extraction, error evaluation, pedagogical analysis, feedback generation, and suggestions
+- Uses `EvaluatorAgent` with tools for context extraction, error evaluation, pedagogical analysis, feedback generation, and suggestions
 
 **Question Augmentation (Workflow 2):**
 - Generates additional questions matching existing quiz style
 - Analyzes coverage gaps and suggests concepts
 - Maintains consistency with original quiz characteristics
-- Uses `AugmenterAgent` (Gemini 2.5 Flash) with tools for context extraction, coverage analysis, question generation, and validation
+- Uses `AugmenterAgent` with tools for context extraction, coverage analysis, question generation, and validation
 
 ## Dependencies
 
@@ -188,23 +186,14 @@ Create `.env` file:
 OPENROUTER_API_KEY=your_openrouter_api_key_here
 ```
 
-### AI Model Configuration
-
-The application uses task-optimized models for different agents. Models are configured in `src/quiz_ai.py`:
+Change AI model in `src/quiz_ai.py` or agent initialization:
 
 ```python
-# Model configuration for different agents
-GENERATOR_MODEL = "anthropic/claude-3.5-haiku"  # Excellent reasoning, cost-effective for question generation
-AUGMENTER_MODEL = "google/gemini-2.5-flash"     # Fast, cost-effective, excellent pattern matching for style consistency
-EVALUATOR_MODEL = "google/gemini-2.5-flash"     # Fast, accurate evaluation, good structured output
+QuizAI(model="google/gemini-2.5-flash")  # Default
+GeneratorAgent(model="google/gemini-2.5-flash")  # For quiz generation
+EvaluatorAgent(model="google/gemini-2.5-flash")  # For evaluation
+AugmenterAgent(model="google/gemini-2.5-flash")  # For augmentation
 ```
-
-**Model Selection Rationale:**
-- **Generator**: Claude 3.5 Haiku provides strong reasoning capabilities for creating questions from scratch while remaining cost-effective
-- **Augmenter**: Gemini 2.5 Flash excels at pattern matching and style replication, perfect for maintaining consistency when adding questions
-- **Evaluator**: Gemini 2.5 Flash offers fast, accurate evaluation with excellent structured output for feedback and suggestions
-
-To change models, update the constants at the top of `src/quiz_ai.py`.
 
 ## Deployment
 
