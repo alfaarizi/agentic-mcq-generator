@@ -2,6 +2,19 @@
 
 An agentic AI-powered quiz platform built with FastAPI and OpenRouter AI for intelligent quiz generation, answer evaluation, and question augmentation. Features autonomous agents that orchestrate specialized tools to create, evaluate, and enhance educational quizzes.
 
+## Screenshots
+
+<div align="center">
+  <img src="docs/images/1-quizzes-list.png" alt="Quizzes List" height="300"/>
+  <img src="docs/images/2-quiz-preview.png" alt="Quiz Preview" height="300"/>
+</div>
+
+<div align="center">
+  <img src="docs/images/5-quiz-interface.png" alt="Quiz Interface" height="300"/>
+  <img src="docs/images/3-correct-answer-feedback.png" alt="Correct Answer Feedback" height="300"/>
+  <img src="docs/images/4-incorrect-answer-feedback.png" alt="Incorrect Answer Feedback" height="300"/>
+</div>
+
 ## Features
 
 - **Autonomous Quiz Generation** - Generate complete quizzes from topic descriptions using AI agents
