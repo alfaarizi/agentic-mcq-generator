@@ -117,6 +117,13 @@
   "creation_failed_retry": "ไม่สามารถสร้างแบบทดสอบได้ กรุณาลองอีกครั้ง",
   "reset_failed": "รีเซ็ตล้มเหลว",
   "reset_failed_detail": "ไม่สามารถรีเซ็ตแบบทดสอบได้: {}",
-  "reset_failed_retry": "ไม่สามารถรีเซ็ตแบบทดสอบได้ กรุณาลองอีกครั้ง"
+  "reset_failed_retry": "ไม่สามารถรีเซ็ตแบบทดสอบได้ กรุณาลองอีกครั้ง",
+  "no_content_provided": "ไม่มีเนื้อหา",
+  "no_quizzes_found_in_file": "ไฟล์ไม่มีแบบทดสอบ",
+  "quiz_not_found": "ไม่พบแบบทดสอบ",
+  "only_one_quiz_allowed": "แก้ไขได้ครั้งละหนึ่งแบบทดสอบเท่านั้น",
+  "session_not_found": "ไม่พบเซสชัน",
+  "already_submitted": "ส่งไปแล้ว",
+  "invalid_language_code": "รหัสภาษาไม่ถูกต้อง"
 }
 

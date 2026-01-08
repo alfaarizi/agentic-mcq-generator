@@ -117,6 +117,13 @@
   "creation_failed_retry": "Error al crear cuestionario. Por favor, inténtalo de nuevo.",
   "reset_failed": "Error al Restablecer",
   "reset_failed_detail": "Error al restablecer cuestionarios: {}",
-  "reset_failed_retry": "Error al restablecer cuestionarios. Por favor, inténtalo de nuevo."
+  "reset_failed_retry": "Error al restablecer cuestionarios. Por favor, inténtalo de nuevo.",
+  "no_content_provided": "Sin contenido",
+  "no_quizzes_found_in_file": "El archivo no contiene cuestionarios",
+  "quiz_not_found": "Cuestionario no encontrado",
+  "only_one_quiz_allowed": "Solo se puede editar un cuestionario a la vez",
+  "session_not_found": "Sesión no encontrada",
+  "already_submitted": "Ya enviado",
+  "invalid_language_code": "Código de idioma inválido"
 }
 

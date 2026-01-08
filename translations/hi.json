@@ -117,6 +117,13 @@
   "creation_failed_retry": "क्विज़ बनाने में विफल। कृपया पुनः प्रयास करें।",
   "reset_failed": "रीसेट करने में विफल",
   "reset_failed_detail": "क्विज़ रीसेट करने में विफल: {}",
-  "reset_failed_retry": "क्विज़ रीसेट करने में विफल। कृपया पुनः प्रयास करें।"
+  "reset_failed_retry": "क्विज़ रीसेट करने में विफल। कृपया पुनः प्रयास करें।",
+  "no_content_provided": "सामग्री नहीं है",
+  "no_quizzes_found_in_file": "फ़ाइल में कोई क्विज़ नहीं है",
+  "quiz_not_found": "क्विज़ नहीं मिली",
+  "only_one_quiz_allowed": "एक बार में केवल एक क्विज़ संपादित की जा सकती है",
+  "session_not_found": "सत्र नहीं मिला",
+  "already_submitted": "पहले से ही सबमिट किया गया",
+  "invalid_language_code": "अमान्य भाषा कोड"
 }
 

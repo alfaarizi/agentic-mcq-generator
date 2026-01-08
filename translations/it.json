@@ -117,6 +117,13 @@
   "creation_failed_retry": "Impossibile creare il quiz. Riprova.",
   "reset_failed": "Reimpostazione Fallita",
   "reset_failed_detail": "Impossibile reimpostare i quiz: {}",
-  "reset_failed_retry": "Impossibile reimpostare i quiz. Riprova."
+  "reset_failed_retry": "Impossibile reimpostare i quiz. Riprova.",
+  "no_content_provided": "Nessun contenuto",
+  "no_quizzes_found_in_file": "Il file non contiene quiz",
+  "quiz_not_found": "Quiz non trovato",
+  "only_one_quiz_allowed": "È possibile modificare un solo quiz alla volta",
+  "session_not_found": "Sessione non trovata",
+  "already_submitted": "Già inviato",
+  "invalid_language_code": "Codice lingua non valido"
 }
 

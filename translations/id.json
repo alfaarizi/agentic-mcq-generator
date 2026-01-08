@@ -117,6 +117,13 @@
   "creation_failed_retry": "Gagal membuat kuis. Silakan coba lagi.",
   "reset_failed": "Reset Gagal",
   "reset_failed_detail": "Gagal mereset kuis: {}",
-  "reset_failed_retry": "Gagal mereset kuis. Silakan coba lagi."
+  "reset_failed_retry": "Gagal mereset kuis. Silakan coba lagi.",
+  "no_content_provided": "Tidak ada konten",
+  "no_quizzes_found_in_file": "File tidak berisi kuis",
+  "quiz_not_found": "Kuis tidak ditemukan",
+  "only_one_quiz_allowed": "Hanya satu kuis yang dapat diedit sekaligus",
+  "session_not_found": "Sesi tidak ditemukan",
+  "already_submitted": "Sudah dikirim",
+  "invalid_language_code": "Kode bahasa tidak valid"
 }
 

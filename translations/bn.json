@@ -117,6 +117,13 @@
   "creation_failed_retry": "কুইজ তৈরি করতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।",
   "reset_failed": "রিসেট ব্যর্থ",
   "reset_failed_detail": "কুইজ রিসেট করতে ব্যর্থ: {}",
-  "reset_failed_retry": "কুইজ রিসেট করতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।"
+  "reset_failed_retry": "কুইজ রিসেট করতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  "no_content_provided": "কোনো বিষয়বস্তু নেই",
+  "no_quizzes_found_in_file": "ফাইলে কুইজ নেই",
+  "quiz_not_found": "কুইজ পাওয়া যায়নি",
+  "only_one_quiz_allowed": "একবারে শুধুমাত্র একটি কুইজ সম্পাদনা করা যাবে",
+  "session_not_found": "সেশন পাওয়া যায়নি",
+  "already_submitted": "ইতিমধ্যে জমা হয়েছে",
+  "invalid_language_code": "অবৈধ ভাষা কোড"
 }
 

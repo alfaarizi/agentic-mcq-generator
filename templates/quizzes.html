@@ -320,8 +320,57 @@
             processing: '{{ t.processing }}',
             generating_quiz: '{{ t.generating_quiz }}',
             error: '{{ t.error }}',
-            success_message: '{{ t.success_message }}'
+            unknown_error: '{{ t.unknown_error }}',
+            success_message: '{{ t.success_message }}',
+            submission_failed: '{{ t.submission_failed }}',
+            submission_failed_detail: '{{ t.submission_failed_detail }}',
+            submission_failed_retry: '{{ t.submission_failed_retry }}',
+            start_failed: '{{ t.start_failed }}',
+            start_failed_detail: '{{ t.start_failed_detail }}',
+            start_failed_retry: '{{ t.start_failed_retry }}',
+            generation_failed: '{{ t.generation_failed }}',
+            generation_failed_detail: '{{ t.generation_failed_detail }}',
+            generation_failed_retry: '{{ t.generation_failed_retry }}',
+            generation_quiz_failed_detail: '{{ t.generation_quiz_failed_detail }}',
+            generation_quiz_failed_retry: '{{ t.generation_quiz_failed_retry }}',
+            topic_description_required: '{{ t.topic_description_required }}',
+            copy_failed: '{{ t.copy_failed }}',
+            copy_failed_detail: '{{ t.copy_failed_detail }}',
+            upload_failed: '{{ t.upload_failed }}',
+            upload_failed_retry: '{{ t.upload_failed_retry }}',
+            creation_failed: '{{ t.creation_failed }}',
+            creation_failed_detail: '{{ t.creation_failed_detail }}',
+            creation_failed_retry: '{{ t.creation_failed_retry }}',
+            reset_failed: '{{ t.reset_failed }}',
+            reset_failed_detail: '{{ t.reset_failed_detail }}',
+            reset_failed_retry: '{{ t.reset_failed_retry }}',
+            no_content_provided: '{{ t.no_content_provided }}',
+            no_quizzes_found_in_file: '{{ t.no_quizzes_found_in_file }}',
+            quiz_not_found: '{{ t.quiz_not_found }}',
+            only_one_quiz_allowed: '{{ t.only_one_quiz_allowed }}',
+            session_not_found: '{{ t.session_not_found }}',
+            already_submitted: '{{ t.already_submitted }}',
+            invalid_language_code: '{{ t.invalid_language_code }}'
         };
+        
+        // Helper function to translate API error messages
+        function translateApiError(errorDetail) {
+            if (!errorDetail) return translations.unknown_error;
+            
+            const errorMap = {
+                'Topic description is required': translations.topic_description_required,
+                'No content provided': translations.no_content_provided,
+                'No quizzes found in content': translations.no_quizzes_found,
+                'No quizzes found in file': translations.no_quizzes_found_in_file,
+                'Quiz not found': translations.quiz_not_found,
+                'Only one quiz is allowed per edit.': translations.only_one_quiz_allowed,
+                'Session not found': translations.session_not_found,
+                'Already submitted': translations.already_submitted,
+                'Invalid language code': translations.invalid_language_code
+            };
+            
+            return errorMap[errorDetail] || errorDetail;
+        }
         
         // Loader functions
         function showLoader(text) {
@@ -474,7 +523,7 @@
                             editQuizContent.readOnly = false;
                         } else {
                             const err = await res.json();
-                            const errorMsg = err.detail || translations.unknown_error;
+                            const errorMsg = translateApiError(err.detail);
                             await showModal(translations.load_failed, translations.load_failed_detail.replace('{}', errorMsg));
                             editQuizContent.value = '';
                             editQuizContent.readOnly = true;
@@ -524,7 +573,7 @@
                             location.reload();
                         } else {
                             const err = await res.json();
-                            const errorMsg = err.detail === 'No quizzes found in content' ? translations.no_quizzes_found : (err.detail || translations.unknown_error);
+                            const errorMsg = translateApiError(err.detail);
                             await showModal(translations.save_failed, translations.save_failed_detail.replace('{}', errorMsg));
                         }
                     } catch (e) {
@@ -567,7 +616,7 @@
                                     location.reload();
                                 } else {
                                     const err = await res.json();
-                                    const errorMsg = err.detail || translations.unknown_error;
+                                    const errorMsg = translateApiError(err.detail);
                                     await showModal(translations.delete_failed, translations.delete_failed_detail.replace('{}', errorMsg));
                                 }
                             } catch (e) {
@@ -615,7 +664,7 @@
                 }
             } catch (e) {
                 console.error(e);
-                await showModal('Start Failed', 'Failed to start quiz. Please try again.');
+                await showModal(translations.start_failed, translations.start_failed_retry);
             }
         }
         
@@ -639,7 +688,8 @@
                             location.reload();
                         } else {
                             const err = await res.json();
-                            await showModal(translations.generation_failed, translations.generation_failed_detail.replace('{}', err.detail || translations.error));
+                            const errorMsg = translateApiError(err.detail);
+                            await showModal(translations.generation_failed, translations.generation_failed_detail.replace('{}', errorMsg));
                         }
                     } catch (e) {
                         console.error(e);
@@ -687,7 +737,8 @@
                     location.reload();
                 } else {
                     const err = await res.json();
-                    await showModal(translations.generation_failed, translations.generation_quiz_failed_detail.replace('{}', err.detail || translations.error));
+                    const errorMsg = translateApiError(err.detail);
+                    await showModal(translations.generation_failed, translations.generation_quiz_failed_detail.replace('{}', errorMsg));
                 }
             } catch (e) {
                 const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -735,7 +786,8 @@
                     location.reload();
                 } else {
                     const err = await res.json();
-                    await showModal(translations.creation_failed, translations.creation_failed_detail.replace('{}', err.detail || translations.error));
+                    const errorMsg = translateApiError(err.detail);
+                    await showModal(translations.creation_failed, translations.creation_failed_detail.replace('{}', errorMsg));
                 }
             } catch (e) {
                 console.error(e);
@@ -759,7 +811,8 @@
                             location.reload();
                         } else {
                             const err = await res.json();
-                            await showModal(translations.reset_failed, translations.reset_failed_detail.replace('{}', err.detail || translations.error));
+                            const errorMsg = translateApiError(err.detail);
+                            await showModal(translations.reset_failed, translations.reset_failed_detail.replace('{}', errorMsg));
                         }
                     } catch (e) {
                         console.error(e);
@@ -777,8 +830,8 @@
         // Update modal button text from translations
         const modalOk = document.getElementById('modalOk');
         const modalCancel = document.getElementById('modalCancel');
-        if (modalOk) modalOk.textContent = translations.ok || 'OK';
-        if (modalCancel) modalCancel.textContent = translations.cancel || 'Cancel';
+        if (modalOk) modalOk.textContent = translations.ok;
+        if (modalCancel) modalCancel.textContent = translations.cancel;
     </script>
 </body>
 </html>

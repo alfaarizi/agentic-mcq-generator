@@ -117,6 +117,13 @@
   "creation_failed_retry": "Betg reussì da crear il quiz. Emprova danovamain.",
   "reset_failed": "Reinitialisar Fallì",
   "reset_failed_detail": "Betg reussì da reinitialisar ils quiz: {}",
-  "reset_failed_retry": "Betg reussì da reinitialisar ils quiz. Emprova danovamain."
+  "reset_failed_retry": "Betg reussì da reinitialisar ils quiz. Emprova danovamain.",
+  "no_content_provided": "Nagins cuntegn",
+  "no_quizzes_found_in_file": "Il file na cuntegna nagins quiz",
+  "quiz_not_found": "Quiz betg chattà",
+  "only_one_quiz_allowed": "Igl è pussaivel da modifitgar mo in quiz a la giada",
+  "session_not_found": "Sessiun betg chattada",
+  "already_submitted": "Gia tramess",
+  "invalid_language_code": "Code da lingua nunvalid"
 }
 

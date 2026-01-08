@@ -117,6 +117,13 @@
   "creation_failed_retry": "ບໍ່ສາມາດສ້າງແບບທົດສອບໄດ້ ກະລຸນາລອງອີກຄັ້ງ",
   "reset_failed": "ຣີເຊັດລົ້ມເຫຼວ",
   "reset_failed_detail": "ບໍ່ສາມາດຣີເຊັດແບບທົດສອບໄດ້: {}",
-  "reset_failed_retry": "ບໍ່ສາມາດຣີເຊັດແບບທົດສອບໄດ້ ກະລຸນາລອງອີກຄັ້ງ"
+  "reset_failed_retry": "ບໍ່ສາມາດຣີເຊັດແບບທົດສອບໄດ້ ກະລຸນາລອງອີກຄັ້ງ",
+  "no_content_provided": "ບໍ່ມີເນື້ອຫາ",
+  "no_quizzes_found_in_file": "ແຟ້ມບໍ່ມີແບບທົດສອບ",
+  "quiz_not_found": "ບໍ່ພົບແບບທົດສອບ",
+  "only_one_quiz_allowed": "ສາມາດແກ້ໄຂແບບທົດສອບໄດ້ພຽງແຕ່ອັນດຽວໃນເວລາດຽວ",
+  "session_not_found": "ບໍ່ພົບເຊດຊັນ",
+  "already_submitted": "ສົ່ງແລ້ວ",
+  "invalid_language_code": "ລະຫັດພາສາບໍ່ຖືກຕ້ອງ"
 }
 

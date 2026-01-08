@@ -117,6 +117,13 @@
   "creation_failed_retry": "クイズの作成に失敗しました。もう一度お試しください。",
   "reset_failed": "リセット失敗",
   "reset_failed_detail": "クイズのリセットに失敗しました：{}",
-  "reset_failed_retry": "クイズのリセットに失敗しました。もう一度お試しください。"
+  "reset_failed_retry": "クイズのリセットに失敗しました。もう一度お試しください。",
+  "no_content_provided": "コンテンツがありません",
+  "no_quizzes_found_in_file": "ファイルにクイズが含まれていません",
+  "quiz_not_found": "クイズが見つかりません",
+  "only_one_quiz_allowed": "一度に1つのクイズのみ編集できます",
+  "session_not_found": "セッションが見つかりません",
+  "already_submitted": "既に送信済み",
+  "invalid_language_code": "無効な言語コード"
 }
 

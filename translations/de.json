@@ -117,6 +117,13 @@
   "creation_failed_retry": "Quiz konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
   "reset_failed": "Zurücksetzen Fehlgeschlagen",
   "reset_failed_detail": "Quiz konnten nicht zurückgesetzt werden: {}",
-  "reset_failed_retry": "Quiz konnten nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
+  "reset_failed_retry": "Quiz konnten nicht zurückgesetzt werden. Bitte versuchen Sie es erneut.",
+  "no_content_provided": "Kein Inhalt vorhanden",
+  "no_quizzes_found_in_file": "Die Datei enthält keine Quizze",
+  "quiz_not_found": "Quiz nicht gefunden",
+  "only_one_quiz_allowed": "Es kann nur ein Quiz gleichzeitig bearbeitet werden",
+  "session_not_found": "Sitzung nicht gefunden",
+  "already_submitted": "Bereits eingereicht",
+  "invalid_language_code": "Ungültiger Sprachcode"
 }
 

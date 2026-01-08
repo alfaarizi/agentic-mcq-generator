@@ -117,6 +117,13 @@
   "creation_failed_retry": "A kvíz létrehozása sikertelen. Kérjük, próbálja újra.",
   "reset_failed": "Visszaállítás Sikertelen",
   "reset_failed_detail": "A kvízek visszaállítása sikertelen: {}",
-  "reset_failed_retry": "A kvízek visszaállítása sikertelen. Kérjük, próbálja újra."
+  "reset_failed_retry": "A kvízek visszaállítása sikertelen. Kérjük, próbálja újra.",
+  "no_content_provided": "Nincs tartalom",
+  "no_quizzes_found_in_file": "A fájl nem tartalmaz kvízt",
+  "quiz_not_found": "Kvíz nem található",
+  "only_one_quiz_allowed": "Egyszerre csak egy kvíz szerkeszthető",
+  "session_not_found": "Munkamenet nem található",
+  "already_submitted": "Már elküldve",
+  "invalid_language_code": "Érvénytelen nyelvkód"
 }
 

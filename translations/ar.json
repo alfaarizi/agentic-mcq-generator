@@ -117,6 +117,13 @@
   "creation_failed_retry": "فشل إنشاء الاختبار. يرجى المحاولة مرة أخرى.",
   "reset_failed": "فشل إعادة التعيين",
   "reset_failed_detail": "فشل إعادة تعيين الاختبارات: {}",
-  "reset_failed_retry": "فشل إعادة تعيين الاختبارات. يرجى المحاولة مرة أخرى."
+  "reset_failed_retry": "فشل إعادة تعيين الاختبارات. يرجى المحاولة مرة أخرى.",
+  "no_content_provided": "لا يوجد محتوى",
+  "no_quizzes_found_in_file": "الملف لا يحتوي على اختبارات",
+  "quiz_not_found": "الاختبار غير موجود",
+  "only_one_quiz_allowed": "يمكنك تعديل اختبار واحد فقط في كل مرة",
+  "session_not_found": "الجلسة غير موجودة",
+  "already_submitted": "تم الإرسال مسبقاً",
+  "invalid_language_code": "رمز اللغة غير صحيح"
 }
 

@@ -117,6 +117,13 @@
   "creation_failed_retry": "Failed to create quiz. Please try again.",
   "reset_failed": "Reset Failed",
   "reset_failed_detail": "Failed to reset quizzes: {}",
-  "reset_failed_retry": "Failed to reset quizzes. Please try again."
+  "reset_failed_retry": "Failed to reset quizzes. Please try again.",
+  "no_content_provided": "No content provided",
+  "no_quizzes_found_in_file": "No quizzes found in file",
+  "quiz_not_found": "Quiz not found",
+  "only_one_quiz_allowed": "Only one quiz is allowed per edit.",
+  "session_not_found": "Session not found",
+  "already_submitted": "Already submitted",
+  "invalid_language_code": "Invalid language code"
 }
 

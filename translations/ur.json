@@ -117,6 +117,13 @@
   "creation_failed_retry": "کوئز بنانے میں ناکام۔ براہ کرم دوبارہ کوشش کریں۔",
   "reset_failed": "ری سیٹ کرنے میں ناکام",
   "reset_failed_detail": "کوئزز ری سیٹ کرنے میں ناکام: {}",
-  "reset_failed_retry": "کوئزز ری سیٹ کرنے میں ناکام۔ براہ کرم دوبارہ کوشش کریں۔"
+  "reset_failed_retry": "کوئزز ری سیٹ کرنے میں ناکام۔ براہ کرم دوبارہ کوشش کریں۔",
+  "no_content_provided": "مواد موجود نہیں",
+  "no_quizzes_found_in_file": "فائل میں کوئز نہیں ہے",
+  "quiz_not_found": "کوئز نہیں ملا",
+  "only_one_quiz_allowed": "ایک وقت میں صرف ایک کوئز ترمیم کی جا سکتی ہے",
+  "session_not_found": "سیشن نہیں ملا",
+  "already_submitted": "پہلے ہی جمع کرایا گیا",
+  "invalid_language_code": "غلط زبان کا کوڈ"
 }
 

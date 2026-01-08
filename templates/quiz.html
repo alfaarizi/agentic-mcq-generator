@@ -311,8 +311,36 @@
             retake_confirm: '{{ t.retake_confirm }}',
             evaluating: '{{ t.evaluating }}',
             time_is_up: '{{ t.time_is_up }}',
-            quiz_will_be_submitted: '{{ t.quiz_will_be_submitted }}'
+            quiz_will_be_submitted: '{{ t.quiz_will_be_submitted }}',
+            error: '{{ t.error }}',
+            unknown_error: '{{ t.unknown_error }}',
+            submission_failed: '{{ t.submission_failed }}',
+            submission_failed_detail: '{{ t.submission_failed_detail }}',
+            submission_failed_retry: '{{ t.submission_failed_retry }}',
+            start_failed: '{{ t.start_failed }}',
+            start_failed_detail: '{{ t.start_failed_detail }}',
+            start_failed_retry: '{{ t.start_failed_retry }}',
+            generation_failed: '{{ t.generation_failed }}',
+            generation_failed_detail: '{{ t.generation_failed_detail }}',
+            generation_failed_retry: '{{ t.generation_failed_retry }}',
+            session_not_found: '{{ t.session_not_found }}',
+            already_submitted: '{{ t.already_submitted }}',
+            quiz_not_found: '{{ t.quiz_not_found }}'
         };
+        
+        // Helper function to translate API error messages
+        function translateApiError(errorDetail) {
+            if (!errorDetail) return translations.unknown_error;
+            
+            const errorMap = {
+                'Session not found': translations.session_not_found,
+                'Already submitted': translations.already_submitted,
+                'Quiz not found': translations.quiz_not_found
+            };
+            
+            return errorMap[errorDetail] || errorDetail;
+        }
+        
         const SLUG = '{{ quiz.slug }}';
         const SID = '{{ session_id }}' || null;
         const STATUS = document.body.dataset.status;
@@ -379,7 +407,8 @@
                 } else {
                     const err = await res.json();
                     hideLoader();
-                    await showModal(translations.submission_failed, translations.submission_failed_detail.replace('{}', err.detail || translations.error));
+                    const errorMsg = translateApiError(err.detail);
+                    await showModal(translations.submission_failed, translations.submission_failed_detail.replace('{}', errorMsg));
                 }
             } catch (e) {
                 console.error(e);
@@ -405,7 +434,7 @@
                 }
             } catch (e) {
                 console.error(e);
-                await showModal('Start Failed', 'Failed to start. Please try again.');
+                await showModal(translations.start_failed, translations.start_failed_retry);
             }
         }
         
@@ -437,7 +466,8 @@
                 } else {
                     const err = await res.json();
                     hideLoader();
-                    await showModal(translations.generation_failed, translations.generation_failed_detail.replace('{}', err.detail || translations.error));
+                    const errorMsg = translateApiError(err.detail);
+                    await showModal(translations.generation_failed, translations.generation_failed_detail.replace('{}', errorMsg));
                 }
             } catch (e) {
                 console.error(e);
@@ -540,8 +570,8 @@
         // Update modal button text from translations
         const modalOk = document.getElementById('modalOk');
         const modalCancel = document.getElementById('modalCancel');
-        if (modalOk) modalOk.textContent = translations.ok || 'OK';
-        if (modalCancel) modalCancel.textContent = translations.cancel || 'Cancel';
+        if (modalOk) modalOk.textContent = translations.ok;
+        if (modalCancel) modalCancel.textContent = translations.cancel;
         
         // Configure marked.js for flexible spacing
         if (typeof marked !== 'undefined') {

@@ -117,6 +117,13 @@
   "creation_failed_retry": "创建测验失败。请重试。",
   "reset_failed": "重置失败",
   "reset_failed_detail": "重置测验失败：{}",
-  "reset_failed_retry": "重置测验失败。请重试。"
+  "reset_failed_retry": "重置测验失败。请重试。",
+  "no_content_provided": "内容为空",
+  "no_quizzes_found_in_file": "文件中没有测验",
+  "quiz_not_found": "找不到测验",
+  "only_one_quiz_allowed": "每次只能编辑一个测验",
+  "session_not_found": "找不到会话",
+  "already_submitted": "已提交",
+  "invalid_language_code": "语言代码无效"
 }
 

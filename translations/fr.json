@@ -117,6 +117,13 @@
   "creation_failed_retry": "Échec de la création du quiz. Veuillez réessayer.",
   "reset_failed": "Échec de la Réinitialisation",
   "reset_failed_detail": "Échec de la réinitialisation des quiz : {}",
-  "reset_failed_retry": "Échec de la réinitialisation des quiz. Veuillez réessayer."
+  "reset_failed_retry": "Échec de la réinitialisation des quiz. Veuillez réessayer.",
+  "no_content_provided": "Aucun contenu",
+  "no_quizzes_found_in_file": "Le fichier ne contient aucun quiz",
+  "quiz_not_found": "Quiz introuvable",
+  "only_one_quiz_allowed": "Un seul quiz peut être modifié à la fois",
+  "session_not_found": "Session introuvable",
+  "already_submitted": "Déjà soumis",
+  "invalid_language_code": "Code de langue invalide"
 }
 
