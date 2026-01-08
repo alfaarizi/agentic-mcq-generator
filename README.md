@@ -5,14 +5,14 @@ An agentic AI-powered quiz platform built with FastAPI and OpenRouter AI for int
 ## Screenshots
 
 <div align="center">
-  <img src="docs/images/1-quizzes-list.png" alt="Quizzes List" height="300"/>
-  <img src="docs/images/2-quiz-preview.png" alt="Quiz Preview" height="300"/>
+  <img src="docs/images/1-quizzes-list.png" alt="Quizzes List" width="400" height="300"/>
+  <img src="docs/images/2-quiz-preview.png" alt="Quiz Preview" width="400" height="300"/>
 </div>
 
 <div align="center">
-  <img src="docs/images/5-quiz-interface.png" alt="Quiz Interface" height="300"/>
-  <img src="docs/images/3-correct-answer-feedback.png" alt="Correct Answer Feedback" height="300"/>
-  <img src="docs/images/4-incorrect-answer-feedback.png" alt="Incorrect Answer Feedback" height="300"/>
+  <img src="docs/images/5-quiz-interface.png" alt="Quiz Interface" width="266" height="300"/>
+  <img src="docs/images/3-correct-answer-feedback.png" alt="Correct Answer Feedback" width="266" height="300"/>
+  <img src="docs/images/4-incorrect-answer-feedback.png" alt="Incorrect Answer Feedback" width="266" height="300"/>
 </div>
 
 ## Features
