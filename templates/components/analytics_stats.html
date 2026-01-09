@@ -40,6 +40,11 @@
 (async () => {
     if (!document.getElementById('analytics-stats')) return;
     
+    // Cache configuration (TTL must match backend ANALYTICS_CACHE_TTL_SECONDS)
+    const CACHE_KEY = 'analytics_stats';
+    const CACHE_TTL = 180000; // 3 minutes (180 seconds)
+    
+    // Show error state (display '-' for all metrics)
     const showError = () => {
         document.querySelectorAll('.skeleton-text').forEach(el => {
             el.textContent = '-';
@@ -47,7 +52,58 @@
         });
     };
     
+    // Update UI with formatted analytics data
+    const updateUI = (data) => {
+        [
+            ['unique-visitors', data.unique_visitors, (n) => n?.toLocaleString() ?? '-'],
+            ['page-views', data.page_views, (n) => n?.toLocaleString() ?? '-'],
+            ['avg-time', data.average_time, (t) => t ?? '0:00'],
+            ['return-rate', data.return_visitor_rate, (n) => n != null ? `${n.toFixed(1)}%` : '-']
+        ].forEach(([id, value, formatter]) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = formatter(value);
+                el.classList.add('loaded');
+            }
+        });
+    };
+    
+    // Get cached data if still valid
+    const getCached = () => {
+        try {
+            const analytics_cache = localStorage.getItem(CACHE_KEY);
+            if (!analytics_cache) return null;
+            const { data, timestamp } = JSON.parse(analytics_cache);
+            return Date.now() - timestamp < CACHE_TTL ? data : null;
+        } catch {
+            return null;
+        }
+    };
+    
+    // Save data to cache
+    const setCached = (data) => {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ 
+                data, 
+                timestamp: Date.now() 
+            }));
+        } catch {}
+    };
+    
+    // Main: Check cache first, then fetch if needed (stale-while-revalidate pattern)
     try {
+        const analytics_cache = getCached();
+        if (analytics_cache) {
+            updateUI(analytics_cache);
+            // Fetch fresh data in background to update cache
+            fetch('{{ api_base_url }}/quizzes/analytics')
+                .then(res => res.ok && res.json())
+                .then(data => data && !data.error && setCached(data))
+                .catch(() => {});
+            return;
+        }
+        
+        // No valid cache, fetch from API
         const res = await fetch('{{ api_base_url }}/quizzes/analytics');
         if (!res.ok || !res.headers.get('content-type')?.includes('application/json')) {
             showError();
@@ -60,26 +116,8 @@
             return;
         }
         
-        const format = {
-            number: (n) => n?.toLocaleString() ?? '-',
-            percent: (n) => n != null ? `${n.toFixed(1)}%` : '-',
-            time: (t) => t ?? '0:00'
-        };
-        
-        const updates = [
-            ['unique-visitors', data.unique_visitors, format.number],
-            ['page-views', data.page_views, format.number],
-            ['avg-time', data.average_time, format.time],
-            ['return-rate', data.return_visitor_rate, format.percent]
-        ];
-        
-        updates.forEach(([id, value, formatter]) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.textContent = formatter(value);
-                el.classList.add('loaded');
-            }
-        });
+        setCached(data);
+        updateUI(data);
     } catch {
         showError();
     }

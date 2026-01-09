@@ -4,7 +4,8 @@ This module provides dependency injection functions for FastAPI routes.
 """
 
 from functools import lru_cache
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
+from datetime import datetime, timezone
 
 from fastapi import Request
 
@@ -19,6 +20,9 @@ _quiz_contexts: Dict[str, Any] = {}
 
 # In-memory language preferences (keyed by session_id)
 language_preferences: Dict[str, str] = {}
+
+# In-memory analytics cache (keyed by period)
+_analytics_cache: Dict[str, Tuple[Dict[str, Any], datetime]] = {}
 
 
 @lru_cache()
@@ -63,3 +67,8 @@ def get_user_language(request: Request) -> str:
     """Get user's preferred language from session or default to 'en'."""
     session_id = request.cookies.get("session_id")
     return language_preferences.get(session_id, "en")
+
+
+def get_analytics_cache() -> Dict[str, Tuple[Dict[str, Any], datetime]]:
+    """Get in-memory analytics cache."""
+    return _analytics_cache

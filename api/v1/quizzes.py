@@ -3,7 +3,7 @@
 import uuid
 import asyncio
 import logging
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from typing import Dict, List, Optional, Union, Awaitable, Any, Tuple
 
 from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException, Query
@@ -16,7 +16,7 @@ except ImportError:
     httpx = None
 
 from api.config import settings
-from api.dependencies import get_storage, get_ai, get_sessions, get_quiz_contexts, get_user_language, language_preferences
+from api.dependencies import get_storage, get_ai, get_sessions, get_quiz_contexts, get_user_language, language_preferences, get_analytics_cache
 from api.i18n import load_translations
 from src.storage import QuizStorage
 from src.quiz_ai import QuizAI
@@ -415,9 +415,14 @@ async def generate_questions(
 # Optional analytics endpoints for visitor statistics:
 # - GET /analytics: Get analytics data from Plausible
 
+# Analytics cache configuration
+ANALYTICS_CACHE_TTL_SECONDS = 180  # 3 minutes
+ANALYTICS_CACHE_KEY_ALL_TIME = "all_time"
+
 @router.get("/analytics")
 async def get_analytics(
-    period: Optional[str] = Query(None, description="Time period: 7d, 30d, 12mo, or omit for all time")
+    period: Optional[str] = Query(None, description="Time period: 7d, 30d, 12mo, or omit for all time"),
+    analytics_cache: Dict[str, Tuple[Dict[str, Any], datetime]] = Depends(get_analytics_cache)
 ):
     """Get analytics data from Plausible (optional feature)."""
     if not settings.PLAUSIBLE_DOMAIN or not settings.PLAUSIBLE_API_TOKEN:
@@ -425,6 +430,10 @@ async def get_analytics(
     
     if httpx is None:
         return JSONResponse({"error": "Analytics dependencies not installed"}, status_code=503)
+    
+    cache_key = period or ANALYTICS_CACHE_KEY_ALL_TIME
+    if cache_key in analytics_cache and datetime.now(timezone.utc) - analytics_cache[cache_key][1] < timedelta(seconds=ANALYTICS_CACHE_TTL_SECONDS):
+        return JSONResponse(analytics_cache[cache_key][0])
     
     try:
         params = {
@@ -464,12 +473,15 @@ async def get_analytics(
             # Calculate return visitor rate: (visits - unique visitors) / unique visitors * 100
             return_visitor_rate = round(((visits - unique_visitors) / unique_visitors * 100), 1) if unique_visitors > 0 else 0
             
-            return JSONResponse({
+            response_data = {
                 "unique_visitors": unique_visitors,
                 "page_views": pageviews,
                 "average_time": avg_time,
                 "return_visitor_rate": return_visitor_rate
-            })
+            }
+            
+            analytics_cache[cache_key] = (response_data, datetime.now(timezone.utc))
+            return JSONResponse(response_data)
     except httpx.HTTPStatusError:
         return JSONResponse({"error": "Analytics service unavailable"}, status_code=502)
     except Exception as e:
