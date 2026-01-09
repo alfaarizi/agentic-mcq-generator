@@ -5,10 +5,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Callable, Optional
 
-from dotenv import load_dotenv
 from openai import OpenAI
-
-load_dotenv()
 
 # Constants
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"

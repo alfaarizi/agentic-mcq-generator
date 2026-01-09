@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuizAI</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    {% include 'components/analytics.html' %}
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/static/modal.js"></script>
     <style>
@@ -833,5 +834,7 @@
         if (modalOk) modalOk.textContent = translations.ok;
         if (modalCancel) modalCancel.textContent = translations.cancel;
     </script>
+    
+    {% include 'components/analytics_stats.html' %}
 </body>
 </html>

@@ -3,12 +3,17 @@
 import uuid
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from typing import Dict, List, Optional, Union, Awaitable, Any, Tuple
 
 from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException, Query
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+
+try:
+    import httpx
+except ImportError:
+    httpx = None
 
 from api.config import settings
 from api.dependencies import get_storage, get_ai, get_sessions, get_quiz_contexts, get_user_language, language_preferences
@@ -31,6 +36,20 @@ def accepts_json(request: Request) -> bool:
     """Check if client accepts JSON response based on Accept header."""
     accept = request.headers.get("accept", "")
     return "application/json" in accept
+
+
+def get_template_context(request: Request, **kwargs) -> dict:
+    """Get common template context including analytics."""
+    lang = get_user_language(request)
+    translations = load_translations(lang)
+    return {
+        "request": request,
+        "api_base_url": settings.API_BASE_URL,
+        "lang": lang,
+        "t": translations,
+        "plausible_domain": settings.PLAUSIBLE_DOMAIN,
+        **kwargs
+    }
 
 
 def serialize_quizzes(
@@ -389,6 +408,75 @@ async def generate_questions(
         logging.error(f"Failed to generate questions: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to generate questions: {str(e)}")
 
+
+# ============================================
+# Analytics
+# ============================================
+# Optional analytics endpoints for visitor statistics:
+# - GET /analytics: Get analytics data from Plausible
+
+@router.get("/analytics")
+async def get_analytics(
+    period: Optional[str] = Query(None, description="Time period: 7d, 30d, 12mo, or omit for all time")
+):
+    """Get analytics data from Plausible (optional feature)."""
+    if not settings.PLAUSIBLE_DOMAIN or not settings.PLAUSIBLE_API_TOKEN:
+        return JSONResponse({"error": "Analytics not configured"}, status_code=404)
+    
+    if httpx is None:
+        return JSONResponse({"error": "Analytics dependencies not installed"}, status_code=503)
+    
+    try:
+        params = {
+            "site_id": settings.PLAUSIBLE_DOMAIN,
+            "metrics": "visitors,visits,pageviews,visit_duration"
+        }
+        
+        if period:
+            params["period"] = period
+        else:
+            # Plausible doesn't have "all time", so we must use custom period with date range
+            today = date.today()
+            params["period"] = "custom"
+            params["date"] = f"2025-01-09,{today.isoformat()}"
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://plausible.io/api/v1/stats/aggregate",
+                params=params,
+                headers={"Authorization": f"Bearer {settings.PLAUSIBLE_API_TOKEN}"},
+                timeout=10.0
+            )
+            response.raise_for_status()
+            
+            results = response.json().get("results", {})
+            unique_visitors = results.get("visitors", {}).get("value", 0)
+            visits = results.get("visits", {}).get("value", 0)
+            pageviews = results.get("pageviews", {}).get("value", 0)
+            visit_duration = results.get("visit_duration", {}).get("value", 0)
+            
+            # Convert seconds to MM:SS format
+            avg_time = "0:00"
+            if visit_duration and visit_duration > 0:
+                minutes, seconds = divmod(int(visit_duration), 60)
+                avg_time = f"{minutes:02d}:{seconds:02d}"
+            
+            # Calculate return visitor rate: (visits - unique visitors) / unique visitors * 100
+            return_visitor_rate = round(((visits - unique_visitors) / unique_visitors * 100), 1) if unique_visitors > 0 else 0
+            
+            return JSONResponse({
+                "unique_visitors": unique_visitors,
+                "page_views": pageviews,
+                "average_time": avg_time,
+                "return_visitor_rate": return_visitor_rate
+            })
+    except httpx.HTTPStatusError:
+        return JSONResponse({"error": "Analytics service unavailable"}, status_code=502)
+    except Exception as e:
+        logging.error(f"Analytics error: {e}")
+        return JSONResponse({"error": "Failed to fetch analytics"}, status_code=500)
+
+
 # ============================================
 # Quiz Retrieval & Management
 # ============================================
@@ -405,19 +493,14 @@ async def get_quizzes(
 ):
     """List all quizzes."""
     quizzes = serialize_quizzes(storage.get_quizzes(), quiz_contexts)
-    lang = get_user_language(request)
-    translations = load_translations(lang)
     
     if accepts_json(request):
         return JSONResponse({"quizzes": quizzes})
     
-    return templates.TemplateResponse("quizzes.html", {
-        "request": request,
-        "quizzes": quizzes,
-        "api_base_url": settings.API_BASE_URL,
-        "lang": lang,
-        "t": translations
-    })
+    return templates.TemplateResponse("quizzes.html", get_template_context(
+        request,
+        quizzes=quizzes
+    ))
 
 
 @router.get("/{slug}")
@@ -436,9 +519,6 @@ async def get_quiz(
         if accepts_json(request):
             raise HTTPException(status_code=404, detail="Quiz not found")
         return RedirectResponse(url=f"{settings.API_BASE_URL}/quizzes")
-    
-    lang = get_user_language(request)
-    translations = load_translations(lang)
     
     # JSON: return preview
     if accepts_json(request):
@@ -460,39 +540,33 @@ async def get_quiz(
             quiz_context_dict = quiz_context.to_dict()
             quiz_contexts[slug] = quiz_context_dict
         
-        return templates.TemplateResponse("quiz.html", {
-            "request": request,
-            "quiz": {
+        return templates.TemplateResponse("quiz.html", get_template_context(
+            request,
+            quiz={
                 "slug": quiz.slug,
                 "topic": quiz.topic,
                 "time_limit": quiz.time_limit,
                 "questions": serialize_questions(quiz.questions)
             },
-            "quiz_context": quiz_context_dict,
-            "status": "preview",
-            "api_base_url": settings.API_BASE_URL,
-            "lang": lang,
-            "t": translations
-        })
+            quiz_context=quiz_context_dict,
+            status="preview"
+        ))
     
     # Active session
     session = sessions[session_id]
     session_quiz = session["quiz"]
-    template_data = {
-        "request": request,
-        "quiz": {
+    template_data = get_template_context(
+        request,
+        quiz={
             "slug": session_quiz.slug,
             "topic": session_quiz.topic,
             "time_limit": session_quiz.time_limit,
             "questions": serialize_questions(session_quiz.questions)
         },
-        "session_id": session_id,
-        "status": session["status"],
-        "started_at": session["started_at"].isoformat() + "Z",
-        "api_base_url": settings.API_BASE_URL,
-        "lang": lang,
-        "t": translations
-    }
+        session_id=session_id,
+        status=session["status"],
+        started_at=session["started_at"].isoformat() + "Z"
+    )
     
     if session["status"] == "completed":
         template_data["response"] = serialize_response(
