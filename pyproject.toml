@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agentic-mcq-generator"
+name = "agentic-quiz-generator"
 version = "0.1.0"
 description = "Agentic AI-powered quiz platform with autonomous quiz generation, evaluation, and augmentation"
 readme = "README.md"

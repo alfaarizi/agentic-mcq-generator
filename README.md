@@ -257,4 +257,4 @@ MIT
 
 **Built with FastAPI, OpenRouter AI, and Tailwind CSS**
 
-[GitHub Repository](https://github.com/alfaarizi/agentic-mcq-generator)
+[GitHub Repository](https://github.com/alfaarizi/agentic-quiz-generator)

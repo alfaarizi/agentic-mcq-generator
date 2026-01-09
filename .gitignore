@@ -24,4 +24,4 @@ ENV/
 # Data
 quizzes/*.md
 !quizzes/sample_quiz.md
-agentic_mcq_generator.egg-info
+agentic_quiz_generator.egg-info
