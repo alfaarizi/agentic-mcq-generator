@@ -79,7 +79,7 @@ For each new question, evaluate against these criteria:
    - Is the prerequisite knowledge requirement consistent?
 
 4. **Language Consistency:**
-   - Is the question written in {profile.language}?
+   - Is the question written in the {profile.language} language?
    - Is the language quality and clarity consistent with existing questions?
    - Are there any translation issues or language errors?
 

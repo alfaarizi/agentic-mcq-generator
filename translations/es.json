@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "Solo se puede editar un cuestionario a la vez",
   "session_not_found": "Sesión no encontrada",
   "already_submitted": "Ya enviado",
-  "invalid_language_code": "Código de idioma inválido"
+  "invalid_language_code": "Código de idioma inválido",
+  "session_updated": "Sesión actualizada",
+  "analytics_unique_visitors": "Visitantes únicos",
+  "analytics_page_views": "Visualizaciones de página",
+  "analytics_avg_time": "Tiempo promedio en el sitio",
+  "analytics_returning_visitors": "Visitantes recurrentes"
 }
 

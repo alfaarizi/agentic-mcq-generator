@@ -17,6 +17,15 @@
         .topics-list::-webkit-scrollbar { width: 8px; }
         .topics-list::-webkit-scrollbar-track { background: #f1f1f1; }
         .topics-list::-webkit-scrollbar-thumb { background: #888; }
+        .question-navigator::-webkit-scrollbar { width: 8px; }
+        .question-navigator::-webkit-scrollbar-track { background: #f1f1f1; }
+        .question-navigator::-webkit-scrollbar-thumb { background: #ccc; }
+        .question-navigator {
+            max-height: calc(9 * (2.5rem + 0.5rem)); /* ~45 questions (9 rows × 5 cols) */
+        }
+        .question-navigator-container::-webkit-scrollbar { width: 8px; }
+        .question-navigator-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .question-navigator-container::-webkit-scrollbar-thumb { background: #ccc; }
         .submit-retake-btn { width: 100%; }
         @media (min-width: 768px) {
             .submit-retake-btn { width: calc(5 * 2.5rem + 4 * 0.5rem); }
@@ -62,7 +71,8 @@
 <body class="bg-white text-gray-800 max-w-6xl mx-auto p-4 md:p-8" 
       data-time-limit="{{ quiz.time_limit|default(0) }}" 
       data-started-at="{{ started_at|default('') }}" 
-      data-status="{{ status }}">
+      data-status="{{ status }}"
+      data-answers="{{ answers|default({})|tojson }}">
     <a href="{{ api_base_url }}/quizzes" class="text-gray-600 text-base hover:underline">← {{ t.back }}</a>
 
     <div class="flex justify-between items-baseline border-b-2 border-gray-800 pb-2 mb-2 mt-4">
@@ -217,16 +227,18 @@
         </div>
 
         <!-- Right: Question Navigator -->
-        <div class="w-full md:w-auto md:flex-shrink-0">
-            <div class="p-3 md:border md:border-gray-300 md:py-5 md:px-6 md:min-h-[calc(100vh-250px)]">
+        <div class="w-full md:w-auto md:flex-shrink-0 md:max-h-[calc(100vh-250px)]">
+            <div class="p-3 md:border md:border-gray-300 md:py-5 md:px-6 h-full flex flex-col question-navigator-container overflow-y-auto">
                 <h3 class="hidden md:block text-xl mb-3 text-gray-800">{{ t.questions|title }}</h3>
-                <div class="hidden md:grid grid-cols-5 gap-2 mb-4">
-                    {% for question in quiz.questions %}
-                    <button data-question="{{ loop.index0 }}"
-                            class="question-nav w-10 h-10 border border-gray-400 hover:bg-gray-200 flex items-center justify-center text-base">
-                        {{ loop.index }}
-                    </button>
-                    {% endfor %}
+                <div class="hidden md:block question-navigator overflow-y-auto pr-1 mb-4">
+                    <div class="grid grid-cols-5 gap-2">
+                        {% for question in quiz.questions %}
+                        <button data-question="{{ loop.index0 }}"
+                                class="question-nav w-10 h-10 border border-gray-400 hover:bg-gray-200 flex items-center justify-center text-base">
+                            {{ loop.index }}
+                        </button>
+                        {% endfor %}
+                    </div>
                 </div>
                 <button id="submitBtn" class="submit-retake-btn bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 text-base">{{ t.submit_quiz }}</button>
             </div>
@@ -273,19 +285,21 @@
         </div>
 
         <!-- Right: Question Navigator -->
-        <div class="w-full md:w-auto md:flex-shrink-0">
-            <div class="p-3 md:border md:border-gray-300 md:py-5 md:px-6 md:min-h-[calc(100vh-250px)]">
+        <div class="w-full md:w-auto md:flex-shrink-0 md:max-h-[calc(100vh-250px)]">
+            <div class="p-3 md:border md:border-gray-300 md:py-5 md:px-6 h-full flex flex-col question-navigator-container overflow-y-auto">
                 <h3 class="hidden md:block text-xl mb-3 text-gray-800">{{ t.questions|title }}</h3>
-                <div class="hidden md:grid grid-cols-5 gap-2 mb-4">
-                    {% for question in quiz.questions %}
-                    {% set nav_q_idx = loop.index0 %}
-                    {% set nav_response_data = response[nav_q_idx] if response and nav_q_idx in response else {} %}
-                    {% set was_answered = nav_response_data.your_answer is defined and nav_response_data.your_answer|length > 0 %}
-                    <button data-question="{{ loop.index0 }}"
-                            class="question-nav w-10 h-10 border flex items-center justify-center text-base {{ 'border-green-600 bg-green-100' if nav_response_data.correct|default(False) else ('border-red-600 bg-red-100' if was_answered else 'border-gray-400') }}">
-                        {{ loop.index }}
-                    </button>
-                    {% endfor %}
+                <div class="hidden md:block question-navigator overflow-y-auto pr-1 mb-4">
+                    <div class="grid grid-cols-5 gap-2">
+                        {% for question in quiz.questions %}
+                        {% set nav_q_idx = loop.index0 %}
+                        {% set nav_response_data = response[nav_q_idx] if response and nav_q_idx in response else {} %}
+                        {% set was_answered = nav_response_data.your_answer is defined and nav_response_data.your_answer|length > 0 %}
+                        <button data-question="{{ loop.index0 }}"
+                                class="question-nav w-10 h-10 border flex items-center justify-center text-base {{ 'border-green-600 bg-green-100' if nav_response_data.correct|default(False) else ('border-red-600 bg-red-100' if was_answered else 'border-gray-400') }}">
+                            {{ loop.index }}
+                        </button>
+                        {% endfor %}
+                    </div>
                 </div>
                 <button id="retakeBtn" class="submit-retake-btn bg-blue-600 hover:bg-blue-700 text-white py-2 px-4">{{ t.retake_quiz }}</button>
             </div>
@@ -326,7 +340,8 @@
             generation_failed_retry: '{{ t.generation_failed_retry }}',
             session_not_found: '{{ t.session_not_found }}',
             already_submitted: '{{ t.already_submitted }}',
-            quiz_not_found: '{{ t.quiz_not_found }}'
+            quiz_not_found: '{{ t.quiz_not_found }}',
+            session_updated: '{{ t.session_updated }}'
         };
         
         // Helper function to translate API error messages
@@ -336,7 +351,8 @@
             const errorMap = {
                 'Session not found': translations.session_not_found,
                 'Already submitted': translations.already_submitted,
-                'Quiz not found': translations.quiz_not_found
+                'Quiz not found': translations.quiz_not_found,
+                'Session updated': translations.session_updated
             };
             
             return errorMap[errorDetail] || errorDetail;
@@ -346,7 +362,15 @@
         const SID = '{{ session_id }}' || null;
         const STATUS = document.body.dataset.status;
         const TIME_LIMIT = parseInt(document.body.dataset.timeLimit) || 0;
-        const STARTED_AT = document.body.dataset.startedAt;
+        const STARTED_AT = document.body.dataset.startedAt || '';
+        const ANSWERS = (() => { try { return JSON.parse(document.body.dataset.answers || '{}'); } catch { return {}; } })();
+        
+        const STORAGE_KEYS = {
+            session: `quiz_${SLUG}`,
+            completed: `quiz_${SLUG}_completed`,
+            score: `quiz_${SLUG}_score`,
+            answers: `quiz_${SLUG}_answers`
+        };
         
         let timerInterval = null;
         
@@ -373,14 +397,45 @@
         function updateQuestionStatus() {
             document.querySelectorAll('.question-nav').forEach(btn => {
                 const qIndex = btn.dataset.question;
-                const inputs = document.querySelectorAll(`input[data-q="${qIndex}"]:checked`);
-                if (inputs.length > 0) {
-                    btn.classList.remove('border-gray-400', 'hover:bg-gray-200');
-                    btn.classList.add('border-blue-600', 'bg-blue-100');
-                } else {
-                    btn.classList.remove('border-blue-600', 'bg-blue-100');
-                    btn.classList.add('border-gray-400', 'hover:bg-gray-200');
+                const hasAnswer = document.querySelectorAll(`input[data-q="${qIndex}"]:checked`).length > 0;
+                btn.classList.toggle('border-blue-600', hasAnswer);
+                btn.classList.toggle('bg-blue-100', hasAnswer);
+                btn.classList.toggle('border-gray-400', !hasAnswer);
+                btn.classList.toggle('hover:bg-gray-200', !hasAnswer);
+            });
+        }
+        
+        async function saveAnswers() {
+            const answers = {};
+            document.querySelectorAll('#quizForm input[data-q]:checked').forEach(inp => {
+                const q = inp.dataset.q;
+                if (!answers[q]) answers[q] = [];
+                answers[q].push(inp.value);
+            });
+            
+            try {
+                localStorage.setItem(STORAGE_KEYS.answers, JSON.stringify(answers));
+                if (SID && SID !== 'None') {
+                    await fetch(`${API}/quizzes/${SLUG}/sessions/latest?session_id=${SID}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ answers })
+                    });
                 }
+            } catch (e) {
+                console.warn('Failed to save answers:', e);
+            }
+        }
+        
+        function restoreAnswers(answers) {
+            if (!answers || !Object.keys(answers).length) return;
+            Object.entries(answers).forEach(([qIdx, choices]) => {
+                if (!Array.isArray(choices)) return;
+                choices.forEach(text => {
+                    document.querySelectorAll(`input[data-q="${qIdx}"]`).forEach(input => {
+                        if (input.value === text) input.checked = true;
+                    });
+                });
             });
         }
         
@@ -402,14 +457,13 @@
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    localStorage.setItem('quiz_' + SLUG + '_completed', 'true');
-                    localStorage.setItem('quiz_' + SLUG + '_score', `${data.score}/${data.total}`);
+                    localStorage.setItem(STORAGE_KEYS.completed, 'true');
+                    localStorage.setItem(STORAGE_KEYS.score, data.score + '/' + data.total);
                     location.href = `${API}/quizzes/${SLUG}?session_id=${SID}`;
                 } else {
                     const err = await res.json();
                     hideLoader();
-                    const errorMsg = translateApiError(err.detail);
-                    await showModal(translations.submission_failed, translations.submission_failed_detail.replace('{}', errorMsg));
+                    await showModal(translations.submission_failed, translations.submission_failed_detail.replace('{}', translateApiError(err.detail)));
                 }
             } catch (e) {
                 console.error(e);
@@ -426,9 +480,8 @@
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    localStorage.setItem('quiz_' + SLUG, data.session_id);
-                    localStorage.removeItem('quiz_' + SLUG + '_completed');
-                    localStorage.removeItem('quiz_' + SLUG + '_score');
+                    localStorage.setItem(STORAGE_KEYS.session, data.session_id);
+                    Object.values(STORAGE_KEYS).slice(1).forEach(key => localStorage.removeItem(key));
                     location.href = `${API}/quizzes/${SLUG}?session_id=${data.session_id}`;
                 } else {
                     await showModal(translations.start_failed, translations.start_failed_retry);
@@ -444,9 +497,7 @@
                 '{{ t.retake_quiz }}',
                 '{{ t.retake_confirm }}',
                 async () => {
-                    localStorage.removeItem('quiz_' + SLUG);
-                    localStorage.removeItem('quiz_' + SLUG + '_completed');
-                    localStorage.removeItem('quiz_' + SLUG + '_score');
+                    Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
                     await startQuiz();
                 }
             );
@@ -480,39 +531,21 @@
         // Timer function - countdown timer for timed quizzes
         function startTimer() {
             const timer = document.getElementById('timer');
-            if (!timer) return;
+            if (!timer || !TIME_LIMIT) return;
             
-            // Parse start time (ISO 8601 format, 'Z' indicates UTC)
-            const parseStartTime = () => {
-                if (!STARTED_AT?.trim()) return Date.now();
-                const isoString = STARTED_AT.endsWith('Z') ? STARTED_AT : STARTED_AT + 'Z';
-                const parsed = new Date(isoString);
-                return isNaN(parsed.getTime()) ? Date.now() : parsed.getTime();
-            };
+            const startTime = STARTED_AT ? new Date(STARTED_AT.endsWith('Z') ? STARTED_AT : STARTED_AT + 'Z').getTime() : null;
+            if (!startTime || isNaN(startTime)) {
+                timer.textContent = '--:--';
+                return;
+            }
             
-            const startTime = parseStartTime();
             const endTime = startTime + TIME_LIMIT * 1000;
+            const formatTime = (s) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
             
-            // Format seconds as MM:SS
-            const formatTime = (seconds) => {
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            };
-            
-            // Update timer display
             const updateTimer = async () => {
                 const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
                 timer.textContent = formatTime(remaining);
-                
-                // Visual warning when time is running out
-                if (remaining <= 60 && remaining > 0) {
-                    timer.classList.add('text-red-500');
-                } else {
-                    timer.classList.remove('text-red-500');
-                }
-                
-                // Auto-submit when time expires
+                timer.classList.toggle('text-red-500', remaining <= 60 && remaining > 0);
                 if (remaining <= 0) {
                     clearInterval(timerInterval);
                     await showModal(translations.time_is_up, translations.quiz_will_be_submitted);
@@ -520,14 +553,18 @@
                 }
             };
             
-            // Update immediately and then every second
             updateTimer();
             timerInterval = setInterval(updateTimer, 1000);
         }
         
-        // Initialize on page load
+        // Preserve session_id in URL and localStorage
         if (SID && SID !== 'None') {
-            localStorage.setItem('quiz_' + SLUG, SID);
+            localStorage.setItem(STORAGE_KEYS.session, SID);
+            if (!window.location.search.includes('session_id=')) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('session_id', SID);
+                window.history.replaceState({}, '', url);
+            }
         }
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -551,12 +588,18 @@
                 const submitBtn = document.getElementById('submitBtn');
                 if (submitBtn) submitBtn.addEventListener('click', submitQuiz);
                 
+                // Restore answers (prefer session, fallback to localStorage)
+                restoreAnswers(Object.keys(ANSWERS || {}).length ? ANSWERS : (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.answers) || '{}'); } catch { return {}; } })());
+                
+                // Save answers on change
                 document.querySelectorAll('#quizForm input[data-q]').forEach(input => {
-                    input.addEventListener('change', updateQuestionStatus);
+                    input.addEventListener('change', () => {
+                        updateQuestionStatus();
+                        saveAnswers();
+                    });
                 });
                 updateQuestionStatus();
-                
-                    startTimer();
+                startTimer();
             }
             
             if (STATUS === 'completed') {

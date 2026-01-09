@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "Нэг удаад зөвхөн нэг тест засах боломжтой",
   "session_not_found": "Хурал олдсонгүй",
   "already_submitted": "Аль хэдийн илгээгдсэн",
-  "invalid_language_code": "Хүчингүй хэлний код"
+  "invalid_language_code": "Хүчингүй хэлний код",
+  "session_updated": "Хурал шинэчлэгдсэн",
+  "analytics_unique_visitors": "Өвөрмөц зочид",
+  "analytics_page_views": "Хуудасны үзлэг",
+  "analytics_avg_time": "Сайт дээрх дундаж цаг",
+  "analytics_returning_visitors": "Дахин ирсэн зочид"
 }
 

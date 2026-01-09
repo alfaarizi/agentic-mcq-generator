@@ -36,10 +36,10 @@ def generate_feedback(
     # Build language requirement section if quiz_context is provided
     language_requirement = f"""
 **Language Requirement:**
-- Generate ALL feedback components (concept, explanation, key points, and hints) in {quiz_context.profile.language} language
-- Write naturally and idiomatically in {quiz_context.profile.language}
+- Generate ALL feedback components (concept, explanation, key points, and hints) in the {quiz_context.profile.language} language
+- Write naturally and idiomatically in the {quiz_context.profile.language} language
 - Do not mix languages or translate terms unnecessarily
-- Ensure grammatical correctness and appropriate tone for {quiz_context.profile.language}
+- Ensure grammatical correctness and appropriate tone for the {quiz_context.profile.language} language
 """ if quiz_context else ""
     
     system_prompt = \
@@ -72,7 +72,7 @@ f"""
 {language_requirement}
 
 **Instructions:**
-Generate feedback with the following components:
+Generate feedback with the following components{f" in the {quiz_context.profile.language} language" if quiz_context else " in the quiz's language"}:
 
 1. **Concept** (1-2 sentences): State the fundamental principle, rule, or concept being tested. This should be the core idea the student needs to understand.
 

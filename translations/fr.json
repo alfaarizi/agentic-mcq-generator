@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "Un seul quiz peut être modifié à la fois",
   "session_not_found": "Session introuvable",
   "already_submitted": "Déjà soumis",
-  "invalid_language_code": "Code de langue invalide"
+  "invalid_language_code": "Code de langue invalide",
+  "session_updated": "Session mise à jour",
+  "analytics_unique_visitors": "Visiteurs uniques",
+  "analytics_page_views": "Pages vues",
+  "analytics_avg_time": "Temps moyen sur le site",
+  "analytics_returning_visitors": "Visiteurs de retour"
 }
 

@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "يمكنك تعديل اختبار واحد فقط في كل مرة",
   "session_not_found": "الجلسة غير موجودة",
   "already_submitted": "تم الإرسال مسبقاً",
-  "invalid_language_code": "رمز اللغة غير صحيح"
+  "invalid_language_code": "رمز اللغة غير صحيح",
+  "session_updated": "تم تحديث الجلسة",
+  "analytics_unique_visitors": "زوار فريدون",
+  "analytics_page_views": "مشاهدات الصفحة",
+  "analytics_avg_time": "متوسط الوقت على الموقع",
+  "analytics_returning_visitors": "زوار عائدون"
 }
 

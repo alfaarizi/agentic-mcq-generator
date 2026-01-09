@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "Only one quiz is allowed per edit.",
   "session_not_found": "Session not found",
   "already_submitted": "Already submitted",
-  "invalid_language_code": "Invalid language code"
+  "invalid_language_code": "Invalid language code",
+  "session_updated": "Session updated",
+  "analytics_unique_visitors": "Unique Visitors",
+  "analytics_page_views": "Page Views",
+  "analytics_avg_time": "Avg. Time on Site",
+  "analytics_returning_visitors": "Returning Visitors"
 }
 

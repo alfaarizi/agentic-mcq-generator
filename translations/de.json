@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "Es kann nur ein Quiz gleichzeitig bearbeitet werden",
   "session_not_found": "Sitzung nicht gefunden",
   "already_submitted": "Bereits eingereicht",
-  "invalid_language_code": "Ungültiger Sprachcode"
+  "invalid_language_code": "Ungültiger Sprachcode",
+  "session_updated": "Sitzung aktualisiert",
+  "analytics_unique_visitors": "Eindeutige Besucher",
+  "analytics_page_views": "Seitenaufrufe",
+  "analytics_avg_time": "Ø Verweildauer",
+  "analytics_returning_visitors": "Wiederkehrende Besucher"
 }
 

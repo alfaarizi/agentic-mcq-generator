@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "แก้ไขได้ครั้งละหนึ่งแบบทดสอบเท่านั้น",
   "session_not_found": "ไม่พบเซสชัน",
   "already_submitted": "ส่งไปแล้ว",
-  "invalid_language_code": "รหัสภาษาไม่ถูกต้อง"
+  "invalid_language_code": "รหัสภาษาไม่ถูกต้อง",
+  "session_updated": "อัปเดตเซสชันแล้ว",
+  "analytics_unique_visitors": "ผู้เยี่ยมชมที่ไม่ซ้ำกัน",
+  "analytics_page_views": "การดูหน้า",
+  "analytics_avg_time": "เวลาเฉลี่ยบนไซต์",
+  "analytics_returning_visitors": "ผู้เยี่ยมชมที่กลับมา"
 }
 

@@ -2,19 +2,19 @@
 <div id="analytics-stats" class="mt-6 pt-4 border-t border-gray-200">
     <div class="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-600">
         <div class="flex items-baseline gap-1.5 justify-center">
-            <span class="text-gray-500">Unique Visitors:</span>
+            <span class="text-gray-500">{{ t.analytics_unique_visitors }}:</span>
             <span id="unique-visitors" class="font-medium text-gray-700 skeleton-text">---</span>
         </div>
         <div class="flex items-baseline gap-1.5 justify-center">
-            <span class="text-gray-500">Page Views:</span>
+            <span class="text-gray-500">{{ t.analytics_page_views }}:</span>
             <span id="page-views" class="font-medium text-gray-700 skeleton-text">---</span>
         </div>
         <div class="flex items-baseline gap-1.5 justify-center">
-            <span class="text-gray-500">Avg. Time on Site:</span>
+            <span class="text-gray-500">{{ t.analytics_avg_time }}:</span>
             <span id="avg-time" class="font-medium text-gray-700 skeleton-text">--:--</span>
         </div>
         <div class="flex items-baseline gap-1.5 justify-center">
-            <span class="text-gray-500">Returning Visitors:</span>
+            <span class="text-gray-500">{{ t.analytics_returning_visitors }}:</span>
             <span id="return-rate" class="font-medium text-gray-700 skeleton-text">--.-%</span>
         </div>
     </div>
@@ -95,10 +95,15 @@
         const analytics_cache = getCached();
         if (analytics_cache) {
             updateUI(analytics_cache);
-            // Fetch fresh data in background to update cache
+            // Fetch fresh data in background to update cache and UI
             fetch('{{ api_base_url }}/quizzes/analytics')
                 .then(res => res.ok && res.json())
-                .then(data => data && !data.error && setCached(data))
+                .then(data => {
+                    if (data && !data.error) {
+                        setCached(data);
+                        updateUI(data);
+                    }
+                })
                 .catch(() => {});
             return;
         }

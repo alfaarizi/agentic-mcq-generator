@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "每次只能编辑一个测验",
   "session_not_found": "找不到会话",
   "already_submitted": "已提交",
-  "invalid_language_code": "语言代码无效"
+  "invalid_language_code": "语言代码无效",
+  "session_updated": "会话已更新",
+  "analytics_unique_visitors": "独立访客",
+  "analytics_page_views": "页面浏览量",
+  "analytics_avg_time": "平均网站停留时间",
+  "analytics_returning_visitors": "回访访客"
 }
 

@@ -160,7 +160,7 @@ class D(B, C): pass
 
 4. **Question Quality:**
    - Test conceptual understanding, not trivial recall or memorization
-   - Use clear, unambiguous language appropriate for {profile.language}
+   - Use clear, unambiguous language appropriate for the {profile.language} language
    - Create plausible distractors based on common misconceptions
    - Ensure correct answers are clearly correct and distractors are clearly incorrect
    - Avoid trick questions or ambiguous wording

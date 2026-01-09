@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "Можно редактировать только одну викторину за раз",
   "session_not_found": "Сессия не найдена",
   "already_submitted": "Уже отправлено",
-  "invalid_language_code": "Неверный код языка"
+  "invalid_language_code": "Неверный код языка",
+  "session_updated": "Сессия обновлена",
+  "analytics_unique_visitors": "Уникальные посетители",
+  "analytics_page_views": "Просмотры страниц",
+  "analytics_avg_time": "Среднее время на сайте",
+  "analytics_returning_visitors": "Возвращающиеся посетители"
 }
 

@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "एक बार में केवल एक क्विज़ संपादित की जा सकती है",
   "session_not_found": "सत्र नहीं मिला",
   "already_submitted": "पहले से ही सबमिट किया गया",
-  "invalid_language_code": "अमान्य भाषा कोड"
+  "invalid_language_code": "अमान्य भाषा कोड",
+  "session_updated": "सत्र अपडेट किया गया",
+  "analytics_unique_visitors": "अद्वितीय आगंतुक",
+  "analytics_page_views": "पृष्ठ दृश्य",
+  "analytics_avg_time": "साइट पर औसत समय",
+  "analytics_returning_visitors": "वापस आने वाले आगंतुक"
 }
 

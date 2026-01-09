@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "Hanya satu kuis yang dapat diedit sekaligus",
   "session_not_found": "Sesi tidak ditemukan",
   "already_submitted": "Sudah dikirim",
-  "invalid_language_code": "Kode bahasa tidak valid"
+  "invalid_language_code": "Kode bahasa tidak valid",
+  "session_updated": "Sesi diperbarui",
+  "analytics_unique_visitors": "Pengunjung Unik",
+  "analytics_page_views": "Tayangan Halaman",
+  "analytics_avg_time": "Rata-rata Waktu di Situs",
+  "analytics_returning_visitors": "Pengunjung Kembali"
 }
 

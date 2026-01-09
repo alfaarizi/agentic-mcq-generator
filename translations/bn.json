@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "একবারে শুধুমাত্র একটি কুইজ সম্পাদনা করা যাবে",
   "session_not_found": "সেশন পাওয়া যায়নি",
   "already_submitted": "ইতিমধ্যে জমা হয়েছে",
-  "invalid_language_code": "অবৈধ ভাষা কোড"
+  "invalid_language_code": "অবৈধ ভাষা কোড",
+  "session_updated": "সেশন আপডেট হয়েছে",
+  "analytics_unique_visitors": "অনন্য দর্শক",
+  "analytics_page_views": "পৃষ্ঠা দেখা",
+  "analytics_avg_time": "সাইটে গড় সময়",
+  "analytics_returning_visitors": "ফিরে আসা দর্শক"
 }
 

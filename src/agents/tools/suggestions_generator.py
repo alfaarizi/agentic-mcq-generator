@@ -55,10 +55,12 @@ def generate_suggestions(
         style_desc = style_descriptions.get(quiz_context.profile.style, "clear, accessible language")
         adaptation_requirements = f"""
 **Adaptation Requirements:**
+- Generate ALL suggestions (titles, explanations, and resources) in the {quiz_context.profile.language} language
+- Write naturally and idiomatically in the {quiz_context.profile.language} language
 - Match the quiz's communication style ({quiz_context.profile.style}) - use {style_desc}
 - Recommend resources appropriate for {quiz_context.profile.complexity} level
 - Tailor suggestions for {quiz_context.profile.target_audience} level
-- Provide resources in {quiz_context.profile.language} language
+- Provide resources in the {quiz_context.profile.language} language
 - Focus on {quiz_context.profile.domain} domain when relevant
 """
 

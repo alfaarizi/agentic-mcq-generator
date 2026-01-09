@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "ایک وقت میں صرف ایک کوئز ترمیم کی جا سکتی ہے",
   "session_not_found": "سیشن نہیں ملا",
   "already_submitted": "پہلے ہی جمع کرایا گیا",
-  "invalid_language_code": "غلط زبان کا کوڈ"
+  "invalid_language_code": "غلط زبان کا کوڈ",
+  "session_updated": "سیشن اپ ڈیٹ ہو گیا",
+  "analytics_unique_visitors": "منفرد زائرین",
+  "analytics_page_views": "صفحہ کے نظارے",
+  "analytics_avg_time": "سائٹ پر اوسط وقت",
+  "analytics_returning_visitors": "واپس آنے والے زائرین"
 }
 

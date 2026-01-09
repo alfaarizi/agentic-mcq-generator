@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "Igl è pussaivel da modifitgar mo in quiz a la giada",
   "session_not_found": "Sessiun betg chattada",
   "already_submitted": "Gia tramess",
-  "invalid_language_code": "Code da lingua nunvalid"
+  "invalid_language_code": "Code da lingua nunvalid",
+  "session_updated": "Sessiun actualisada",
+  "analytics_unique_visitors": "Visitaders unics",
+  "analytics_page_views": "Visualisaziuns da pagina",
+  "analytics_avg_time": "Temp median sin la pagina",
+  "analytics_returning_visitors": "Visitaders che returnan"
 }
 

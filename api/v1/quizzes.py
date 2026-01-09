@@ -577,8 +577,14 @@ async def get_quiz(
         },
         session_id=session_id,
         status=session["status"],
-        started_at=session["started_at"].isoformat() + "Z"
+        started_at=session["started_at"].isoformat().replace('+00:00', 'Z')
     )
+    
+    if session["status"] == "in_progress" and session.get("answers"):
+        template_data["answers"] = {
+            idx: [c.text for c in choices]
+            for idx, choices in session["answers"].items()
+        }
     
     if session["status"] == "completed":
         template_data["response"] = serialize_response(
@@ -586,7 +592,7 @@ async def get_quiz(
             answers=session.get("answers"),
             evaluations=session.get("evaluations")
         )
-        template_data["submitted_at"] = session["submitted_at"].isoformat() + "Z"
+        template_data["submitted_at"] = session["submitted_at"].isoformat().replace('+00:00', 'Z')
         template_data["score"] = session["score"]
         template_data["total"] = session["total"]
     
@@ -653,7 +659,7 @@ async def start_session(
             "session_id": session_id,
             "slug": slug,
             "status": "in_progress",
-            "started_at": started_at.isoformat() + "Z"
+            "started_at": started_at.isoformat().replace('+00:00', 'Z')
         }, status_code=201)
     
     return RedirectResponse(url=f"{settings.API_BASE_URL}/quizzes/{slug}", status_code=303)
@@ -771,6 +777,35 @@ async def submit_session(
     return JSONResponse({"score": session["score"], "total": quiz.total_questions})
 
 
+@router.patch("/{slug}/sessions/latest")
+async def update_session(
+    request: Request,
+    slug: str,
+    session_id: str = Query(...),
+    sessions: Dict[str, Any] = Depends(get_sessions)
+):
+    """Update session data (e.g., save answers incrementally)."""
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    session = sessions[session_id]
+    if session["status"] != "in_progress":
+        raise HTTPException(status_code=400, detail="Session is not in progress")
+    
+    quiz: Quiz = session["quiz"]
+    body = await request.json()
+    
+    # Update answers if provided
+    if "answers" in body:
+        session["answers"] = {
+            idx: [c for c in quiz.questions[idx].choices if c.text in texts]
+            for idx_str, texts in body["answers"].items()
+            if (idx := int(idx_str)) < len(quiz.questions) and texts
+        }
+    
+    return JSONResponse({"message": "Session updated"})
+
+
 @router.get("/{slug}/sessions/latest")
 async def get_latest_session(
     slug: str,
@@ -789,7 +824,7 @@ async def get_latest_session(
         "session_id": session_id,
         "slug": slug,
         "status": session["status"],
-        "started_at": session["started_at"].isoformat() + "Z",
+        "started_at": session["started_at"].isoformat().replace('+00:00', 'Z'),
         "quiz": {
             "slug": quiz.slug,
             "topic": quiz.topic,
@@ -804,7 +839,7 @@ async def get_latest_session(
             answers=session.get("answers"),
             evaluations=session.get("evaluations")
         )
-        response["submitted_at"] = session["submitted_at"].isoformat() + "Z"
+        response["submitted_at"] = session["submitted_at"].isoformat().replace('+00:00', 'Z')
         response["score"] = session["score"]
         response["total"] = session["total"]
     

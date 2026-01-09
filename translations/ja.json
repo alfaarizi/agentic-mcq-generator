@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "一度に1つのクイズのみ編集できます",
   "session_not_found": "セッションが見つかりません",
   "already_submitted": "既に送信済み",
-  "invalid_language_code": "無効な言語コード"
+  "invalid_language_code": "無効な言語コード",
+  "session_updated": "セッションが更新されました",
+  "analytics_unique_visitors": "ユニークビジター",
+  "analytics_page_views": "ページビュー",
+  "analytics_avg_time": "平均サイト滞在時間",
+  "analytics_returning_visitors": "リピーター"
 }
 

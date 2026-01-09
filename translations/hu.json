@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "Egyszerre csak egy kvíz szerkeszthető",
   "session_not_found": "Munkamenet nem található",
   "already_submitted": "Már elküldve",
-  "invalid_language_code": "Érvénytelen nyelvkód"
+  "invalid_language_code": "Érvénytelen nyelvkód",
+  "session_updated": "Munkamenet frissítve",
+  "analytics_unique_visitors": "Egyedi látogatók",
+  "analytics_page_views": "Oldalmegtekintések",
+  "analytics_avg_time": "Átlagos idő az oldalon",
+  "analytics_returning_visitors": "Visszatérő látogatók"
 }
 

@@ -124,6 +124,11 @@
   "only_one_quiz_allowed": "ສາມາດແກ້ໄຂແບບທົດສອບໄດ້ພຽງແຕ່ອັນດຽວໃນເວລາດຽວ",
   "session_not_found": "ບໍ່ພົບເຊດຊັນ",
   "already_submitted": "ສົ່ງແລ້ວ",
-  "invalid_language_code": "ລະຫັດພາສາບໍ່ຖືກຕ້ອງ"
+  "invalid_language_code": "ລະຫັດພາສາບໍ່ຖືກຕ້ອງ",
+  "session_updated": "ອັບເດດເຊດຊັນແລ້ວ",
+  "analytics_unique_visitors": "ຜູ້ເຂົ້າຊົມທີ່ບໍ່ຊ້ຳກັນ",
+  "analytics_page_views": "ການເບິ່ງໜ້າ",
+  "analytics_avg_time": "ເວລາສະເລ່ຍຢູ່ໃນເວັບໄຊທ໌",
+  "analytics_returning_visitors": "ຜູ້ເຂົ້າຊົມທີ່ກັບມາ"
 }
 
